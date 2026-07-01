@@ -32,9 +32,7 @@ print("\nNested Loop:", combs1)
 combs2 = [(x, y) for x in [1, 2, 3] for y in [3, 1, 4] if x != y]
 print("Nested Comprehension:", combs2)
 
-# -----------------------------------------------------
 # MORE EXAMPLES OF LIST COMPREHENSIONS
-# -----------------------------------------------------
 vec = [-4, -2, 0, 2, 4]
 
 # Create a new list with the values doubled
@@ -57,3 +55,8 @@ print("Tuples:", [(x, x**2) for x in range(6)])
 # Flatten a 2D list (a list of lists) into a single flat list
 vec2d = [[1,2,3], [4,5,6], [7,8,9]]
 print("Flattened list:", [num for elem in vec2d for num in elem])
+
+# Rounding Pi to a varying number of decimal places (1 through 5)
+# Note how it calls a function (round) AND casts to a string (str) all in one go!
+from math import pi
+print("Pi rounded:", [str(round(pi, i)) for i in range(1, 6)])
