@@ -22,4 +22,16 @@ pos_only_arg(1)
 kwd_only_arg(arg=3)
 # kwd_only_arg(3) # Raises TypeError
 
+# combined_example(1, 2, 3) # Raises TypeError
 combined_example(1, 2, kwd_only=3)
+combined_example(1, standard=2, kwd_only=3)
+# combined_example(pos_only=1, standard=2, kwd_only=3) # Raises TypeError
+
+# -----------------------------------------------------
+# Avoiding Name Collisions
+# -----------------------------------------------------
+# By making 'name' positional-only (/), we can safely use 'name' as a key in **kwds
+def foo(name, /, **kwds):
+    return 'name' in kwds
+
+print(foo(1, **{'name': 2})) # Returns True
