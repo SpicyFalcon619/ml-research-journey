@@ -1,4 +1,3 @@
-# 8.7 Defining Clean-up Actions
 # The 'finally' clause executes no matter what happens (even if an error occurs).
 
 try:

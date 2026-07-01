@@ -1,4 +1,3 @@
-# 8.8 Predefined Clean-up Actions
 # The 'with' statement is super important for opening files!
 # It automatically closes the file for you when the block finishes, even if an error occurs.
 

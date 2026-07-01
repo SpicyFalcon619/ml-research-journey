@@ -1,4 +1,3 @@
-# 8.1 Syntax Errors
 # Syntax errors are parsing errors, the most common kind when learning Python.
 
 # while True print('Hello world') 

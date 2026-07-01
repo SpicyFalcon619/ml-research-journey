@@ -1,4 +1,3 @@
-# 8.4 Raising Exceptions
 # The raise statement allows you to force a specified exception to occur.
 
 try:
