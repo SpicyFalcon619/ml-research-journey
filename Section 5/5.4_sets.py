@@ -1,6 +1,4 @@
-# -----------------------------------------------------
 # SETS
-# -----------------------------------------------------
 # A Set is an UNORDERED collection with NO DUPLICATE elements.
 # Very useful in Machine Learning for quickly removing duplicates from a massive list.
 
@@ -12,9 +10,7 @@ print("Is 'orange' in basket?", 'orange' in basket)
 print("Is 'crabgrass' in basket?", 'crabgrass' in basket)
 
 
-# -----------------------------------------------------
 # SET MATH OPERATIONS
-# -----------------------------------------------------
 a = set('abracadabra')
 b = set('alacazam')
 
