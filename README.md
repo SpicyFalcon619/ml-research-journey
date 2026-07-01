@@ -1,24 +1,26 @@
-# 🚀 ML & AI Research Journey
+# ML Research Journey
 
-Welcome to my Machine Learning and AI research repository! This codebase documents my progress from the foundational programming basics all the way to advanced machine learning concepts, models, and research.
+Hey there, welcome to my machine learning and AI research repository. I created this to document my progress from the absolute basics of programming all the way up to advanced machine learning concepts, models, and independent research.
 
-## 🗺️ Interactive Roadmap
+## The Roadmap
 
-I am following a comprehensive, interactive roadmap to track my learning. You can view the live version of my roadmap website here:
+I'm following a comprehensive, interactive roadmap to keep myself on track. I've hosted a live version of this roadmap so you can see exactly where I'm at in my journey:
 
-👉 **[View My ML Research Roadmap](https://SpicyFalcon619.github.io/ml-research-journey/ml-research-roadmap.html)** *(Note: requires GitHub Pages to be enabled)*
+[View My ML Research Roadmap](https://SpicyFalcon619.github.io/ml-research-journey/ml-research-roadmap.html)
 
-## 📂 Repository Structure
+## Repository Structure
 
-Currently working through **Basecamp 0: Python Foundations**.
+I'm currently working my way through **Basecamp 0: Python Foundations**. 
 
-* **Section 3/** - Python first steps (Fibonacci series, basic scripts)
-* **Section 4/** - Control flow tools (`if`, `for`, `match` cases, defining functions, loop logic)
-* **Test/** - Experimental test scripts
-* `ml-research-roadmap.html` - The HTML roadmap tracking my journey
+Inside this repo, you'll find:
+- **Section 3:** My first steps with Python, like writing basic scripts and generating the Fibonacci series.
+- **Section 4:** Deep dives into control flow (if statements, for loops, match cases, and defining functions).
+- **Test:** A scratchpad for experimental scripts.
+- **ml-research-roadmap.html:** The source code for my interactive roadmap.
 
-*More to come... (NumPy, Pandas, PyTorch, and Neural Networks!)*
+I'll be adding new folders for NumPy, Pandas, PyTorch, and Neural Networks as I progress.
 
-## 🛠️ Current Tech Stack
-* **Python 3**
-* **HTML/CSS** (for roadmap documentation)
+## Tech Stack
+Right now, this repository is built entirely on:
+- Python 3
+- HTML and CSS (for the roadmap documentation)
