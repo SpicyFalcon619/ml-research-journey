@@ -12,7 +12,14 @@ def ask_ok(prompt, retries=4, reminder='Please try again!'):
             raise ValueError('invalid user response')
         print(reminder)
         
-# Here we only pass the 'prompt' argument, so 'retries' stays at 4 and 'reminder' stays the same.
+# 1. Here we only pass the mandatory 'prompt' argument, so 'retries' stays at 4 and 'reminder' stays the same.
 response = ask_ok("Are you OK?\n")
+print(response)
 
+# 2. Here we override 'retries' to 2, but let 'reminder' stay as the default.
+response = ask_ok("Are you OK?\n", 2)
+print(response)
+
+# 3. Here we completely override both defaults with our own custom values.
+response = ask_ok("Are you OK?\n", 2, 'Response correctly idiot!')
 print(response)
