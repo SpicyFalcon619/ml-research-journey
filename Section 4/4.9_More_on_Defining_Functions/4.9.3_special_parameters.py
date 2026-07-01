@@ -27,9 +27,9 @@ combined_example(1, 2, kwd_only=3)
 combined_example(1, standard=2, kwd_only=3)
 # combined_example(pos_only=1, standard=2, kwd_only=3) # Raises TypeError
 
-# -----------------------------------------------------
+
 # Avoiding Name Collisions
-# -----------------------------------------------------
+
 # By making 'name' positional-only (/), we can safely use 'name' as a key in **kwds
 def foo(name, /, **kwds):
     return 'name' in kwds
