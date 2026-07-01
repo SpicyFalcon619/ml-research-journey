@@ -18,7 +18,7 @@ pairs = [(1, 'one'), (2, 'two'), (3, 'three'), (4, 'four')]
 # We want to sort this list of tuples.
 # By default it would sort by the first item (1, 2, 3, 4).
 # We use a lambda to tell the sort function: "Look at the second item (index 1) to sort alphabetically!"
-pairs.sort(key=lambda pair: pair[1])
+pairs.sort(key=lambda pair: pair[0])
 
 # Alphabetical order: 'four' (f), 'one' (o), 'three' (t), 'two' (t)
 print(pairs)
