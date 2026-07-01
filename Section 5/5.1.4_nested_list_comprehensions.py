@@ -1,6 +1,4 @@
-# -----------------------------------------------------
 # NESTED LIST COMPREHENSIONS (Transposing a Matrix)
-# -----------------------------------------------------
 # NOTE: In real Machine Learning, we NEVER do this manually! 
 # We use NumPy arrays instead, which have a built-in matrix.transpose() function.
 
