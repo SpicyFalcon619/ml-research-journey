@@ -7,11 +7,22 @@ def parrot(voltage, state='a stiff', action='voom', type='Norwegian Blue'):
     print("-- It's", state, "!")
     
 parrot(1000)                                          # 1 positional argument
+print()
 parrot(voltage=1000)                                  # 1 keyword argument
+print()
+
 parrot(voltage=1000000, action='VOOOOOM')             # 2 keyword arguments
+print()
+
 parrot(action='VOOOOOM', voltage=1000000)             # 2 keyword arguments (out of order!)
+print()
+
 parrot('a million', 'bereft of life', 'jump')         # 3 positional arguments
+print()
+
 parrot('a thousand', state='pushing up the daisies')  # 1 positional, 1 keyword
+print()
+
 
 # Invalid calls:
 # parrot()                     # required argument missing
@@ -46,3 +57,22 @@ cheeseshop("Limburger", "It's very runny, sir.",
            shopkeeper="Michael Palin",
            client="John Cleese",
            sketch="Cheese Shop Sketch")
+
+print()
+
+# PRACTICE PROBLEM: Pizza Delivery System
+# `size` is a required positional argument.
+# `*toppings` gathers all extra positional arguments into a tuple.
+# `**details` gathers all extra keyword arguments into a dictionary.
+def order_pizza(size, *toppings, **details):
+    print("--- Ordering a" , size, "pizza ---")
+
+    for topping in toppings:
+        print(topping)
+    
+    print("-" * 30)
+    
+    for detail in details:
+        print(detail, ":", details[detail])
+
+order_pizza("Large", "Pepperoni", "Extra Cheese", "Olives", name="John Doe", address="123 Main St", tip=5)
