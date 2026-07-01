@@ -15,7 +15,6 @@ I'm currently working my way through **Basecamp 0: Python Foundations**.
 Inside this repo, you'll find:
 - **Section 3:** My first steps with Python, like writing basic scripts and generating the Fibonacci series.
 - **Section 4:** Deep dives into control flow (if statements, for loops, match cases, and defining functions).
-- **Test:** A scratchpad for experimental scripts.
 - **ml-research-roadmap.html:** The source code for my interactive roadmap.
 
 I'll be adding new folders for NumPy, Pandas, PyTorch, and Neural Networks as I progress.
