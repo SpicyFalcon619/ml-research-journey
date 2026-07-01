@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field Guide: Charting a Course into ML &amp; AI Research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0c1118;
+    --bg-alt: #0f1620;
+    --bg-soft: #131c27;
+    --paper: #efe5cf;
+    --paper-edge: #d9c79f;
+    --ink: #211a10;
+    --ink-soft: #4a4030;
+    --cream: #f3ecdb;
+    --cream-dim: #b8c0c8;
+    --gold: #d2a14e;
+    --gold-dim: #8a7142;
+    --teal: #6fa39a;
+    --rust: #c06a3f;
+    --line: rgba(243,236,219,0.09);
+    --line-strong: rgba(243,236,219,0.18);
+    --max: 880px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  ::selection{background:var(--gold);color:var(--ink);}
+
+  a{color:var(--teal);}
+
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 28px;}
+
+  /* ---------- background contour texture ---------- */
+  .topo{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    opacity:0.5;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:120px 0 90px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero__inner{position:relative; z-index:1;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--gold);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:28px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:28px; height:1px;
+    background:var(--gold-dim);
+    display:inline-block;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:clamp(2.4rem, 5.2vw, 3.8rem);
+    line-height:1.06;
+    margin:0 0 26px;
+    color:var(--cream);
+    max-width:11ch;
+  }
+  h1 em{
+    font-style:italic;
+    color:var(--gold);
+    font-weight:500;
+  }
+  .hero__lede{
+    font-size:1.05rem;
+    color:var(--cream-dim);
+    max-width:56ch;
+    margin:0 0 8px;
+  }
+  .hero__lede strong{color:var(--cream); font-weight:600;}
+
+  .compass{
+    position:absolute;
+    top:90px; right:0;
+    width:150px; height:150px;
+    opacity:0.85;
+    animation: rotateCompass 60s linear infinite;
+  }
+  @keyframes rotateCompass {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @media(max-width:760px){ .compass{display:none;} }
+
+  .you-are-here{
+    margin-top:46px;
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--cream-dim);
+    border:1px dashed var(--line-strong);
+    padding:10px 16px;
+    border-radius:3px;
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(4px);
+  }
+  .you-are-here .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--rust);
+    box-shadow:0 0 0 4px rgba(192,106,63,0.18);
+    flex-shrink:0;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(192,106,63,0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(192,106,63,0); }
+    100% { box-shadow: 0 0 0 0 rgba(192,106,63,0); }
+  }
+  .you-are-here b{color:var(--cream); font-weight:600;}
+
+  /* ---------- LEGEND ---------- */
+  .legend{
+    padding:38px 0;
+    border-bottom:1px solid var(--line);
+    position:relative; z-index:1;
+  }
+  .legend__grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+  }
+  @media(max-width:640px){ .legend__grid{grid-template-columns:1fr; gap:14px;} }
+  .legend__item{
+    display:flex; gap:12px; align-items:flex-start;
+    font-size:13.5px;
+    color:var(--cream-dim);
+  }
+  .legend__icon{
+    flex-shrink:0; width:22px; height:22px; margin-top:1px;
+    color:var(--gold);
+  }
+  .legend__item b{color:var(--cream); font-weight:600; display:block; font-size:13px; margin-bottom:2px;}
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section-intro{
+    padding:64px 0 8px;
+    position:relative; z-index:1;
+  }
+  .section-intro h2{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:1.9rem;
+    color:var(--cream);
+    margin:0 0 12px;
+  }
+  .section-intro p{
+    color:var(--cream-dim);
+    max-width:58ch;
+    font-size:0.97rem;
+    margin:0;
+  }
+  
+  .progress-summary {
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+    background: rgba(19, 28, 39, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 20px;
+    border-radius: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--cream);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    margin-top: 30px;
+    transition: all 0.3s ease;
+  }
+  .progress-bar-bg {
+    width: 100px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .progress-reset {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--cream-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 5px 11px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .progress-reset:hover {
+    border-color: var(--rust);
+    color: var(--rust);
+  }
+  .milestone {
+    display: block;
+    margin: 14px 0 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.4s ease, max-height 0.4s ease;
+  }
+  .milestone.is-shown {
+    opacity: 1;
+    max-height: 40px;
+  }
+
+  /* ---------- TRAIL ---------- */
+  .trail{
+    position:relative;
+    padding:20px 0 20px;
+    z-index:1;
+  }
+  .trail::before{
+    content:'';
+    position:absolute;
+    left:32px; top:6px; bottom:6px;
+    width:1px;
+    background-image:linear-gradient(to bottom, var(--gold-dim) 0 6px, transparent 6px 13px);
+    background-size:1px 13px;
+  }
+  @media(max-width:560px){ .trail::before{left:19px;} }
+
+  .waypoint{
+    position:relative;
+    margin-bottom:64px;
+    padding-left:96px;
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity 0.7s ease, transform 0.7s ease;
+  }
+  .waypoint.is-visible{opacity:1; transform:translateY(0);}
+  @media(max-width:560px){ .waypoint{padding-left:60px;} }
+
+  .waypoint:last-child{margin-bottom:24px;}
+
+  .waypoint__marker{
+    position:absolute;
+    left:0; top:0;
+    width:64px; height:64px;
+    border-radius:50%;
+    background:var(--bg);
+    border:1px solid var(--gold-dim);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--gold);
+    text-align:center;
+    line-height:1.25;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(210,161,78,0);
+  }
+  .waypoint.completed .waypoint__marker {
+    background: rgba(210,161,78,0.1);
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(210,161,78,0.2);
+    color: var(--cream);
+  }
+  @media(max-width:560px){
+    .waypoint__marker{width:40px; height:40px; font-size:9px;}
+  }
+
+  .waypoint__head{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:6px;
+  }
+  .waypoint h3{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:1.5rem;
+    color:var(--cream);
+    margin:0;
+    transition: color 0.3s ease;
+  }
+  .waypoint.completed h3 {
+    color: var(--gold);
+  }
+  .waypoint__time{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    color:var(--teal);
+    border:1px solid rgba(111,163,154,0.35);
+    padding:3px 9px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .waypoint__note{
+    color:var(--cream-dim);
+    font-size:0.95rem;
+    max-width:60ch;
+    margin:0 0 22px;
+  }
+
+  /* GLASSMORPHIC TICKETS & PROGRESS */
+  .tickets{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .ticket{
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  .ticket::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .ticket:hover{
+    transform: translateY(-3px) translateX(3px);
+    box-shadow: -4px 8px 25px rgba(0,0,0,0.3), -3px 0 0 var(--gold);
+    border-color: rgba(210, 161, 78, 0.4);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .ticket:hover::before { opacity: 1; }
+  
+  .ticket.completed {
+    opacity: 0.6;
+    border-color: rgba(111, 163, 154, 0.4);
+    box-shadow: -3px 0 0 var(--teal);
+  }
+
+  .ticket__check {
+    appearance: none;
+    width: 22px; height: 22px;
+    border: 1.5px solid var(--gold-dim);
+    border-radius: 5px;
+    background: rgba(0,0,0,0.2);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .ticket__check:checked {
+    background: var(--teal);
+    border-color: var(--teal);
+  }
+  .ticket__check:checked::before {
+    content: '✓';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--bg);
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .ticket__body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 16px;
+    align-items: baseline;
+  }
+
+  .ticket__title{
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--cream);
+    grid-column: 1;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .ticket__title:hover {
+    color: var(--gold);
+    text-decoration: underline;
+  }
+  .ticket.completed .ticket__title {
+    text-decoration: line-through;
+    color: var(--cream-dim);
+  }
+  .ticket__source{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--teal);
+    grid-column: 2;
+    grid-row: 1;
+    white-space:nowrap;
+    justify-self:end;
+  }
+  .ticket__why{
+    grid-column: 1 / -1;
+    font-size:0.9rem;
+    color:var(--cream-dim);
+    margin:0;
+    line-height: 1.5;
+  }
+
+  /* ---------- FORK (specialization branches) ---------- */
+  .fork{
+    position:relative; z-index:1;
+    padding:10px 0 30px;
+  }
+  .fork__grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+    margin-top:32px;
+  }
+  @media(max-width:680px){ .fork__grid{grid-template-columns:1fr;} }
+  
+  .branch{
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 26px 26px 24px;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  .branch:hover {
+    transform: translateY(-4px);
+    border-color: rgba(210, 161, 78, 0.3);
+  }
+  .branch__label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--rust);
+    margin-bottom:10px;
+    display:block;
+  }
+  .branch h4{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:1.25rem;
+    color:var(--cream);
+    margin:0 0 10px;
+  }
+  .branch .tickets{margin-top:16px;}
+  .branch p.signal{
+    font-size:0.9rem;
+    color:var(--cream-dim);
+    margin:0;
+  }
+  .branch--wide{ grid-column: 1 / -1; }
+
+  /* ---------- LIBRARY (books) ---------- */
+  .library{
+    position:relative; z-index:1;
+    padding:10px 0 30px;
+  }
+  .library__grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+    margin-top:30px;
+  }
+  @media(max-width:640px){ .library__grid{grid-template-columns:1fr;} }
+  .book{
+    display:flex;
+    gap:16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 18px 20px;
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+  }
+  .book:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(210, 161, 78, 0.3);
+    transform: translateY(-2px);
+  }
+  .book__spine{
+    flex-shrink:0;
+    width:6px;
+    border-radius:3px;
+    background: var(--rust);
+  }
+  .book__spine.teal{ background: var(--teal); }
+  .book__spine.gold{ background: var(--gold); }
+  .book__spine.dim{ background: var(--gold-dim); }
+  .book__body{flex:1;}
+  .book a{
+    font-weight:600;
+    color:var(--cream);
+    text-decoration:none;
+    font-size:0.98rem;
+    border-bottom:1px solid var(--gold-dim);
+  }
+  .book a:hover{color:var(--gold);}
+  .book__authors{
+    display:block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:6px 0 8px;
+  }
+  .book p{
+    margin:0;
+    font-size:0.86rem;
+    color:var(--cream-dim);
+  }
+
+  /* ---------- DISPATCH (staying current) ---------- */
+  .dispatch{
+    position:relative; z-index:1;
+    padding:10px 0 30px;
+  }
+  .dispatch__grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-top:30px;
+  }
+  @media(max-width:760px){ .dispatch__grid{grid-template-columns:1fr 1fr;} }
+  @media(max-width:520px){ .dispatch__grid{grid-template-columns:1fr;} }
+  .dispatch__item{
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.02);
+    transition: all 0.2s ease;
+  }
+  .dispatch__item:hover{
+    border-color: rgba(111,163,154,0.35);
+    background: rgba(255,255,255,0.04);
+  }
+  .dispatch__kind{
+    display:block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--rust);
+    margin-bottom:8px;
+  }
+  .dispatch__item a{
+    font-weight:600;
+    color:var(--cream);
+    text-decoration:none;
+    font-size:0.94rem;
+  }
+  .dispatch__item a:hover{color:var(--gold);}
+  .dispatch__item p{
+    margin:6px 0 0;
+    font-size:0.82rem;
+    color:var(--cream-dim);
+  }
+
+  /* ---------- SUPPLY CACHE (tools grid) ---------- */
+  .cache{
+    position:relative; z-index:1;
+    padding:10px 0 30px;
+  }
+  .cache__grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+    margin-top:30px;
+  }
+  @media(max-width:640px){ .cache__grid{grid-template-columns:1fr;} }
+  .tool{
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 20px 22px;
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+  }
+  .tool:hover {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(210, 161, 78, 0.3);
+  }
+  .tool a{
+    font-weight:600;
+    color:var(--cream);
+    text-decoration:none;
+    font-size:1rem;
+    border-bottom:1px solid var(--gold-dim);
+    transition: color 0.2s;
+  }
+  .tool a:hover{color:var(--gold);}
+  .tool p{
+    margin:10px 0 0;
+    font-size:0.9rem;
+    color:var(--cream-dim);
+  }
+
+  /* ---------- WISDOM ---------- */
+  .wisdom{
+    position:relative; z-index:1;
+    padding:10px 0 90px;
+  }
+  .wisdom__box{
+    border-left:3px solid var(--gold);
+    padding:8px 0 8px 30px;
+    margin-top:32px;
+    background: linear-gradient(90deg, rgba(210,161,78,0.05) 0%, rgba(0,0,0,0) 100%);
+    border-radius: 0 8px 8px 0;
+  }
+  .wisdom__box p{
+    color:var(--cream-dim);
+    font-size:1rem;
+    margin:0 0 20px;
+  }
+  .wisdom__box p:last-child{margin-bottom:0;}
+  .wisdom__box strong{color:var(--cream);}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:34px 0 50px;
+    position:relative; z-index:1;
+  }
+  footer p{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    color:var(--cream-dim);
+    margin:0;
+    letter-spacing:0.02em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .waypoint{transition:none; opacity:1; transform:none;}
+    html{scroll-behavior:auto;}
+    .compass{animation:none;}
+    .you-are-here .dot{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<svg class="topo" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+  <g fill="none" stroke="rgba(243,236,219,0.05)" stroke-width="1">
+    <path d="M -100 140 Q 250 60 600 160 T 1300 120"/>
+    <path d="M -100 200 Q 250 130 600 230 T 1300 190"/>
+    <path d="M -100 260 Q 250 200 600 300 T 1300 260"/>
+    <path d="M -150 900 Q 200 820 550 920 T 1300 880"/>
+    <path d="M -150 960 Q 200 890 550 990 T 1300 950"/>
+    <path d="M -150 1020 Q 200 960 550 1050 T 1300 1010"/>
+    <path d="M -150 1600 Q 250 1520 650 1630 T 1350 1580"/>
+    <path d="M -150 1660 Q 250 1590 650 1690 T 1350 1640"/>
+  </g>
+</svg>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero__inner">
+      <svg class="compass" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="75" cy="75" r="60" fill="none" stroke="rgba(210,161,78,0.45)" stroke-width="1"/>
+        <circle cx="75" cy="75" r="2.5" fill="#d2a14e"/>
+        <path d="M75 18 L83 75 L75 132 L67 75 Z" fill="rgba(210,161,78,0.5)"/>
+        <path d="M18 75 L75 67 L132 75 L75 83 Z" fill="rgba(243,236,219,0.18)"/>
+        <text x="75" y="12" text-anchor="middle" fill="#b8c0c8" font-family="JetBrains Mono, monospace" font-size="9">N</text>
+        <text x="75" y="146" text-anchor="middle" fill="#b8c0c8" font-family="JetBrains Mono, monospace" font-size="9">S</text>
+      </svg>
+
+      <div class="eyebrow">A field guide, compiled for one traveler</div>
+      <h1>Charting a course into <em>ML &amp; AI research</em></h1>
+      <p class="hero__lede">You already think in code &mdash; <strong>JS, PHP</strong> &mdash; which means the on-ramp here is shorter than it looks. This guide assumes nothing about where the trail ends. It's built to get you fluent enough, fast enough, that the destination becomes obvious on its own.</p>
+      <p class="hero__lede">Follow the path top to bottom. Every numbered basecamp is a stage; every ticket below it is a real, named resource with a working link.</p>
+
+      <div class="you-are-here">
+        <span class="dot"></span>
+        <span>YOU ARE HERE &mdash; <b>comfortable coder, new to Python &amp; ML, destination unmapped</b></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="legend">
+  <div class="wrap">
+    <div class="legend__grid">
+      <div class="legend__item">
+        <svg class="legend__icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.3"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+        <span><b>Basecamp</b>A sequential stage. Finish roughly in order &mdash; each one leans on the last.</span>
+      </div>
+      <div class="legend__item">
+        <svg class="legend__icon" viewBox="0 0 24 24" fill="none"><path d="M12 3v8M12 11l-6 9M12 11l6 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <span><b>The fork</b>Where the trail splits by interest. Pick one branch once the fundamentals click.</span>
+      </div>
+      <div class="legend__item">
+        <svg class="legend__icon" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M4 9h16" stroke="currentColor" stroke-width="1.3"/></svg>
+        <span><b>Ticket</b>A named course, book, or tool. Check it off to track your progress!</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="progress-summary">
+      <span id="progress-text">Progress: 0 / 0</span>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
+      <button class="progress-reset" id="progress-reset" type="button">Reset</button>
+    </div>
+    <span class="milestone" id="milestone-msg"></span>
+
+    <div class="section-intro">
+      <h2>The main trail</h2>
+      <p>Four basecamps, walked in order. Budget roughly 2&ndash;3 months at a casual, consistent pace to clear all four.</p>
+    </div>
+
+    <div class="trail">
+
+      <!-- BASECAMP 0 -->
+      <article class="waypoint" id="base-0">
+        <div class="waypoint__marker">BASE<br>00</div>
+        <div class="waypoint__head">
+          <h3>Python, for someone who already codes</h3>
+          <span class="waypoint__time">1&ndash;2 weeks</span>
+        </div>
+        <p class="waypoint__note">Skip beginner-from-zero courses entirely. You need the syntax differences, the scientific stack, and comfort in notebooks &mdash; not "what is a variable."</p>
+        <div class="tickets">
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-py-tutorial">
+            <div class="ticket__body">
+              <a href="https://docs.python.org/3/tutorial/index.html" target="_blank" rel="noopener" class="ticket__title">The Python Tutorial</a>
+              <span class="ticket__source">docs.python.org</span>
+              <p class="ticket__why">The official tutorial. Fastest way to pick up syntax when you already think procedurally.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-numpy">
+            <div class="ticket__body">
+              <a href="https://numpy.org/doc/stable/user/quickstart.html" target="_blank" rel="noopener" class="ticket__title">NumPy Quickstart</a>
+              <span class="ticket__source">numpy.org</span>
+              <p class="ticket__why">Arrays and vectorized operations &mdash; the substrate everything else in ML sits on.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-pandas">
+            <div class="ticket__body">
+              <a href="https://pandas.pydata.org/docs/getting_started/index.html" target="_blank" rel="noopener" class="ticket__title">pandas: Getting Started</a>
+              <span class="ticket__source">pandas.pydata.org</span>
+              <p class="ticket__why">For wrangling real datasets &mdash; you'll use this constantly from Basecamp 1 onward.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- SUPPLY LINE: MATH -->
+      <article class="waypoint" id="base-math">
+        <div class="waypoint__marker">SUP<br>LINE</div>
+        <div class="waypoint__head">
+          <h3>Math, picked up as you walk</h3>
+          <span class="waypoint__time">ongoing</span>
+        </div>
+        <p class="waypoint__note">Not a gate before basecamp 1 &mdash; a supply line that runs alongside the whole trail. Learn each piece when a concept ahead needs it.</p>
+        <div class="tickets">
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-linalg">
+            <div class="ticket__body">
+              <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank" rel="noopener" class="ticket__title">Essence of Linear Algebra</a>
+              <span class="ticket__source">3Blue1Brown</span>
+              <p class="ticket__why">Vectors, matrices, dot products &mdash; the best visual intuition for this material anywhere, free.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-calc">
+            <div class="ticket__body">
+              <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr" target="_blank" rel="noopener" class="ticket__title">Essence of Calculus</a>
+              <span class="ticket__source">3Blue1Brown</span>
+              <p class="ticket__why">Derivatives and gradients, the part that makes "gradient descent" stop being a magic phrase.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-stats">
+            <div class="ticket__body">
+              <a href="https://www.khanacademy.org/math/statistics-probability" target="_blank" rel="noopener" class="ticket__title">Statistics &amp; Probability</a>
+              <span class="ticket__source">Khan Academy</span>
+              <p class="ticket__why">Distributions, expectation, Bayes' theorem &mdash; pull up specific lessons as they come up.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- BASECAMP 1 -->
+      <article class="waypoint" id="base-1">
+        <div class="waypoint__marker">BASE<br>01</div>
+        <div class="waypoint__head">
+          <h3>Classical machine learning</h3>
+          <span class="waypoint__time">4&ndash;6 weeks</span>
+        </div>
+        <p class="waypoint__note">Where you learn what ML actually is, before deep learning. Regression, classification, trees, the full real workflow of clean &rarr; train &rarr; evaluate &rarr; iterate.</p>
+        <div class="tickets">
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-ml-spec">
+            <div class="ticket__body">
+              <a href="https://www.coursera.org/specializations/machine-learning-introduction" target="_blank" rel="noopener" class="ticket__title">Machine Learning Specialization</a>
+              <span class="ticket__source">Andrew Ng</span>
+              <p class="ticket__why">Still the gold standard for building real intuition. Free to audit on Coursera.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-sklearn">
+            <div class="ticket__body">
+              <a href="https://scikit-learn.org/stable/tutorial/index.html" target="_blank" rel="noopener" class="ticket__title">scikit-learn Tutorials</a>
+              <span class="ticket__source">scikit-learn.org</span>
+              <p class="ticket__why">Implement everything from the course above on real data, in the library the field actually uses.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-titanic">
+            <div class="ticket__body">
+              <a href="https://www.kaggle.com/competitions/titanic" target="_blank" rel="noopener" class="ticket__title">Titanic &mdash; Machine Learning from Disaster</a>
+              <span class="ticket__source">Kaggle</span>
+              <p class="ticket__why">The classic first project. Boring on purpose &mdash; it teaches the workflow, not the glamour.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- BASECAMP 2 -->
+      <article class="waypoint" id="base-2">
+        <div class="waypoint__marker">BASE<br>02</div>
+        <div class="waypoint__head">
+          <h3>Deep learning</h3>
+          <span class="waypoint__time">6&ndash;8 weeks</span>
+        </div>
+        <p class="waypoint__note">Where it gets fun. Neural networks, and the framework the field has standardized on &mdash; PyTorch.</p>
+        <div class="tickets">
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-fastai">
+            <div class="ticket__body">
+              <a href="https://course.fast.ai/" target="_blank" rel="noopener" class="ticket__title">Practical Deep Learning for Coders</a>
+              <span class="ticket__source">fast.ai</span>
+              <p class="ticket__why">Project-first: you'll train and deploy a real model by lesson two. Fits a coder's instinct to build before fully understanding theory.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-dl-spec">
+            <div class="ticket__body">
+              <a href="https://www.coursera.org/specializations/deep-learning" target="_blank" rel="noopener" class="ticket__title">Deep Learning Specialization</a>
+              <span class="ticket__source">Andrew Ng</span>
+              <p class="ticket__why">More rigorous, theory-first. CNNs, RNNs, and the math underneath each architecture.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-karpathy">
+            <div class="ticket__body">
+              <a href="https://karpathy.ai/zero-to-hero.html" target="_blank" rel="noopener" class="ticket__title">Neural Networks: Zero to Hero</a>
+              <span class="ticket__source">Andrej Karpathy</span>
+              <p class="ticket__why">Builds backprop and a GPT from scratch, in code, line by line. The single best "I actually understand this now" resource.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- BASECAMP 3 -->
+      <article class="waypoint" id="base-3">
+        <div class="waypoint__marker">BASE<br>03</div>
+        <div class="waypoint__head">
+          <h3>ML Engineering & MLOps</h3>
+          <span class="waypoint__time">2&ndash;4 weeks</span>
+        </div>
+        <p class="waypoint__note">Taking models out of local notebooks and into production. Tracking experiments, deploying APIs, and managing model lifecycles.</p>
+        <div class="tickets">
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-fsdl">
+            <div class="ticket__body">
+              <a href="https://fullstackdeeplearning.com/" target="_blank" rel="noopener" class="ticket__title">Full Stack Deep Learning</a>
+              <span class="ticket__source">FSDL</span>
+              <p class="ticket__why">The premier course on what happens after you train a model. Serving, monitoring, and scaling.</p>
+            </div>
+          </div>
+          <div class="ticket">
+            <input type="checkbox" class="ticket__check" id="t-wandb">
+            <div class="ticket__body">
+              <a href="https://wandb.ai/site/tutorials" target="_blank" rel="noopener" class="ticket__title">Weights & Biases (W&B)</a>
+              <span class="ticket__source">wandb.ai</span>
+              <p class="ticket__why">The industry standard for experiment tracking. Stop using spreadsheets to record your loss curves.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- FORK -->
+    <div class="fork">
+      <div class="section-intro" style="padding-top:0;">
+        <h2>The fork in the trail</h2>
+        <p>Once the fundamentals click, you'll notice yourself pulled one direction. That pull is the answer to "what kind of AI work do I actually want to do".</p>
+      </div>
+      <div class="fork__grid">
+
+        <div class="branch">
+          <span class="branch__label">If you're drawn to images</span>
+          <h4>Computer Vision</h4>
+          <p class="signal">Signal: you want to see what the model sees, and care how a pixel becomes a prediction.</p>
+          <div class="tickets">
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-cv-cs231n">
+              <div class="ticket__body">
+                <a href="https://cs231n.stanford.edu/" target="_blank" rel="noopener" class="ticket__title">CS231n: Computer Vision</a>
+                <span class="ticket__source">Stanford</span>
+                <p class="ticket__why">Lectures, notes, and assignments are all free and public.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <span class="branch__label">If you're drawn to language</span>
+          <h4>NLP &amp; LLMs</h4>
+          <p class="signal">Signal: you keep wanting to build chatbots, text tools, or fine-tune something on your own data.</p>
+          <div class="tickets">
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-nlp-cs224n">
+              <div class="ticket__body">
+                <a href="https://web.stanford.edu/class/cs224n/" target="_blank" rel="noopener" class="ticket__title">CS224n: NLP with Deep Learning</a>
+                <span class="ticket__source">Stanford</span>
+                <p class="ticket__why">From word vectors to transformers to modern LLMs.</p>
+              </div>
+            </div>
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-llm-hf">
+              <div class="ticket__body">
+                <a href="https://huggingface.co/learn/llm-course" target="_blank" rel="noopener" class="ticket__title">The LLM Course</a>
+                <span class="ticket__source">Hugging Face</span>
+                <p class="ticket__why">Hands-on companion &mdash; fine-tune real transformer models.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <span class="branch__label">If you're drawn to making things</span>
+          <h4>Generative &amp; Diffusion Models</h4>
+          <p class="signal">Signal: you want to generate images, music, or worlds.</p>
+          <div class="tickets">
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-gen-fastai">
+              <div class="ticket__body">
+                <a href="https://course.fast.ai/Lessons/part2.html" target="_blank" rel="noopener" class="ticket__title">Deep Learning to Stable Diffusion</a>
+                <span class="ticket__source">fast.ai Part 2</span>
+                <p class="ticket__why">Builds diffusion models from scratch.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <span class="branch__label">If you're drawn to decision making</span>
+          <h4>Reinforcement Learning</h4>
+          <p class="signal">Signal: you want AI agents that learn by interacting with environments (games, robotics).</p>
+          <div class="tickets">
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-rl-spinningup">
+              <div class="ticket__body">
+                <a href="https://spinningup.openai.com/en/latest/" target="_blank" rel="noopener" class="ticket__title">Spinning Up in Deep RL</a>
+                <span class="ticket__source">OpenAI</span>
+                <p class="ticket__why">The canonical introduction to modern deep reinforcement learning concepts and math.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="branch branch--wide">
+          <span class="branch__label">The ultimate destination</span>
+          <h4>Reading Papers & Core Research</h4>
+          <p class="signal">Signal: you want to implement things that aren't in libraries yet.</p>
+          <div class="tickets">
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-res-read">
+              <div class="ticket__body">
+                <a href="https://web.stanford.edu/class/ee384m/Handouts/HowtoReadPaper.pdf" target="_blank" rel="noopener" class="ticket__title">How to Read a Paper</a>
+                <span class="ticket__source">S. Keshav</span>
+                <p class="ticket__why">Stop reading linearly. Learn the 3-pass method to digest dense research efficiently.</p>
+              </div>
+            </div>
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-res-arxiv">
+              <div class="ticket__body">
+                <a href="https://huggingface.co/papers" target="_blank" rel="noopener" class="ticket__title">Hugging Face Daily Papers</a>
+                <span class="ticket__source">Hugging Face</span>
+                <p class="ticket__why">The firehose of new research (arXiv cs.LG) curated into a digestible daily feed.</p>
+              </div>
+            </div>
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-res-attention">
+              <div class="ticket__body">
+                <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener" class="ticket__title">Attention Is All You Need</a>
+                <span class="ticket__source">arXiv &middot; Vaswani et al., 2017</span>
+                <p class="ticket__why">The paper that introduced the Transformer. Everything from BERT to GPT to Claude traces back to this one.</p>
+              </div>
+            </div>
+            <div class="ticket">
+              <input type="checkbox" class="ticket__check" id="f-res-resnet">
+              <div class="ticket__body">
+                <a href="https://arxiv.org/abs/1512.03385" target="_blank" rel="noopener" class="ticket__title">Deep Residual Learning for Image Recognition</a>
+                <span class="ticket__source">arXiv &middot; He et al., 2015</span>
+                <p class="ticket__why">Introduces ResNet and skip connections &mdash; the trick that made truly deep networks trainable.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SUPPLY CACHE -->
+    <div class="cache">
+      <div class="section-intro" style="padding-top:0;">
+        <h2>The supply cache</h2>
+        <p>Tools and platforms you'll reach for constantly, regardless of which branch you take.</p>
+      </div>
+      <div class="cache__grid">
+        <div class="tool">
+          <a href="https://colab.research.google.com/" target="_blank" rel="noopener">Google Colab</a>
+          <p>Free Jupyter notebooks with free GPU/TPU access. Your default workspace until a project genuinely outgrows it.</p>
+        </div>
+        <div class="tool">
+          <a href="https://www.kaggle.com/" target="_blank" rel="noopener">Kaggle</a>
+          <p>Datasets, notebooks, and competitions &mdash; plus a community working through the exact same learning curve.</p>
+        </div>
+        <div class="tool">
+          <a href="https://huggingface.co/" target="_blank" rel="noopener">Hugging Face Hub</a>
+          <p>The de facto hub for pretrained models and datasets once you're past the fundamentals.</p>
+        </div>
+        <div class="tool">
+          <a href="https://paperswithcode.com/" target="_blank" rel="noopener">Papers with Code</a>
+          <p>Pairs research papers with their actual implementations.</p>
+        </div>
+        <div class="tool">
+          <a href="https://github.com/features/copilot" target="_blank" rel="noopener">GitHub Copilot</a>
+          <p>Worth picking up once you're writing more code &mdash; autocomplete on boilerplate frees you up for the parts that actually teach you something.</p>
+        </div>
+        <div class="tool">
+          <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>
+          <p>A genuinely useful study partner &mdash; ask it to explain a concept three ways, debug a shape mismatch, or quiz you on a topic.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- REFERENCE LIBRARY -->
+    <div class="library">
+      <div class="section-intro" style="padding-top:0;">
+        <h2>The reference library</h2>
+        <p>Not sequential reading &mdash; books to keep nearby and dip into when a course moves too fast or you want the fuller picture.</p>
+      </div>
+      <div class="library__grid">
+        <div class="book">
+          <span class="book__spine gold"></span>
+          <div class="book__body">
+            <a href="https://d2l.ai/" target="_blank" rel="noopener">Dive into Deep Learning</a>
+            <span class="book__authors">Zhang, Lipton, Li &amp; Smola</span>
+            <p>Free, interactive textbook &mdash; every chapter is runnable code alongside the math. Pairs well with Basecamp 2.</p>
+          </div>
+        </div>
+        <div class="book">
+          <span class="book__spine teal"></span>
+          <div class="book__body">
+            <a href="https://mml-book.github.io/" target="_blank" rel="noopener">Mathematics for Machine Learning</a>
+            <span class="book__authors">Deisenroth, Faisal &amp; Ong</span>
+            <p>Free PDF. Built specifically to bridge the gap between high-school math and reading an ML paper.</p>
+          </div>
+        </div>
+        <div class="book">
+          <span class="book__spine dim"></span>
+          <div class="book__body">
+            <a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener">Deep Learning</a>
+            <span class="book__authors">Goodfellow, Bengio &amp; Courville</span>
+            <p>Free online. The field's standard reference text &mdash; denser than a course, best used to look things up.</p>
+          </div>
+        </div>
+        <div class="book">
+          <span class="book__spine"></span>
+          <div class="book__body">
+            <a href="https://cs231n.github.io/" target="_blank" rel="noopener">CS231n Course Notes</a>
+            <span class="book__authors">Stanford</span>
+            <p>Written notes that stand alone from the lectures &mdash; often clearer than the video for a quick re-read.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPATCH: STAYING CURRENT -->
+    <div class="dispatch">
+      <div class="section-intro" style="padding-top:0;">
+        <h2>Dispatches from further up the trail</h2>
+        <p>The field moves fast. These are how you keep hearing about it without doom-scrolling Twitter.</p>
+      </div>
+      <div class="dispatch__grid">
+        <div class="dispatch__item">
+          <span class="dispatch__kind">Newsletter</span>
+          <a href="https://www.deeplearning.ai/the-batch/" target="_blank" rel="noopener">The Batch</a>
+          <p>Andrew Ng's weekly roundup &mdash; readable at any stage of the trail.</p>
+        </div>
+        <div class="dispatch__item">
+          <span class="dispatch__kind">Community</span>
+          <a href="https://www.reddit.com/r/MachineLearning/" target="_blank" rel="noopener">r/MachineLearning</a>
+          <p>Where new papers and results get argued over in real time.</p>
+        </div>
+        <div class="dispatch__item">
+          <span class="dispatch__kind">Forum</span>
+          <a href="https://forums.fast.ai/" target="_blank" rel="noopener">fast.ai Forums</a>
+          <p>Course-specific help, plus a genuinely kind community of learners at every level.</p>
+        </div>
+        <div class="dispatch__item">
+          <span class="dispatch__kind">Podcast</span>
+          <a href="https://www.latent.space/" target="_blank" rel="noopener">Latent Space</a>
+          <p>Interviews with the people actually building the models &mdash; good for hearing how research becomes product.</p>
+        </div>
+        <div class="dispatch__item">
+          <span class="dispatch__kind">Feed</span>
+          <a href="https://paperswithcode.com/" target="_blank" rel="noopener">Papers with Code Trending</a>
+          <p>See which papers the field is actually implementing this week, not just publishing.</p>
+        </div>
+        <div class="dispatch__item">
+          <span class="dispatch__kind">Archive</span>
+          <a href="https://arxiv.org/list/cs.LG/recent" target="_blank" rel="noopener">arXiv cs.LG</a>
+          <p>The raw feed, once you're ready to skip the curation layer entirely.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAIL WISDOM -->
+    <div class="wisdom">
+      <div class="section-intro" style="padding-top:0;">
+        <h2>Trail wisdom</h2>
+        <p>How to actually walk this, not just read the map.</p>
+      </div>
+      <div class="wisdom__box">
+        <p><strong>Build after every module, not just at the end.</strong> The single biggest predictor of who finishes this trail and who doesn't is whether they apply each concept to a tiny project immediately.</p>
+        <p><strong>Tie a project to something you actually care about.</strong> Build on a game-adjacent or creative dataset. It will teach you more than another anonymous Titanic notebook &mdash; because you'll actually want to finish it.</p>
+        <p><strong>Let the fork resolve itself.</strong> You don't need to know your destination before setting out. By the end of Basecamp 2, you'll know whether you're chasing research, building products, or just satisfying curiosity.</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>FIELD GUIDE &middot; COMPILED FOR ONE TRAVELER &middot; ROUTE SUBJECT TO REVISION</p>
+  </div>
+</footer>
+
+<script>
+  // Setup Interactive Checkboxes and Progress Tracking
+  const checkboxes = document.querySelectorAll('.ticket__check');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const resetBtn = document.getElementById('progress-reset');
+  const milestoneMsg = document.getElementById('milestone-msg');
+
+  const MILESTONES = [
+    { at: 100, text: "Full trail cleared. You've earned an opinion on where to go next." },
+    { at: 75,  text: 'Home stretch &mdash; the destination is probably obvious by now.' },
+    { at: 50,  text: 'Halfway. This is usually where the fork starts calling to you.' },
+    { at: 25,  text: 'Good pace &mdash; the fundamentals are starting to stick.' },
+  ];
+
+  function updateProgress() {
+    const total = checkboxes.length;
+    const completed = Array.from(checkboxes).filter(chk => chk.checked).length;
+    const percentage = total ? (completed / total) * 100 : 0;
+
+    progressBar.style.width = `${percentage}%`;
+    progressText.innerText = `Progress: ${completed} / ${total}`;
+
+    // Add completed class to parent tickets
+    checkboxes.forEach(chk => {
+      const ticket = chk.closest('.ticket');
+      if (chk.checked) ticket.classList.add('completed');
+      else ticket.classList.remove('completed');
+    });
+
+    // Check if entire waypoint is completed
+    document.querySelectorAll('.waypoint').forEach(waypoint => {
+      const checks = waypoint.querySelectorAll('.ticket__check');
+      if(checks.length === 0) return;
+
+      const allChecked = Array.from(checks).every(c => c.checked);
+      if(allChecked) waypoint.classList.add('completed');
+      else waypoint.classList.remove('completed');
+    });
+
+    // Milestone message
+    const hit = MILESTONES.find(m => percentage >= m.at);
+    if (hit) {
+      milestoneMsg.innerHTML = hit.text;
+      milestoneMsg.classList.add('is-shown');
+    } else {
+      milestoneMsg.classList.remove('is-shown');
+    }
+  }
+
+  // Load state from local storage
+  checkboxes.forEach(chk => {
+    const saved = localStorage.getItem(`roadmap-${chk.id}`);
+    if (saved === 'true') chk.checked = true;
+
+    chk.addEventListener('change', (e) => {
+      localStorage.setItem(`roadmap-${chk.id}`, e.target.checked);
+      updateProgress();
+    });
+  });
+
+  // Reset all progress
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('Reset all checked progress on this guide?')) return;
+      checkboxes.forEach(chk => {
+        chk.checked = false;
+        localStorage.removeItem(`roadmap-${chk.id}`);
+      });
+      updateProgress();
+    });
+  }
+
+  // Initial render
+  updateProgress();
+
+  // Scroll animations
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const items = document.querySelectorAll('.waypoint, .branch');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+    items.forEach(el => io.observe(el));
+  } else {
+    document.querySelectorAll('.waypoint, .branch').forEach(el => el.classList.add('is-visible'));
+  }
+</script>
+
+</body>
+</html>
