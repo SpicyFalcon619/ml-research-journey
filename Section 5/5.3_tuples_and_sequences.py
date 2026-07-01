@@ -1,6 +1,4 @@
-# -----------------------------------------------------
 # TUPLES AND SEQUENCES
-# -----------------------------------------------------
 # A tuple is a sequence of values, much like a list.
 # The big difference: Tuples are IMMUTABLE (cannot be changed).
 
