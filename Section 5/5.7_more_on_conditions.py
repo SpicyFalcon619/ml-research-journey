@@ -1,6 +1,4 @@
-# -----------------------------------------------------
 # MORE ON CONDITIONS
-# -----------------------------------------------------
 # The 'or' operator short-circuits and returns the FIRST truthy value it finds!
 # Empty strings ('') are considered "falsy".
 

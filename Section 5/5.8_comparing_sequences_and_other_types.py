@@ -1,6 +1,4 @@
-# -----------------------------------------------------
 # COMPARING SEQUENCES
-# -----------------------------------------------------
 # Python compares sequences (lists, tuples, strings) lexicographically (like an English dictionary).
 # It compares the first items. If they are the same, it moves to the second items, etc.
 
