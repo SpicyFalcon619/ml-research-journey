@@ -20,3 +20,9 @@ transposed = [[row[i] for row in matrix] for i in range(4)]
 print("\nTransposed Matrix:")
 for row in transposed:
     print(row)
+    
+# The SUPER Pythonic Way (Using zip and unpacking)
+# zip() groups elements from multiple iterables together. 
+# *matrix unpacks the matrix into separate rows.
+print("\nTransposed using zip():")
+print(list(zip(*matrix)))
