@@ -1,4 +1,3 @@
-# 8.2 Exceptions
 # Even if a statement is syntactically correct, it may cause an error when executed.
 # These errors are called "Exceptions". Here are a few common ones you will see in ML:
 
