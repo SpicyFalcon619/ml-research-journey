@@ -1,6 +1,5 @@
-# -----------------------------------------------------
+
 # LOOPING TECHNIQUES
-# -----------------------------------------------------
 
 # 1. LOOPING THROUGH DICTIONARIES
 # Use .items() to get the Key AND the Value at the same time
