@@ -1,6 +1,4 @@
-# -----------------------------------------------------
-# DICTIONARIES (🔥 CRITICAL FOR MACHINE LEARNING! 🔥)
-# -----------------------------------------------------
+# DICTIONARIES
 # Dictionaries store data in "Key: Value" pairs.
 # You will use these constantly to store Model configurations, hyperparameters, and datasets.
 
@@ -34,9 +32,7 @@ print("Sorted Keys:", sorted(tel))
 print("Is 'guido' a key in tel?", 'guido' in tel)
 print("Is 'jack' NOT a key in tel?", 'jack' not in tel)
 
-# -----------------------------------------------------
 # OTHER WAYS TO CREATE DICTIONARIES
-# -----------------------------------------------------
 # From a list of tuples
 dict1 = dict([('sape', 4139), ('guido', 4127), ('jack', 4098)])
 
