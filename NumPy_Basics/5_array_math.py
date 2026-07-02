@@ -1,5 +1,9 @@
 import numpy as np
 
+my_array = np.array([1, 2, 3]) + 3
+
+print(my_array)
+
 # Challenge 4:
 # NumPy arrays allow you to do math on every single item in the array at once!
 prices = np.array([10, 20, 30, 40, 50])
@@ -12,3 +16,9 @@ prices = np.array([10, 20, 30, 40, 50])
 #    Create a new array called 'cursed_prices' by adding 100 to the 'prices' array.
 # 4. Print 'cursed_prices'.
 
+
+sale_prices = prices / 2
+cursed_prices = prices + 100
+
+print(f"Sale Prices: {sale_prices}")
+print(f"Cursed Prices: {cursed_prices}")
