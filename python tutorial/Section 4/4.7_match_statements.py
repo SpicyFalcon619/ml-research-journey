@@ -1,3 +1,8 @@
+"""
+Python Reference: Match statements
+"""
+
+
 # Using match-case for structural pattern matching (similar to switch-case in other languages)
 def http_error(status):
     match status:
@@ -9,6 +14,7 @@ def http_error(status):
             return "I'm a teapot"
         case _:
             return "Something's wrong with the internet"
+
 
 status = int(input("Status: "))
 print(http_error(status))
@@ -34,13 +40,14 @@ match point:
         print(f"X={x}, Y={y}")
     case _:
         raise ValueError("Not a point")
-    
+
 
 # Pattern matching with Python Classes (Objects)
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
 
 def where_is(point):
     match point:
@@ -55,33 +62,40 @@ def where_is(point):
         case _:
             print("Not a point")
 
+
 # Testing the class pattern matching
 where_is(Point(0, 0))
 where_is(Point(0, 10))
 
+
 # Using __match_args__ allows positional matching (e.g. Point(0, 0) instead of Point(x=0, y=0))
 class Point:
-    __match_args__ = ('x', 'y')
+    __match_args__ = ("x", "y")
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        
+
+
 # Pattern matching against sequences (lists/tuples) of objects
-points = [Point(0, 3), Point(0, 5)] # Now it's a list containing two Point objects!
+points = [Point(0, 3), Point(0, 5)]  # Now it's a list containing two Point objects!
 
 match points:
-    case []: # Matches an empty list/tuple
+    case []:  # Matches an empty list/tuple
         print("No points")
-    case [Point(0, 0)]: # Matches a list/tuple with exactly one Point at the origin
+    case [Point(0, 0)]:  # Matches a list/tuple with exactly one Point at the origin
         print("The origin")
-    case [Point(x, y)]: # Matches a list/tuple with exactly one Point anywhere
+    case [Point(x, y)]:  # Matches a list/tuple with exactly one Point anywhere
         print(f"Single point {x}, {y}")
-    case [Point(0, y1), Point(0, y2)]: # Matches a list/tuple with exactly two Points, both on the Y-axis
+    case [
+        Point(0, y1),
+        Point(0, y2),
+    ]:  # Matches a list/tuple with exactly two Points, both on the Y-axis
         print(f"Two on the Y axis at {y1}, {y2}")
     case _:
         print("Something else")
-        
-        
+
+
 match point:
     case Point(x, y) if x == y:
         print(f"Y=X at {x}")

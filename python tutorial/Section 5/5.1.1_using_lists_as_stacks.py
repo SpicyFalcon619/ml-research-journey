@@ -1,3 +1,7 @@
+"""
+Python Reference: Using lists as stacks
+"""
+
 # STACKS: "Last-In, First-Out" (LIFO)
 # Think of it like a stack of plates. The last plate you put on top is the first one you take off.
 

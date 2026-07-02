@@ -1,3 +1,7 @@
+"""
+NumPy Reference: Boolean masking
+"""
+
 import numpy as np
 
 arr = np.array([10, 25, 5, 40, 15])
@@ -8,7 +12,7 @@ mask = arr > 15
 
 # print(arr[arr>15])
 
-# Challenge 9: Boolean Masking
+### Topic: Boolean Masking ###
 # Here are the temperatures (in Celsius) recorded over 10 days:
 temps = np.array([22, 35, 18, 40, 28, 15, 33, 26, 41, 19])
 

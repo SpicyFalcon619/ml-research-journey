@@ -4,22 +4,25 @@ Hey there, welcome to my machine learning and AI research repository. I created 
 
 ## The Roadmap
 
-I'm following a comprehensive, interactive roadmap to keep myself on track. I've hosted a live version of this roadmap so you can see exactly where I'm at in my journey:
-
+I'm following a comprehensive roadmap to keep myself on track. I've hosted a live version of the original roadmap here:
 [View My ML Research Roadmap](https://SpicyFalcon619.github.io/ml-research-journey/ml-research-roadmap.html)
+
+I have also added a markdown version of my learning checklist in [ROADMAP.md](ROADMAP.md) to track my day-to-day progress.
 
 ## Repository Structure
 
-I'm currently working my way through **Basecamp 0: Python Foundations**. 
+I'm currently working my way through Data Science libraries (NumPy and Pandas). 
 
 Inside this repo, you'll find:
-- **Section 3:** My first steps with Python, like writing basic scripts and generating the Fibonacci series.
-- **Section 4:** Deep dives into control flow (if statements, for loops, match cases, and defining functions).
+- **python tutorial:** My first steps with Python, like control flow, data structures, and functions.
+- **NumPy_Basics:** Array generation, matrix math, broadcasting, reshaping, indexing, and random numbers.
+- **Pandas_Basics:** Introduction to DataFrames and Series.
 - **ml-research-roadmap.html:** The source code for my interactive roadmap.
 
-I'll be adding new folders for NumPy, Pandas, PyTorch, and Neural Networks as I progress.
+I'll be adding new folders for Data Visualization, PyTorch, and Neural Networks as I progress.
 
 ## Tech Stack
 Right now, this repository is built entirely on:
 - Python 3
+- Data Science Libraries (NumPy, Pandas)
 - HTML and CSS (for the roadmap documentation)

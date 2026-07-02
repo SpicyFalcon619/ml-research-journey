@@ -1,3 +1,7 @@
+"""
+NumPy Reference: Array functions
+"""
+
 import numpy as np
 
 my_array = np.array([3, 4, 5])
@@ -7,8 +11,7 @@ my_array = np.array([3, 4, 5])
 # print(np.min(my_array))
 # print(np.std(my_array))
 
-my_matrix = np.array([[1, 2, 3],
-                     [4, 5, 6]])
+my_matrix = np.array([[1, 2, 3], [4, 5, 6]])
 # print(np.sum(my_matrix))
 # print(np.mean(my_matrix))
 # print(np.max(my_matrix))
@@ -17,12 +20,9 @@ my_matrix = np.array([[1, 2, 3],
 
 # print(np.mean(my_matrix, axis=1))
 
-# Challenge 7: Array Functions
+### Topic: Array Functions ###
 # Here are the exam scores from 4 students across 3 subjects:
-scores = np.array([[72, 85, 90],
-                   [88, 79, 95],
-                   [60, 70, 65],
-                   [91, 88, 84]])
+scores = np.array([[72, 85, 90], [88, 79, 95], [60, 70, 65], [91, 88, 84]])
 
 # Row = Student, Column = Subject (Math, Science, English)
 

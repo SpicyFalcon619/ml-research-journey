@@ -1,3 +1,7 @@
+"""
+Python Reference: The del statement
+"""
+
 # THE DEL STATEMENT
 a = [-1, 1, 66.25, 333, 333, 1234.5]
 print("Original:", a)

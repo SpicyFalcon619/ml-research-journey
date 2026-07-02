@@ -1,5 +1,9 @@
+"""
+Python Reference: Nested list comprehensions
+"""
+
 # NESTED LIST COMPREHENSIONS (Transposing a Matrix)
-# NOTE: In real Machine Learning, we NEVER do this manually! 
+# NOTE: In real Machine Learning, we NEVER do this manually!
 # We use NumPy arrays instead, which have a built-in matrix.transpose() function.
 
 matrix = [
@@ -18,9 +22,9 @@ transposed = [[row[i] for row in matrix] for i in range(4)]
 print("\nTransposed Matrix:")
 for row in transposed:
     print(row)
-    
+
 # The SUPER Pythonic Way (Using zip and unpacking)
-# zip() groups elements from multiple iterables together. 
+# zip() groups elements from multiple iterables together.
 # *matrix unpacks the matrix into separate rows.
 print("\nTransposed using zip():")
 print(list(zip(*matrix)))

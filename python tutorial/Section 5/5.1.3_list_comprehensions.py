@@ -1,3 +1,7 @@
+"""
+Python Reference: List comprehensions
+"""
+
 # THE OLD WAY (Using a traditional for-loop)
 # This takes 3 lines of code.
 squares1 = []
@@ -36,7 +40,7 @@ print("Nested Comprehension:", combs2)
 vec = [-4, -2, 0, 2, 4]
 
 # Create a new list with the values doubled
-print("\nDoubled:", [x*2 for x in vec])
+print("\nDoubled:", [x * 2 for x in vec])
 
 # Filter the list to exclude negative numbers using an 'if' condition
 print("Positive only:", [x for x in vec if x >= 0])
@@ -45,7 +49,7 @@ print("Positive only:", [x for x in vec if x >= 0])
 print("Absolute values:", [abs(x) for x in vec])
 
 # Call a method (.strip()) on each string element to remove whitespace
-freshfruit = ['  banana', '  loganberry ', 'passion fruit  ']
+freshfruit = ["  banana", "  loganberry ", "passion fruit  "]
 print("Stripped strings:", [weapon.strip() for weapon in freshfruit])
 
 # Create a list of 2-tuples like (number, square)
@@ -53,10 +57,11 @@ print("Stripped strings:", [weapon.strip() for weapon in freshfruit])
 print("Tuples:", [(x, x**2) for x in range(6)])
 
 # Flatten a 2D list (a list of lists) into a single flat list
-vec2d = [[1,2,3], [4,5,6], [7,8,9]]
+vec2d = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 print("Flattened list:", [num for elem in vec2d for num in elem])
 
 # Rounding Pi to a varying number of decimal places (1 through 5)
 # Note how it calls a function (round) AND casts to a string (str) all in one go!
 from math import pi
+
 print("Pi rounded:", [str(round(pi, i)) for i in range(1, 6)])

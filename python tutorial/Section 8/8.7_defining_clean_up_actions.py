@@ -1,3 +1,7 @@
+"""
+Python Reference: Defining clean up actions
+"""
+
 # The 'finally' clause executes no matter what happens (even if an error occurs).
 
 try:

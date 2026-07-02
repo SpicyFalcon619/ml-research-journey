@@ -1,15 +1,20 @@
+"""
+Python Reference: Range function
+"""
+
 # Basic range loop (0 to 4)
 for i in range(5):
-    print(i, end=' ')
+    print(i, end=" ")
 
 # Empty print() outputs a newline
 print()
 
-wrestlers = {"John Cena" : "Retired",
-         "Dean Ambrose" : "AEW",
-         "Rey Mysterio" : "Midget",
-         "Seth Rollins" : "Weird",
-         }
+wrestlers = {
+    "John Cena": "Retired",
+    "Dean Ambrose": "AEW",
+    "Rey Mysterio": "Midget",
+    "Seth Rollins": "Weird",
+}
 
 # Iterating over dictionary items, keys, and values
 for i in wrestlers.items():
