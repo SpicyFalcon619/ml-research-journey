@@ -13,3 +13,11 @@ car_data = {
 }
 #    Convert this dictionary into a Pandas DataFrame called 'cars'.
 #    Print it. Notice how nicely it formats the table!
+
+fruits = pd.Series(["Apple", "Banana", "Cherry"])
+# fruits.index = fruits.index + 1
+print(fruits)
+
+cars = pd.DataFrame(car_data)
+# cars.index = cars.index + 1
+print(cars)
