@@ -111,3 +111,46 @@ body {
 .animate-fade-up {
   animation: fade-up 0.4s ease-out both;
 }
+
+/* Shiki code block chrome */
+.code-scroll pre.shiki {
+  background: transparent !important;
+  margin: 0;
+  padding: 0 1.25rem 0 0;
+}
+.code-scroll code {
+  counter-reset: line;
+  display: block;
+  min-width: max-content;
+}
+.code-line {
+  counter-increment: line;
+  display: inline-block;
+  width: 100%;
+  padding-left: 3.25rem;
+  position: relative;
+  scroll-margin: 6rem;
+}
+.code-line::before {
+  content: counter(line);
+  position: absolute;
+  left: 0;
+  width: 2.5rem;
+  text-align: right;
+  color: var(--color-ink-faint);
+  user-select: none;
+}
+
+@keyframes line-flash {
+  0%,
+  100% {
+    background: transparent;
+  }
+  30% {
+    background: var(--color-accent-glow);
+  }
+}
+.line-flash {
+  animation: line-flash 1.8s ease-out;
+  border-radius: 4px;
+}

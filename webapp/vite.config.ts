@@ -4,8 +4,9 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
 // https://vite.dev/config/
-export default defineConfig({
-  base: '/ml-research-journey/',
+export default defineConfig(({ command }) => ({
+  // GitHub Pages serves this project from /ml-research-journey/; local dev/preview stays at root.
+  base: command === 'build' ? '/ml-research-journey/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -18,4 +19,4 @@ export default defineConfig({
       allow: ['..'],
     },
   },
-})
+}))

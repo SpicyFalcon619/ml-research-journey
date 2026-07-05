@@ -166,3 +166,7 @@ export const navGroups: NavGroup[] = basecamps
 export function flattenNavItems(items: NavItem[]): NavItem[] {
   return items.flatMap((item) => [item, ...flattenNavItems(item.children)])
 }
+
+export function countSnippets(item: NavItem): number {
+  return flattenNavItems([item]).reduce((sum, node) => sum + node.snippets.length, 0)
+}
