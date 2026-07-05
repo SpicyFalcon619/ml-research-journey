@@ -14,7 +14,7 @@ export function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-white/[0.03] px-2.5 py-1 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:bg-white/[0.07] hover:text-[var(--color-ink)] cursor-pointer"
+      className="flex items-center gap-1.5 rounded-md border border-[var(--color-code-border)] bg-[var(--color-code-surface)] px-2.5 py-1 text-xs text-[var(--color-code-ink-dim)] transition-colors hover:border-[var(--color-code-border-strong)] hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)] cursor-pointer"
     >
       <AnimatePresence mode="wait" initial={false}>
         {copied ? (

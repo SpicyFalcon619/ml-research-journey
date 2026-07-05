@@ -23,7 +23,7 @@ function NavNode({
     <div>
       <button
         onClick={() => toggle(item.slug)}
-        className="flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-left text-[13px] font-medium text-[var(--color-ink-dim)] transition-colors hover:bg-white/[0.04] hover:text-[var(--color-ink)] cursor-pointer"
+        className="flex w-full items-center gap-1.5 rounded-lg py-1.5 pr-2 text-left text-[13px] font-medium text-[var(--color-ink-dim)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] cursor-pointer"
         style={{ paddingLeft: `${depth * 0.85 + 0.5}rem` }}
       >
         {hasContent ? (
@@ -44,7 +44,7 @@ function NavNode({
               to={`/s/${snippet.id}`}
               className={({ isActive }) =>
                 cn(
-                  'block truncate rounded-lg py-1.5 pr-2 text-[13px] text-[var(--color-ink-faint)] transition-colors hover:bg-white/[0.04] hover:text-[var(--color-ink)]',
+                  'block truncate rounded-lg py-1.5 pr-2 text-[13px] text-[var(--color-ink-faint)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]',
                   isActive && 'bg-[var(--color-accent-glow)]/[0.18] text-[var(--color-accent-soft)]',
                 )
               }

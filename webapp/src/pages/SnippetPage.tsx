@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ChevronRight, ExternalLink } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
+import { getOutput } from '@/lib/outputs'
 import { CodeBlock } from '@/components/code/CodeBlock'
 import { Badge } from '@/components/ui/Badge'
 
@@ -22,9 +23,14 @@ export function SnippetPage() {
   const lineParam = searchParams.get('line')
   const focusLine = lineParam ? Number(lineParam) : undefined
   const githubUrl = `https://github.com/SpicyFalcon619/ml-research-journey/blob/master/${encodeURI(snippet.path)}`
+  const output = getOutput(snippet.path)
 
   return (
-    <div className="mx-auto max-w-4xl animate-fade-up pb-16">
+    // Keyed by snippet id so navigating between snippets (same route pattern, `/s/:id`)
+    // remounts this whole subtree instead of reusing it — otherwise CodeBlock's
+    // "Run" toggle state (and highlighted-language cache) would leak from one
+    // snippet's code block into the next one's.
+    <div key={snippet.id} className="mx-auto max-w-4xl animate-fade-up pb-16">
       <nav className="mb-4 flex flex-wrap items-center gap-1.5 text-xs text-[var(--color-ink-faint)]">
         <Link to={`/c/${snippet.categorySlug}`} className="hover:text-[var(--color-ink-dim)]">
           {snippet.categoryLabel}
@@ -57,7 +63,7 @@ export function SnippetPage() {
             <button
               key={topic.line}
               onClick={() => jumpToLine(topic.line)}
-              className="cursor-pointer rounded-full border border-[var(--color-border)] bg-white/[0.03] px-3 py-1 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-accent-glow)] hover:text-[var(--color-accent-soft)]"
+              className="cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-accent-glow)] hover:text-[var(--color-accent-soft)]"
             >
               {topic.label}
             </button>
@@ -65,7 +71,7 @@ export function SnippetPage() {
         </div>
       )}
 
-      <CodeBlock code={snippet.code} filename={snippet.filename} focusLine={focusLine} />
+      <CodeBlock code={snippet.code} filename={snippet.filename} focusLine={focusLine} output={output} />
 
       <div className="mt-6 flex flex-wrap gap-1.5">
         {snippet.tags.slice(0, 12).map((tag) => (

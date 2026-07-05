@@ -5,15 +5,15 @@ NumPy Reference: Indexing
 import numpy as np
 
 arr = np.array([10, 20, 30, 40])
-# print(arr[0])
-# print(arr[-1])
-# print(arr[1:3])
+print(arr[0])
+print(arr[-1])
+print(arr[1:3])
 
 matrix = np.array([[1, 2, 3], [4, 5, 6]])
-# print(matrix[0, 0])
-# print(matrix[0, :])
-# print(matrix[1, 0])
-# print(matrix[:, :])
+print(matrix[0, 0])
+print(matrix[0, :])
+print(matrix[1, 0])
+print(matrix[:, :])
 
 ### Topic: Indexing & Slicing ###
 # Here is your array to work with:

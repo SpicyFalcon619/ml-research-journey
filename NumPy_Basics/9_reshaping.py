@@ -6,13 +6,13 @@ from numpy import reshape
 import numpy as np
 
 my_array = np.arange(9)
-# print(my_array)
+print(my_array)
 
 reshaped = my_array.reshape(3, 3)
-# print(reshaped)
+print(reshaped)
 
 flattened = reshaped.flatten()
-# print(flattened)
+print(flattened)
 
 ### Topic: Reshaping ###
 # Start with this 1D array of 12 numbers:

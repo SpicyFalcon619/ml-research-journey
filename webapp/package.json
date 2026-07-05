@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "capture-outputs": "node scripts/capture-outputs.mjs",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {

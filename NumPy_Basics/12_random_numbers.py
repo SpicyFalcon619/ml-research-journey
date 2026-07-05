@@ -5,16 +5,16 @@ NumPy Reference: Random numbers
 import numpy as np
 
 random = np.random.randint(0, 2)
-# print(random)
+print(random)
 
 custom_floats = np.random.uniform(10, 50, size=5)
-# print(custom_floats)
+print(custom_floats)
 
 int_matrix = np.random.randint(1, 100, size=(3, 3))
-# print(int_matrix)
+print(int_matrix)
 
 float_matrix = np.random.uniform(10, 50, size=(2, 4))
-# print(float_matrix)
+print(float_matrix)
 
 ### Topic: Random Numbers ###
 # Generating random data is essential in ML for initializing weights or creating dummy data.

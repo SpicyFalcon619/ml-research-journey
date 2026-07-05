@@ -1,6 +1,8 @@
 import type { SVGProps } from 'react'
-import { Link } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { Compass, Search } from 'lucide-react'
+import { ThemeToggle } from './ThemeToggle'
+import { cn } from '@/lib/cn'
 
 function GithubMark(props: SVGProps<SVGSVGElement>) {
   return (
@@ -11,31 +13,45 @@ function GithubMark(props: SVGProps<SVGSVGElement>) {
 }
 
 export function TopBar({ onOpenSearch }: { onOpenSearch: () => void }) {
+  const location = useLocation()
+  // On snippet pages the code block's own header takes over as the persistent,
+  // reachable control (Run/Copy), so the site nav scrolls away instead of
+  // competing with it for sticky real estate.
+  const isSnippetPage = location.pathname.startsWith('/s/')
+
   return (
-    <header className="glass-panel sticky top-4 z-30 mx-4 mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 sm:mx-6">
+    <header
+      className={cn(
+        'glass-panel z-30 mx-4 mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 sm:mx-6',
+        !isSnippetPage && 'sticky top-4',
+      )}
+    >
       <Link to="/" className="flex shrink-0 items-center gap-2 font-semibold tracking-tight text-[var(--color-ink)]">
-        <span className="text-lg">🧭</span>
+        <Compass className="h-5 w-5 text-[var(--color-accent-soft)]" strokeWidth={1.75} />
         <span className="hidden sm:inline">Field Guide</span>
       </Link>
       <button
         onClick={onOpenSearch}
-        className="flex flex-1 items-center gap-2 rounded-xl border border-[var(--color-border)] bg-white/[0.03] px-3 py-2 text-sm text-[var(--color-ink-faint)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink-dim)] cursor-pointer max-w-md"
+        className="flex flex-1 items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink-faint)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink-dim)] cursor-pointer max-w-md"
       >
         <Search className="h-4 w-4 shrink-0" />
         <span className="flex-1 truncate text-left">Search snippets…</span>
-        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-white/[0.05] px-1.5 py-0.5 font-mono text-[10px] sm:inline">
+        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-[10px] sm:inline">
           ⌘K
         </kbd>
       </button>
-      <a
-        href="https://github.com/SpicyFalcon619/ml-research-journey"
-        target="_blank"
-        rel="noreferrer"
-        className="ml-auto shrink-0 text-[var(--color-ink-faint)] transition-colors hover:text-[var(--color-ink)]"
-        aria-label="View repository on GitHub"
-      >
-        <GithubMark className="h-5 w-5" />
-      </a>
+      <div className="ml-auto flex shrink-0 items-center gap-2">
+        <ThemeToggle />
+        <a
+          href="https://github.com/SpicyFalcon619/ml-research-journey"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-[var(--color-ink-faint)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]"
+          aria-label="View repository on GitHub"
+        >
+          <GithubMark className="h-4 w-4" />
+        </a>
+      </div>
     </header>
   )
 }

@@ -8,7 +8,7 @@ arr1 = np.array([["John", "Felipe", "Michael"], ["Russel", "Jim", "Andrew"]])
 
 arr2 = np.array([[1, 2, 3], [4, 5, 6]])
 
-# print(np.hstack((arr1, arr2)))
+print(np.hstack((arr1, arr2)))
 
 ### Topic: Stacking and Concatenating ###
 # Here are the test scores for Class A and Class B

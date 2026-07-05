@@ -6,6 +6,7 @@ import { TopBar } from '@/components/layout/TopBar'
 import { CommandPalette } from '@/components/search/CommandPalette'
 import { Home } from '@/pages/Home'
 import { CategoryPage } from '@/pages/CategoryPage'
+import { SearchResultsPage } from '@/pages/SearchResultsPage'
 
 // Shiki (syntax highlighting) is only needed once a snippet is opened, so keep
 // it out of the initial bundle that Home/CategoryPage load.
@@ -39,6 +40,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home onOpenSearch={() => setPaletteOpen(true)} />} />
                 <Route path="/c/:categorySlug" element={<CategoryPage />} />
+                <Route path="/search" element={<SearchResultsPage />} />
                 <Route path="/s/:id" element={<SnippetPage />} />
               </Routes>
             </Suspense>

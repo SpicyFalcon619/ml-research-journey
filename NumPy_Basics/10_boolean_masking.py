@@ -8,9 +8,9 @@ arr = np.array([10, 25, 5, 40, 15])
 
 mask = arr > 15
 
-# print(arr[mask])
+print(arr[mask])
 
-# print(arr[arr>15])
+print(arr[arr>15])
 
 ### Topic: Boolean Masking ###
 # Here are the temperatures (in Celsius) recorded over 10 days:
