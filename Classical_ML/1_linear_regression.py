@@ -22,3 +22,10 @@ y = data["Salary"]
 # 4. Use model.predict(new_X) to predict their salary! 
 #    Variable: 'prediction', and print it out.
 
+model = LinearRegression()
+model.fit(X, y)
+
+new_X = pd.DataFrame({"Years_Experience": [6, 7]})
+prediction = model.predict(new_X)
+
+print(prediction)
