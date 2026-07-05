@@ -1,32 +1,30 @@
-# React + TypeScript + Vite
+# Field Guide
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A searchable personal reference site for the Python/NumPy/Pandas/scikit-learn snippets in this repo. It reads the `.py` files directly from the sibling folders (`../NumPy_Basics`, `../Pandas_Basics`, `../Classical_ML`, `../python tutorial`) — nothing is duplicated here, so adding or editing a lesson file elsewhere in the repo is all that's needed for it to show up.
 
-Currently, two official plugins are available:
+Live at: https://SpicyFalcon619.github.io/ml-research-journey/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Running locally
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Adding or updating a lesson
+
+- **Sidebar, search, categorization** — fully automatic. Just save the `.py` file in one of the four content folders; the dev server picks it up immediately, and it's included in every build.
+- **The "Run" button's output** — pre-captured, not executed live in the browser. After adding or editing a file, refresh it:
+  ```bash
+  npm run capture-outputs
+  ```
+  This actually runs every lesson with Python and caches real stdout/stderr into `src/lib/output-cache.json`. Safe to re-run anytime; commit the updated JSON afterward.
+- **A file that calls `input()`** — the capture script can't feed it arbitrary text, so add a few example input sequences to `INTERACTIVE_SCENARIOS` in `scripts/capture-outputs.mjs`, then re-run the script. Without an entry there, the site just shows a "copy this into your own terminal" note for that file.
+
+## Deployment
+
+Pushing to `master` triggers `.github/workflows/deploy.yml`, which builds this app and publishes it to GitHub Pages (also copying `ml-research-roadmap.html` into the output so it keeps serving at its existing URL). No manual deploy step.
+
+## Stack
+
+Vite + React + TypeScript, Tailwind CSS v4, Shiki (syntax highlighting, themed per site theme), Fuse.js + cmdk (search/command palette), Framer Motion.
