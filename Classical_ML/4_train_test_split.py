@@ -30,17 +30,24 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # 2. Initialize your LogisticRegression model
 
+model = LogisticRegression()
 
 # 3. Train the model using ONLY the training data (X_train, y_train)
 
+model.fit(X_train, y_train)
 
 # 4. Now, make the model predict the answers for the test data (X_test).
 #    Do NOT give it y_test! We want it to guess blindly.
 #    Variable: 'predictions'
 
+predictions = model.predict(X_test)
+print(predictions)
 
 # 5. Let's see how well it did! We use accuracy_score to compare its guesses 
 #    against the actual correct answers (y_test).
 #    Variable: 'score' = accuracy_score(y_test, predictions)
 #    Print out the score!
 
+score = accuracy_score(y_test, predictions)
+
+print(score)
