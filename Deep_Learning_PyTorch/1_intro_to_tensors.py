@@ -41,9 +41,12 @@ print(f"Data type: {random_tensor.dtype}\n")
 # We can check what device our tensor is currently on:
 print(f"Random tensor is on device: {random_tensor.device}")
 
-# If you had a GPU available, you could move the tensor to it like this:
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-# random_tensor = random_tensor.to(device)
-# print(f"Moved tensor to: {random_tensor.device}")
+# Best practice for setting up your device (works on any machine):
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"System device selected: {device}")
+
+# Move the tensor to the device!
+random_tensor = random_tensor.to(device)
+print(f"Tensor is now on device: {random_tensor.device}")
 
 print("\nWelcome to PyTorch! You've taken your first step into Deep Learning.")
