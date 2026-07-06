@@ -36,3 +36,17 @@ print()
 
 messy_data["City"] = messy_data['City'].fillna('Unknown')
 print(messy_data)
+print("\n")
+
+### Topic 3: Smart Filling (Mean/Median) ###
+# Instead of filling with a hardcoded number like 0, it's usually better
+# in Machine Learning to fill missing numbers with the average (mean) of that column!
+
+# Let's fill the missing Age with the average age, and the missing Salary with the average salary.
+smart_filled_data = messy_data.copy()
+
+smart_filled_data["Age"] = smart_filled_data["Age"].fillna(smart_filled_data["Age"].mean())
+smart_filled_data["Salary"] = smart_filled_data["Salary"].fillna(smart_filled_data["Salary"].mean())
+
+print("--- Data Filled with Column Averages ---")
+print(smart_filled_data)
