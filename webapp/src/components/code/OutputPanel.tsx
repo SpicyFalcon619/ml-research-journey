@@ -1,7 +1,37 @@
 import { useState } from 'react'
-import { AlertTriangle, Clock, Keyboard, Terminal, X } from 'lucide-react'
+import { AlertTriangle, Clock, ImageIcon, Keyboard, Terminal, X } from 'lucide-react'
 import type { CapturedOutput } from '@/lib/outputs'
 import { cn } from '@/lib/cn'
+
+function withBase(path: string) {
+  return `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
+}
+
+function OutputImages({ images }: { images: string[] }) {
+  return (
+    <div className="border-t border-[var(--color-code-border)] bg-[var(--color-code-bg)] p-4">
+      <div className="mb-3 flex items-center gap-2">
+        <ImageIcon className="h-3.5 w-3.5 shrink-0 text-[var(--color-code-ink-faint)]" />
+        <span className="text-xs font-medium text-[var(--color-code-ink-dim)]">
+          {images.length === 1 ? 'Figure' : `Figures (${images.length})`}
+        </span>
+      </div>
+      <div className="flex flex-col gap-3">
+        {images.map((src) => (
+          <a
+            key={src}
+            href={withBase(src)}
+            target="_blank"
+            rel="noreferrer"
+            className="overflow-hidden rounded-lg border border-[var(--color-code-border)] bg-[var(--color-code-surface)] transition-colors hover:border-[var(--color-code-border-strong)]"
+          >
+            <img src={withBase(src)} alt="" className="block w-full" />
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 const STATUS_DOT: Record<CapturedOutput['status'], string> = {
   ok: 'bg-emerald-400',
@@ -119,12 +149,17 @@ export function OutputPanel({ output, filename, onClose }: OutputPanelProps) {
           </>
         )}
 
-        {output.status === 'empty' && (
+        {output.status === 'empty' && !output.images?.length && (
           <p className="font-mono text-[13px] text-[var(--color-code-ink-faint)] italic">
             This script doesn't print anything (yet) — it's an in-progress exercise. Check the
             numbered comments in the code for what's left to fill in.
           </p>
         )}
+        {output.status === 'empty' && output.images?.length ? (
+          <p className="font-mono text-[13px] text-[var(--color-code-ink-faint)] italic">
+            This script doesn't print to the console — see the figure below.
+          </p>
+        ) : null}
 
         {output.status === 'interactive' && <InteractiveScenarioPicker output={output} />}
 
@@ -144,6 +179,8 @@ export function OutputPanel({ output, filename, onClose }: OutputPanelProps) {
           </pre>
         )}
       </div>
+
+      {output.images && output.images.length > 0 && <OutputImages images={output.images} />}
     </div>
   )
 }

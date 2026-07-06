@@ -15,6 +15,7 @@ export interface CapturedOutput {
   durationMs: number
   capturedAt: string
   scenarios?: InteractiveScenario[]
+  images?: string[]
 }
 
 const outputCache = rawCache as Record<string, CapturedOutput>

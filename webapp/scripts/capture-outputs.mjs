@@ -11,6 +11,7 @@ import {
   mkdirSync,
   copyFileSync,
   readdirSync,
+  unlinkSync,
 } from 'node:fs'
 import { join, dirname, relative, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -19,6 +20,45 @@ import os from 'node:os'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(__dirname, '..', '..')
 const outputPath = join(__dirname, '..', 'src', 'lib', 'output-cache.json')
+const outputsPublicDir = join(__dirname, '..', 'public', 'outputs')
+
+// Regenerated from scratch every run (same as the cache itself), so a lesson
+// that stops plotting doesn't leave an orphaned PNG behind.
+rmSync(outputsPublicDir, { recursive: true, force: true })
+mkdirSync(outputsPublicDir, { recursive: true })
+
+const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.svg'])
+
+// scratchDir is shared across every script in the run (see below), so a plot
+// left behind by one script would otherwise get misattributed to the next
+// one that happens to produce no image of its own. Snapshot the dir before
+// running, and after running move only files that are new, then delete them
+// from the scratch dir so it's clean for the next script.
+function listImageFiles(dir) {
+  return new Set(
+    readdirSync(dir, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && IMAGE_EXTENSIONS.has(extname(entry.name)))
+      .map((entry) => entry.name),
+  )
+}
+
+function captureImages(scratchDir, before, relPath) {
+  const after = listImageFiles(scratchDir)
+  const newFiles = [...after].filter((name) => !before.has(name))
+  if (newFiles.length === 0) return undefined
+
+  const lessonDir = relPath.replace(/\.py$/, '')
+  const destDir = join(outputsPublicDir, lessonDir)
+  mkdirSync(destDir, { recursive: true })
+
+  const urls = []
+  for (const name of newFiles) {
+    copyFileSync(join(scratchDir, name), join(destDir, name))
+    unlinkSync(join(scratchDir, name))
+    urls.push(`/outputs/${lessonDir}/${name}`)
+  }
+  return urls
+}
 
 // Mirrors content.ts's glob: every top-level repo folder is a content folder
 // except this app and the Test/ scratch space, so a brand-new Basecamp
@@ -100,7 +140,10 @@ for (const dir of contentDirs) {
           encoding: 'utf8',
           timeout: 15000,
           input: scenario.inputs.join('\n') + '\n',
-          env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+          // Force matplotlib's non-interactive backend so a lesson that imports
+          // pyplot can never pop a GUI window / hang the capture, regardless of
+          // whether the script remembers to do this itself.
+          env: { ...process.env, PYTHONIOENCODING: 'utf-8', MPLBACKEND: 'Agg' },
         })
         return {
           label: scenario.label,
@@ -121,21 +164,30 @@ for (const dir of contentDirs) {
       continue
     }
 
+    const imagesBefore = listImageFiles(scratchDir)
     const start = Date.now()
     const result = spawnSync(pythonCmd, [file], {
       cwd: scratchDir,
       encoding: 'utf8',
       timeout: 15000,
       input: '',
-      // Windows defaults piped stdout to the system codepage (e.g. cp1252), which
-      // breaks on non-ASCII text (names, emoji, etc.) that prints fine in a real terminal.
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+      env: {
+        ...process.env,
+        // Windows defaults piped stdout to the system codepage (e.g. cp1252), which
+        // breaks on non-ASCII text (names, emoji, etc.) that prints fine in a real terminal.
+        PYTHONIOENCODING: 'utf-8',
+        // Force matplotlib's non-interactive backend so a lesson that imports
+        // pyplot can never pop a GUI window / hang the capture, regardless of
+        // whether the script remembers to do this itself.
+        MPLBACKEND: 'Agg',
+      },
     })
     const durationMs = Date.now() - start
     const timedOut = Boolean(result.signal) || result.error?.code === 'ETIMEDOUT'
     const normalize = (s) => (s ?? '').replace(/\r\n/g, '\n')
     result.stdout = normalize(result.stdout)
     result.stderr = normalize(result.stderr)
+    const images = captureImages(scratchDir, imagesBefore, relPath)
 
     if (timedOut) {
       cache[relPath] = {
@@ -144,6 +196,7 @@ for (const dir of contentDirs) {
         stderr: result.stderr ?? '',
         durationMs,
         capturedAt,
+        images,
       }
       counts.timeout++
       console.log(`TIMEOUT      ${relPath}`)
@@ -154,17 +207,18 @@ for (const dir of contentDirs) {
         stderr: (result.stderr ?? '') || String(result.error ?? ''),
         durationMs,
         capturedAt,
+        images,
       }
       counts.error++
       console.log(`ERROR        ${relPath}`)
     } else if (!result.stdout || !result.stdout.trim()) {
-      cache[relPath] = { status: 'empty', stdout: '', stderr: result.stderr ?? '', durationMs, capturedAt }
+      cache[relPath] = { status: 'empty', stdout: '', stderr: result.stderr ?? '', durationMs, capturedAt, images }
       counts.empty++
-      console.log(`empty        ${relPath}`)
+      console.log(`empty        ${relPath}${images ? `  (${images.length} image${images.length === 1 ? '' : 's'})` : ''}`)
     } else {
-      cache[relPath] = { status: 'ok', stdout: result.stdout, stderr: result.stderr ?? '', durationMs, capturedAt }
+      cache[relPath] = { status: 'ok', stdout: result.stdout, stderr: result.stderr ?? '', durationMs, capturedAt, images }
       counts.ok++
-      console.log(`ok           ${relPath}  (${durationMs}ms)`)
+      console.log(`ok           ${relPath}  (${durationMs}ms)${images ? ` +${images.length} image${images.length === 1 ? '' : 's'}` : ''}`)
     }
   }
 }

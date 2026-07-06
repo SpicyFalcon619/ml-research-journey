@@ -3,6 +3,7 @@ PyTorch Workflow: Linear Regression from Scratch
 """
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 
 # We are going to build a simple Neural Network to solve a problem we already know: Linear Regression!
 # Our formula is: y = weight * X + bias
@@ -95,3 +96,21 @@ print("Final model parameters (learned):")
 print(list(model.parameters()))
 print(f"\nTarget parameters were: weight={weight}, bias={bias}")
 print("The machine learned the parameters almost perfectly!")
+
+
+### Topic 4: Visualizing the Predictions ###
+# A picture is worth a thousand loss values — plot the training/testing data
+# against what the model predicts, so we can *see* how close the fit is.
+model.eval()
+with torch.inference_mode():
+    y_preds = model(X_test)
+
+plt.figure(figsize=(8, 5))
+plt.scatter(X_train, y_train, c="royalblue", s=20, label="Training data")
+plt.scatter(X_test, y_test, c="seagreen", s=20, label="Testing data")
+plt.scatter(X_test, y_preds, c="crimson", s=20, label="Predictions")
+plt.title("Linear Regression: Learned Fit vs. Real Data")
+plt.xlabel("X")
+plt.ylabel("y")
+plt.legend()
+plt.savefig("regression_plot.png", dpi=150, bbox_inches="tight")
