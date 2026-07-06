@@ -36,6 +36,7 @@ A field guide, compiled for one traveler. Follow the path top to bottom. Every n
 
 ## BASECAMP 1: Classical machine learning (4-6 weeks)
 *Where you learn what ML actually is, before deep learning. Regression, classification, trees, the full real workflow.*
+*(Note: Current progress covers the basics like single trees and accuracy scoring. Advanced topics like regularization, cross-validation, and ensembles are saved for a deeper dive later.)*
 
 - [x] **Machine Learning Specialization (Andrew Ng):** Still the gold standard for building real intuition.
 - [x] **scikit-learn Tutorials:** Implement everything from the course above on real data.
@@ -46,7 +47,8 @@ A field guide, compiled for one traveler. Follow the path top to bottom. Every n
 ## BASECAMP 2: Deep learning (6-8 weeks)
 *Where it gets fun. Neural networks, and the framework the field has standardized on — PyTorch.*
 
-- [x] **Practical Deep Learning for Coders (fast.ai):** Project-first: you'll train and deploy a real model by lesson two.
+- [x] **Learn PyTorch for Deep Learning: Zero to Mastery (Daniel Bourke):** The definitive ground-up guide to building neural networks and standard PyTorch workflows.
+- [ ] **Practical Deep Learning for Coders (fast.ai):** Project-first: you'll train and deploy a real model by lesson two.
 - [ ] **Deep Learning Specialization (Andrew Ng):** More rigorous, theory-first. CNNs, RNNs, and the math.
 - [ ] **Neural Networks: Zero to Hero (Andrej Karpathy):** Builds backprop and a GPT from scratch, in code.
 
