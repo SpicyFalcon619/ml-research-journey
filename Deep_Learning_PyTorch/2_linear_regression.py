@@ -3,7 +3,6 @@ PyTorch Workflow: Linear Regression from Scratch
 """
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
 
 # We are going to build a simple Neural Network to solve a problem we already know: Linear Regression!
 # Our formula is: y = weight * X + bias
