@@ -31,32 +31,39 @@ function App() {
   return (
     <>
       <GradientMesh />
-      <div className="mx-auto flex min-h-screen max-w-[1600px]">
-        <aside
-          className={cn(
-            'sticky top-0 hidden h-screen shrink-0 border-r border-[var(--color-border)] lg:block transition-[width,opacity,margin] duration-300 ease-in-out',
-            sidebarOpen ? 'w-72 opacity-100' : 'w-0 border-none opacity-0 overflow-hidden'
-          )}
-        >
-          <div className="w-72 h-full">
-            <Sidebar />
-          </div>
-        </aside>
-        <div className="flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out">
+      <div className="mx-auto flex min-h-screen flex-col max-w-[1600px]">
+        {/* TopBar now spans the full width at the top */}
+        <div className="w-full z-30">
           <TopBar 
             onOpenSearch={() => setPaletteOpen(true)} 
             onToggleSidebar={() => setSidebarOpen((v) => !v)} 
           />
-          <main className="flex-1 px-4 py-8 sm:px-8">
-            <Suspense fallback={null}>
-              <Routes>
-                <Route path="/" element={<Home onOpenSearch={() => setPaletteOpen(true)} />} />
-                <Route path="/c/:categorySlug" element={<CategoryPage />} />
-                <Route path="/search" element={<SearchResultsPage />} />
-                <Route path="/s/:id" element={<SnippetPage />} />
-              </Routes>
-            </Suspense>
-          </main>
+        </div>
+
+        {/* The Sidebar and Main Content sit side-by-side below the TopBar */}
+        <div className="flex flex-1 min-h-0 relative">
+          <aside
+            className={cn(
+              'sticky top-24 hidden h-[calc(100vh-6rem)] shrink-0 border-r border-[var(--color-border)] lg:block transition-[width,opacity,margin] duration-300 ease-in-out',
+              sidebarOpen ? 'w-72 opacity-100' : 'w-0 border-none opacity-0 overflow-hidden'
+            )}
+          >
+            <div className="w-72 h-full">
+              <Sidebar />
+            </div>
+          </aside>
+          <div className="flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out">
+            <main className="flex-1 px-4 py-8 sm:px-8">
+              <Suspense fallback={null}>
+                <Routes>
+                  <Route path="/" element={<Home onOpenSearch={() => setPaletteOpen(true)} />} />
+                  <Route path="/c/:categorySlug" element={<CategoryPage />} />
+                  <Route path="/search" element={<SearchResultsPage />} />
+                  <Route path="/s/:id" element={<SnippetPage />} />
+                </Routes>
+              </Suspense>
+            </main>
+          </div>
         </div>
       </div>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
