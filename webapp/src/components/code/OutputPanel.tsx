@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AlertTriangle, Clock, ImageIcon, Keyboard, Maximize2, Terminal, X } from 'lucide-react'
 import type { CapturedOutput } from '@/lib/outputs'
 import { cn } from '@/lib/cn'
@@ -7,7 +8,51 @@ function withBase(path: string) {
   return `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 }
 
+function ImageLightbox({ src, onClose }: { src: string; onClose: () => void }) {
+  const [zoomed, setZoomed] = useState(false)
+
+  useEffect(() => {
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
+  }, [onClose])
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute right-5 top-5 cursor-pointer rounded-lg p-2 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      <div
+        className={cn('max-h-full max-w-full', zoomed ? 'overflow-auto' : 'overflow-hidden')}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt=""
+          onClick={() => setZoomed((z) => !z)}
+          className={cn(
+            'rounded-md',
+            zoomed ? 'w-auto max-w-none cursor-zoom-out' : 'max-h-[88vh] max-w-[88vw] cursor-zoom-in object-contain',
+          )}
+        />
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
 function OutputImages({ images }: { images: string[] }) {
+  const [openSrc, setOpenSrc] = useState<string | null>(null)
+
   return (
     <div className="border-t border-[var(--color-code-border)] bg-[var(--color-code-bg)] px-4 py-3">
       <div className="mb-2 flex items-center gap-2">
@@ -15,24 +60,37 @@ function OutputImages({ images }: { images: string[] }) {
         <span className="text-xs font-medium text-[var(--color-code-ink-dim)]">
           {images.length === 1 ? 'Figure' : `Figures (${images.length})`}
         </span>
-        <span className="text-[11px] text-[var(--color-code-ink-faint)]">· click to open full size</span>
+        <span className="text-[11px] text-[var(--color-code-ink-faint)]">· click to zoom</span>
       </div>
       <div className="flex flex-wrap gap-2">
-        {images.map((src) => (
-          <a
-            key={src}
-            href={withBase(src)}
-            target="_blank"
-            rel="noreferrer"
-            className="group relative block h-20 overflow-hidden rounded-lg border border-[var(--color-code-border)] bg-[var(--color-code-surface)] transition-colors hover:border-[var(--color-code-border-strong)]"
-          >
-            <img src={withBase(src)} alt="" className="h-full w-auto" />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-150 group-hover:bg-black/40 group-hover:opacity-100">
-              <Maximize2 className="h-4 w-4 text-white" />
-            </div>
-          </a>
-        ))}
+        {images.map((src) => {
+          const url = withBase(src)
+          return (
+            <a
+              key={src}
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => {
+                // Plain left-click opens the in-app zoom view instead of a new
+                // tab; a modifier-click (or right-click, via the native context
+                // menu) still opens the real link the normal browser way.
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+                e.preventDefault()
+                setOpenSrc(url)
+              }}
+              className="group relative block h-20 overflow-hidden rounded-lg border border-[var(--color-code-border)] bg-[var(--color-code-surface)] transition-colors hover:border-[var(--color-code-border-strong)]"
+            >
+              <img src={url} alt="" className="h-full w-auto" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-150 group-hover:bg-black/40 group-hover:opacity-100">
+                <Maximize2 className="h-4 w-4 text-white" />
+              </div>
+            </a>
+          )
+        })}
       </div>
+
+      {openSrc && <ImageLightbox src={openSrc} onClose={() => setOpenSrc(null)} />}
     </div>
   )
 }
