@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Compass, Search, PanelLeft } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { cn } from '@/lib/cn'
+import { isMac } from '@/lib/platform'
 
 function GithubMark(props: SVGProps<SVGSVGElement>) {
   return (
@@ -40,7 +41,7 @@ export function TopBar({ onOpenSearch, onToggleSidebar, sidebarOpen = true }: { 
         <span className="hidden sm:inline">Field Guide</span>
       </Link>
       
-      <div className={cn("flex flex-1 transition-all duration-300", sidebarOpen ? "justify-start" : "justify-center")}>
+      <div className="flex flex-1 justify-center transition-all duration-300">
         <button
           onClick={onOpenSearch}
           className={cn(
@@ -51,7 +52,7 @@ export function TopBar({ onOpenSearch, onToggleSidebar, sidebarOpen = true }: { 
           <Search className="h-4 w-4 shrink-0" />
           <span className="flex-1 truncate text-left">Search snippets…</span>
           <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-[10px] sm:inline">
-            ⌘K
+            {isMac ? '⌘K' : 'Ctrl+K'}
           </kbd>
         </button>
       </div>

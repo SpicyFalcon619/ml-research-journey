@@ -18,8 +18,15 @@ import os from 'node:os'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(__dirname, '..', '..')
-const contentDirs = ['NumPy_Basics', 'Pandas_Basics', 'Classical_ML', 'python tutorial']
 const outputPath = join(__dirname, '..', 'src', 'lib', 'output-cache.json')
+
+// Mirrors content.ts's glob: every top-level repo folder is a content folder
+// except this app and the Test/ scratch space, so a brand-new Basecamp
+// folder gets its output captured automatically too, no list to update here.
+const EXCLUDED_DIRS = new Set(['webapp', 'Test'])
+const contentDirs = readdirSync(repoRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.') && !EXCLUDED_DIRS.has(entry.name))
+  .map((entry) => entry.name)
 
 function walk(dir) {
   let results = []

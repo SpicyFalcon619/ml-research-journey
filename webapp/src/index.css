@@ -28,6 +28,7 @@
   --color-accent: #8b8ff7;
   --color-accent-soft: #b7b9fb;
   --color-accent-glow: rgba(139, 143, 247, 0.35);
+  --color-accent-ink: #0a0a10;
 
   --color-ember: #f2a65a;
   --color-ember-soft: #f7c78e;
@@ -76,6 +77,7 @@
   --color-accent: #ffc799;
   --color-accent-soft: #ffcfa8;
   --color-accent-glow: rgba(255, 199, 153, 0.3);
+  --color-accent-ink: #0a0a10;
 
   --color-ember: #99ffe4;
   --color-ember-soft: #c3ffef;
@@ -121,6 +123,7 @@
   --color-accent: #5b3fd6;
   --color-accent-soft: #4531b3;
   --color-accent-glow: rgba(91, 63, 214, 0.16);
+  --color-accent-ink: #ffffff;
 
   --color-ember: #a2530a;
   --color-ember-soft: #7d4007;
@@ -211,6 +214,26 @@ body {
 
 .animate-fade-up {
   animation: fade-up 0.4s ease-out both;
+}
+
+/* Geist Mono ships programming ligatures (### -> a single merged glyph, --/---
+   -> dash ligatures, etc. — confirmed via the font's own GSUB table). Those
+   substitutions are what looked like glitchy overlapping characters on
+   `### Topic ###` markers and `"--- ... ---"` strings: not a bug in our CSS,
+   the font was literally drawing a different, wider glyph than three `#`/`-`
+   characters. A reference site showing exact source text should never
+   silently substitute glyphs, so ligatures are off everywhere code/mono text
+   renders (this is also VS Code's own default, so it matches "look like the IDE").
+   Even Firefox honors the `-webkit-` prefix as a legacy alias, so one line covers both. */
+pre,
+code,
+kbd,
+samp,
+.font-mono,
+.csv-table {
+  font-variant-ligatures: none;
+  -webkit-font-feature-settings: "liga" 0, "calt" 0;
+  font-feature-settings: "liga" 0, "calt" 0;
 }
 
 /* Shiki code block chrome */

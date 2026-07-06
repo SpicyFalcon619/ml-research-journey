@@ -35,7 +35,7 @@ export function CategoryPage() {
                     <GlassPanel className="group h-full p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--color-border-strong)]">
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="flex items-center gap-1.5 font-medium text-[var(--color-ink)]">
-                          {isData && <FileSpreadsheet className="h-3.5 w-3.5 shrink-0 text-[var(--color-ember)]" />}
+                          {isData && <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" />}
                           {snippet.title}
                         </h3>
                         <span className="shrink-0 font-mono text-[11px] text-[var(--color-ink-faint)]">

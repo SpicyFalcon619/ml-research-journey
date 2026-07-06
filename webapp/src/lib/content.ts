@@ -5,6 +5,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   NumPy_Basics: 'NumPy Basics',
   Pandas_Basics: 'Pandas Basics',
   Classical_ML: 'Classical ML',
+  Deep_Learning_PyTorch: 'PyTorch',
 }
 
 // Keyword -> extra search tags. Matched against raw source text.
@@ -106,8 +107,11 @@ export function compareOrderKey(a: number[], b: number[]): number {
   return 0
 }
 
+// Globs every top-level folder in the repo (except this app and the Test/
+// scratch folder), so a brand-new Basecamp folder shows up the moment it
+// exists — no allowlist here to remember to update each time.
 const rawModules = import.meta.glob(
-  '../../../{NumPy_Basics,Pandas_Basics,Classical_ML,python tutorial,Deep_Learning_PyTorch}/**/*.{py,csv}',
+  ['../../../**/*.{py,csv}', '!../../../webapp/**', '!../../../Test/**'],
   { query: '?raw', import: 'default', eager: true },
 ) as Record<string, string>
 

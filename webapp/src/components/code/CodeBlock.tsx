@@ -43,11 +43,7 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
         theme: SHIKI_THEME_BY_SITE_THEME[siteTheme],
         transformers: [lineIdTransformer],
       })
-      // The Vesper theme italicizes comments to match the real VS Code theme, but
-      // Geist Mono's italic glyphs run tight enough that repeated `#` characters
-      // (like a `### Topic ###` marker) visually collide. Comments stay readable
-      // without it, so drop italic rather than fight font metrics for it.
-      setHtml(out.replace(/font-style:\s*italic;?/g, ''))
+      setHtml(out)
     })
     return () => {
       cancelled = true
@@ -128,7 +124,14 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
           <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]/70" />
           {filename && (
-            <span className="ml-3 font-mono text-xs text-[var(--color-code-ink-faint)]">{filename}</span>
+            <span
+              className={cn(
+                'ml-3 font-mono text-xs',
+                isCsv ? 'font-bold text-[var(--color-code-ink)]' : 'text-[var(--color-code-ink-faint)]',
+              )}
+            >
+              {filename}
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2">

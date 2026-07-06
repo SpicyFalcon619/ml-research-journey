@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Grid3x3, LineChart, Search, Table2, Terminal } from 'lucide-react'
+import { ArrowRight, Flame, Grid3x3, LineChart, Search, Table2, Terminal } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { snippets } from '@/lib/content'
 import { navGroups, basecamps, countSnippets } from '@/lib/roadmap'
@@ -12,6 +12,7 @@ const CATEGORY_ICON: Record<string, LucideIcon> = {
   'numpy-basics': Grid3x3,
   'pandas-basics': Table2,
   'classical-ml': LineChart,
+  'deep-learning-pytorch': Flame,
 }
 
 export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
@@ -35,7 +36,7 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
         <div className="mt-8 flex items-center justify-center gap-3">
           <button
             onClick={onOpenSearch}
-            className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-3 text-sm font-medium text-[#0a0a10] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            className="flex cursor-pointer items-center gap-2 rounded-xl bg-[var(--color-accent)] px-5 py-3 text-sm font-medium text-[var(--color-accent-ink)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
           >
             <Search className="h-4 w-4" /> Search the guide
           </button>

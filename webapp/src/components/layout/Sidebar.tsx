@@ -47,7 +47,7 @@ function NavNode({
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-1.5 truncate rounded-lg py-1.5 pr-2 text-[13px] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]',
-                    isData ? 'text-[var(--color-ember)]/80' : 'text-[var(--color-ink-faint)]',
+                    isData ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-faint)]',
                     isActive && 'bg-[var(--color-accent-glow)]/[0.18] text-[var(--color-accent-soft)]',
                   )
                 }
