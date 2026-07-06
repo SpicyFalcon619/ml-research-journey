@@ -7,11 +7,13 @@ from sklearn.tree import DecisionTreeClassifier
 
 print("Loading Kaggle datasets...")
 
-# STEP 1: LOAD THE DATA
-# Make sure you have downloaded train.csv and test.csv from Kaggle 
-# and placed them in this Classical_ML folder!
-train_data = pd.read_csv("train.csv")
-test_data = pd.read_csv("test.csv")
+import os
+
+# We use os.path to make sure Python always looks for the CSVs in the exact 
+# same folder as this script, regardless of where your terminal is currently located.
+current_folder = os.path.dirname(os.path.abspath(__file__))
+train_data = pd.read_csv(os.path.join(current_folder, "train.csv"))
+test_data = pd.read_csv(os.path.join(current_folder, "test.csv"))
 
 print("Training Data size:", train_data.shape)
 print("Test Data size:", test_data.shape)
@@ -66,3 +68,5 @@ submission = pd.DataFrame({
 
 submission.to_csv("submission.csv", index=False)
 print("Saved submission.csv! Upload this file to Kaggle.")
+
+print("\n🏆 My First Kaggle Score: 0.74641 (74.6%)")
