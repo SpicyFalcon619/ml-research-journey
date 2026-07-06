@@ -69,4 +69,4 @@ submission = pd.DataFrame({
 submission.to_csv("submission.csv", index=False)
 print("Saved submission.csv! Upload this file to Kaggle.")
 
-print("\n🏆 My First Kaggle Score: 0.74641 (74.6%)")
+print("\nMy First Kaggle Score: 0.74641 (74.6%)")

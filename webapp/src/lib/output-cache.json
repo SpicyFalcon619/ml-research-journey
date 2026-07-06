@@ -4,182 +4,182 @@
     "stdout": "[25 40]\n[25 40]\n[False  True False  True False False  True False  True False]\n[35 40 33 41]\n[18 15 19]\n4\n",
     "stderr": "",
     "durationMs": 133,
-    "capturedAt": "2026-07-06T00:09:14.311Z"
+    "capturedAt": "2026-07-06T00:11:06.873Z"
   },
   "NumPy_Basics/11_stacking.py": {
     "status": "ok",
     "stdout": "[['John' 'Felipe' 'Michael' '1' '2' '3']\n ['Russel' 'Jim' 'Andrew' '4' '5' '6']]\n[85 90 88 78 82 80]\n[[85 90 88]\n [78 82 80]]\n[85 90 88 78 82 80]\n",
     "stderr": "",
-    "durationMs": 136,
-    "capturedAt": "2026-07-06T00:09:14.446Z"
+    "durationMs": 143,
+    "capturedAt": "2026-07-06T00:11:07.006Z"
   },
   "NumPy_Basics/12_random_numbers.py": {
     "status": "ok",
-    "stdout": "0\n[19.56836114 41.9665191  44.02966513 19.76062748 28.50033725]\n[[38 19 87]\n [35 50 93]\n [54  3 44]]\n[[18.24983992 32.99878789 10.25769393 12.73060286]\n [39.79266535 42.98084907 28.55980011 24.35363669]]\n[0.35049363 0.1471673  0.66212588 0.45331256 0.48841301]\n[[0.04376419 0.47350692 0.91410797]\n [0.57077749 0.03392223 0.91960812]\n [0.113803   0.34886428 0.31187097]]\n[21  6 36 95 17 62 63  3 82 18]\n",
+    "stdout": "0\n[40.67992347 33.92149504 37.49064041 29.08947053 47.53562014]\n[[93 69 49]\n [ 2 71 76]\n [19  5 19]]\n[[34.76894212 31.49760804 10.83238492 17.19924626]\n [28.40839214 19.99469073 10.34409898 38.80683811]]\n[0.76342069 0.43513406 0.19228529 0.53368955 0.23275603]\n[[0.48706893 0.95101076 0.45267323]\n [0.48513369 0.97430721 0.92705293]\n [0.11296244 0.90559513 0.10263629]]\n[67 83 60 51 45 93 71 24 85 41]\n",
     "stderr": "",
-    "durationMs": 135,
-    "capturedAt": "2026-07-06T00:09:14.582Z"
+    "durationMs": 160,
+    "capturedAt": "2026-07-06T00:11:07.149Z"
   },
   "NumPy_Basics/1_numpy_speed_test.py": {
     "status": "ok",
-    "stdout": "Creating the massive lists...\nDone! Let's race.\n\nStarting Standard Python...\nStandard Python took: 0.5316 seconds\n\nStarting NumPy...\nNumPy took: 0.0239 seconds\n\n--- NumPy was 22.3x faster! ---\n",
+    "stdout": "Creating the massive lists...\nDone! Let's race.\n\nStarting Standard Python...\nStandard Python took: 0.5506 seconds\n\nStarting NumPy...\nNumPy took: 0.0222 seconds\n\n--- NumPy was 24.9x faster! ---\n",
     "stderr": "",
-    "durationMs": 1055,
-    "capturedAt": "2026-07-06T00:09:14.717Z"
+    "durationMs": 1109,
+    "capturedAt": "2026-07-06T00:11:07.309Z"
   },
   "NumPy_Basics/2_creating_arrays.py": {
     "status": "ok",
     "stdout": "[1 2 3 4]\n[1 2 3 4]\n[10 20 30 40 50]\n",
     "stderr": "",
-    "durationMs": 143,
-    "capturedAt": "2026-07-06T00:09:15.772Z"
+    "durationMs": 138,
+    "capturedAt": "2026-07-06T00:11:08.419Z"
   },
   "NumPy_Basics/3_2d_arrays.py": {
     "status": "ok",
     "stdout": "[[1 2 3]\n [4 5 6]\n [7 8 9]]\n[[1 0 1]\n [0 1 0]\n [1 0 1]]\n",
     "stderr": "",
-    "durationMs": 131,
-    "capturedAt": "2026-07-06T00:09:15.915Z"
+    "durationMs": 125,
+    "capturedAt": "2026-07-06T00:11:08.557Z"
   },
   "NumPy_Basics/4_array_generators.py": {
     "status": "ok",
     "stdout": "[0. 0. 0.]\n[1. 1. 1.]\n[0 1 2 3]\n[0. 0. 0. 0. 0.]\n[[1. 1. 1. 1.]\n [1. 1. 1. 1.]]\n[0 1 2 3 4 5 6 7 8 9]\n",
     "stderr": "",
-    "durationMs": 125,
-    "capturedAt": "2026-07-06T00:09:16.046Z"
+    "durationMs": 129,
+    "capturedAt": "2026-07-06T00:11:08.682Z"
   },
   "NumPy_Basics/5_array_math.py": {
     "status": "ok",
     "stdout": "[4 5 6]\nSale Prices: [ 5. 10. 15. 20. 25.]\nCursed Prices: [110 120 130 140 150]\n",
     "stderr": "",
-    "durationMs": 134,
-    "capturedAt": "2026-07-06T00:09:16.171Z"
+    "durationMs": 127,
+    "capturedAt": "2026-07-06T00:11:08.812Z"
   },
   "NumPy_Basics/6_array_attributes.py": {
     "status": "ok",
     "stdout": "(2, 3)\n2\nint64\n(3, 3)\n2\nfloat64\n",
     "stderr": "",
-    "durationMs": 128,
-    "capturedAt": "2026-07-06T00:09:16.305Z"
+    "durationMs": 127,
+    "capturedAt": "2026-07-06T00:11:08.940Z"
   },
   "NumPy_Basics/7_indexing.py": {
     "status": "ok",
     "stdout": "10\n40\n[20 30]\n1\n[1 2 3]\n4\n[[1 2 3]\n [4 5 6]]\n95\n[70 75 80]\n[85 90 70]\n[[85 92 78]\n [90 88 95]]\n",
     "stderr": "",
-    "durationMs": 126,
-    "capturedAt": "2026-07-06T00:09:16.433Z"
+    "durationMs": 128,
+    "capturedAt": "2026-07-06T00:11:09.068Z"
   },
   "NumPy_Basics/8_array_functions.py": {
     "status": "ok",
     "stdout": "12\n4.0\n5\n3\n0.816496580927726\n21\n3.5\n6\n1\n1.707825127659933\n[2. 5.]\n967\n80.58333333333333\n95\n[82.33333333 87.33333333 65.         87.66666667]\n[77.75 80.5  83.5 ]\n",
     "stderr": "",
-    "durationMs": 160,
-    "capturedAt": "2026-07-06T00:09:16.559Z"
+    "durationMs": 128,
+    "capturedAt": "2026-07-06T00:11:09.197Z"
   },
   "NumPy_Basics/9_reshaping.py": {
     "status": "ok",
     "stdout": "[0 1 2 3 4 5 6 7 8]\n[[0 1 2]\n [3 4 5]\n [6 7 8]]\n[0 1 2 3 4 5 6 7 8]\n[[ 1  2  3  4]\n [ 5  6  7  8]\n [ 9 10 11 12]]\n[[ 1  2  3]\n [ 4  5  6]\n [ 7  8  9]\n [10 11 12]]\n[ 1  2  3  4  5  6  7  8  9 10 11 12]\n[[[ 1  2]\n  [ 3  4]\n  [ 5  6]]\n\n [[ 7  8]\n  [ 9 10]\n  [11 12]]]\n",
     "stderr": "",
-    "durationMs": 126,
-    "capturedAt": "2026-07-06T00:09:16.719Z"
+    "durationMs": 127,
+    "capturedAt": "2026-07-06T00:11:09.325Z"
   },
   "Pandas_Basics/1_intro_to_pandas.py": {
     "status": "ok",
     "stdout": "0     Apple\n1    Banana\n2    Cherry\ndtype: str\n    Brand  Price  Electric\n0  Toyota  25000     False\n1    Ford  30000     False\n2   Tesla  50000      True\n",
     "stderr": "",
-    "durationMs": 590,
-    "capturedAt": "2026-07-06T00:09:16.846Z"
+    "durationMs": 611,
+    "capturedAt": "2026-07-06T00:11:09.452Z"
   },
   "Pandas_Basics/2_loading_data.py": {
     "status": "ok",
     "stdout": "   id     name  age           city  salary\n0   1    Alice   28       New York   85000\n1   2      Bob   34  San Francisco  120000\n2   3  Charlie   22        Chicago   65000\n3   4    Diana   29         Austin   90000\n4   5    Ethan   41       New York  110000\n(5, 5)\n",
     "stderr": "",
-    "durationMs": 496,
-    "capturedAt": "2026-07-06T00:09:17.437Z"
+    "durationMs": 488,
+    "capturedAt": "2026-07-06T00:11:10.063Z"
   },
   "Pandas_Basics/3_inspecting_data.py": {
     "status": "ok",
     "stdout": "   id   name  age           city  salary\n0   1  Alice   28       New York   85000\n1   2    Bob   34  San Francisco  120000\n\n<class 'pandas.DataFrame'>\nRangeIndex: 5 entries, 0 to 4\nData columns (total 5 columns):\n #   Column  Non-Null Count  Dtype\n---  ------  --------------  -----\n 0   id      5 non-null      int64\n 1   name    5 non-null      str  \n 2   age     5 non-null      int64\n 3   city    5 non-null      str  \n 4   salary  5 non-null      int64\ndtypes: int64(3), str(2)\nmemory usage: 332.0 bytes\nNone\n\n             id        age        salary\ncount  5.000000   5.000000       5.00000\nmean   3.000000  30.800000   94000.00000\nstd    1.581139   7.120393   21621.74831\nmin    1.000000  22.000000   65000.00000\n25%    2.000000  28.000000   85000.00000\n50%    3.000000  29.000000   90000.00000\n75%    4.000000  34.000000  110000.00000\nmax    5.000000  41.000000  120000.00000\n",
     "stderr": "",
-    "durationMs": 512,
-    "capturedAt": "2026-07-06T00:09:17.933Z"
+    "durationMs": 504,
+    "capturedAt": "2026-07-06T00:11:10.551Z"
   },
   "Pandas_Basics/4_selecting_data.py": {
     "status": "ok",
     "stdout": "Chicago\n   id   name  age           city  salary\n1   2    Bob   34  San Francisco  120000\n3   4  Diana   29         Austin   90000\n4   5  Ethan   41       New York  110000\n",
     "stderr": "",
-    "durationMs": 479,
-    "capturedAt": "2026-07-06T00:09:18.445Z"
+    "durationMs": 493,
+    "capturedAt": "2026-07-06T00:11:11.055Z"
   },
   "Pandas_Basics/5_missing_data.py": {
     "status": "ok",
     "stdout": "--- Original Messy Data ---\n      Name   Age    Salary           City\n0    Alice  28.0   85000.0       New York\n1      Bob   NaN  120000.0  San Francisco\n2  Charlie  22.0       NaN        Chicago\n3    Diana  29.0   90000.0            NaN\n4    Ethan  41.0  110000.0       New York\n\n\n    Name   Age    Salary      City\n0  Alice  28.0   85000.0  New York\n4  Ethan  41.0  110000.0  New York\n      Name   Age    Salary           City\n0    Alice  28.0   85000.0       New York\n1      Bob   0.0  120000.0  San Francisco\n2  Charlie  22.0       0.0        Chicago\n3    Diana  29.0   90000.0              0\n4    Ethan  41.0  110000.0       New York\n\n      Name   Age    Salary           City\n0    Alice  28.0   85000.0       New York\n1      Bob   NaN  120000.0  San Francisco\n2  Charlie  22.0       NaN        Chicago\n3    Diana  29.0   90000.0        Unknown\n4    Ethan  41.0  110000.0       New York\n",
     "stderr": "",
-    "durationMs": 489,
-    "capturedAt": "2026-07-06T00:09:18.924Z"
+    "durationMs": 486,
+    "capturedAt": "2026-07-06T00:11:11.548Z"
   },
   "Pandas_Basics/6_grouping_data.py": {
     "status": "ok",
     "stdout": "--- All Employees ---\n      Name   Department  Salary  Experience_Years\n0    Alice  Engineering   85000                 3\n1      Bob        Sales   60000                 1\n2  Charlie  Engineering   95000                 5\n3    Diana           HR   70000                 2\n4    Ethan        Sales   75000                 4\n5    Fiona  Engineering  110000                 8\n\n\nDepartment\nEngineering    96666.666667\nHR             70000.000000\nSales          67500.000000\nName: Salary, dtype: float64\n\nDepartment\nEngineering    8\nHR             2\nSales          4\nName: Experience_Years, dtype: int64\n",
     "stderr": "",
-    "durationMs": 496,
-    "capturedAt": "2026-07-06T00:09:19.413Z"
+    "durationMs": 506,
+    "capturedAt": "2026-07-06T00:11:12.034Z"
   },
   "Classical_ML/1_linear_regression.py": {
     "status": "ok",
     "stdout": "[ 90000. 100000.]\n",
     "stderr": "",
-    "durationMs": 1496,
-    "capturedAt": "2026-07-06T00:09:19.909Z"
+    "durationMs": 1525,
+    "capturedAt": "2026-07-06T00:11:12.541Z"
   },
   "Classical_ML/2_multiple_regression.py": {
     "status": "ok",
     "stdout": "[419733.33333333]\n",
     "stderr": "",
-    "durationMs": 1544,
-    "capturedAt": "2026-07-06T00:09:21.405Z"
+    "durationMs": 1514,
+    "capturedAt": "2026-07-06T00:11:14.066Z"
   },
   "Classical_ML/3_logistic_regression.py": {
     "status": "ok",
     "stdout": "[1 0]\n",
     "stderr": "",
-    "durationMs": 1569,
-    "capturedAt": "2026-07-06T00:09:22.949Z"
+    "durationMs": 1555,
+    "capturedAt": "2026-07-06T00:11:15.581Z"
   },
   "Classical_ML/4_train_test_split.py": {
     "status": "ok",
     "stdout": "[0 1 0]\n1.0\n",
     "stderr": "",
-    "durationMs": 1520,
-    "capturedAt": "2026-07-06T00:09:24.518Z"
+    "durationMs": 1595,
+    "capturedAt": "2026-07-06T00:11:17.136Z"
   },
   "Classical_ML/5_decision_trees.py": {
     "status": "ok",
     "stdout": "[0 1]\n1.0\n",
     "stderr": "",
-    "durationMs": 1554,
-    "capturedAt": "2026-07-06T00:09:26.039Z"
+    "durationMs": 1596,
+    "capturedAt": "2026-07-06T00:11:18.731Z"
   },
   "Classical_ML/6_titanic_survival.py": {
     "status": "ok",
-    "stdout": "Loading Kaggle datasets...\nTraining Data size: (891, 12)\nTest Data size: (418, 11)\nTarining Data: \n <bound method NDFrame.head of      PassengerId  Survived  Pclass  ...     Fare Cabin  Embarked\n0              1         0       3  ...   7.2500   NaN         S\n1              2         1       1  ...  71.2833   C85         C\n2              3         1       3  ...   7.9250   NaN         S\n3              4         1       1  ...  53.1000  C123         S\n4              5         0       3  ...   8.0500   NaN         S\n..           ...       ...     ...  ...      ...   ...       ...\n886          887         0       2  ...  13.0000   NaN         S\n887          888         1       1  ...  30.0000   B42         S\n888          889         0       3  ...  23.4500   NaN         S\n889          890         1       1  ...  30.0000  C148         C\n890          891         0       3  ...   7.7500   NaN         Q\n\n[891 rows x 12 columns]>\nTest Data: \n <bound method NDFrame.head of      PassengerId  Pclass  ... Cabin Embarked\n0            892       3  ...   NaN        Q\n1            893       3  ...   NaN        S\n2            894       2  ...   NaN        Q\n3            895       3  ...   NaN        S\n4            896       3  ...   NaN        S\n..           ...     ...  ...   ...      ...\n413         1305       3  ...   NaN        S\n414         1306       1  ...  C105        C\n415         1307       3  ...   NaN        S\n416         1308       3  ...   NaN        S\n417         1309       3  ...   NaN        C\n\n[418 rows x 11 columns]>\nSaved submission.csv! Upload this file to Kaggle.\n\n🏆 My First Kaggle Score: 0.74641 (74.6%)\n",
+    "stdout": "Loading Kaggle datasets...\nTraining Data size: (891, 12)\nTest Data size: (418, 11)\nTarining Data: \n <bound method NDFrame.head of      PassengerId  Survived  Pclass  ...     Fare Cabin  Embarked\n0              1         0       3  ...   7.2500   NaN         S\n1              2         1       1  ...  71.2833   C85         C\n2              3         1       3  ...   7.9250   NaN         S\n3              4         1       1  ...  53.1000  C123         S\n4              5         0       3  ...   8.0500   NaN         S\n..           ...       ...     ...  ...      ...   ...       ...\n886          887         0       2  ...  13.0000   NaN         S\n887          888         1       1  ...  30.0000   B42         S\n888          889         0       3  ...  23.4500   NaN         S\n889          890         1       1  ...  30.0000  C148         C\n890          891         0       3  ...   7.7500   NaN         Q\n\n[891 rows x 12 columns]>\nTest Data: \n <bound method NDFrame.head of      PassengerId  Pclass  ... Cabin Embarked\n0            892       3  ...   NaN        Q\n1            893       3  ...   NaN        S\n2            894       2  ...   NaN        Q\n3            895       3  ...   NaN        S\n4            896       3  ...   NaN        S\n..           ...     ...  ...   ...      ...\n413         1305       3  ...   NaN        S\n414         1306       1  ...  C105        C\n415         1307       3  ...   NaN        S\n416         1308       3  ...   NaN        S\n417         1309       3  ...   NaN        C\n\n[418 rows x 11 columns]>\nSaved submission.csv! Upload this file to Kaggle.\n\nMy First Kaggle Score: 0.74641 (74.6%)\n",
     "stderr": "",
-    "durationMs": 1690,
-    "capturedAt": "2026-07-06T00:09:27.593Z"
+    "durationMs": 1561,
+    "capturedAt": "2026-07-06T00:11:20.327Z"
   },
   "python tutorial/Section 3/first_steps.py": {
     "status": "ok",
     "stdout": "0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 ",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:29.285Z"
+    "durationMs": 26,
+    "capturedAt": "2026-07-06T00:11:21.889Z"
   },
   "python tutorial/Section 4/4.1_if_statements.py": {
     "status": "interactive",
     "stdout": "",
     "stderr": "",
     "durationMs": 0,
-    "capturedAt": "2026-07-06T00:09:29.314Z",
+    "capturedAt": "2026-07-06T00:11:21.916Z",
     "scenarios": [
       {
         "label": "Negative number",
@@ -215,43 +215,43 @@
     "status": "ok",
     "stdout": "Cat 3\nWatermelon 10\nXong Xina 9\n{'Hans': 'active', '景太郎': 'active'}\n{'Hans': 'active', '景太郎': 'active'}\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:29.413Z"
+    "durationMs": 26,
+    "capturedAt": "2026-07-06T00:11:22.011Z"
   },
   "python tutorial/Section 4/4.3_range_function.py": {
     "status": "ok",
     "stdout": "0 1 2 3 4 \n('John Cena', 'Retired')\n('Dean Ambrose', 'AEW')\n('Rey Mysterio', 'Midget')\n('Seth Rollins', 'Weird')\nJohn Cena\nDean Ambrose\nRey Mysterio\nSeth Rollins\nRetired\nAEW\nMidget\nWeird\n\n[5, 6, 7, 8, 9]\n[0, 3, 6, 9]\n[-10, -30, -50, -70, -90]\n0 Rahim\n1 had\n2 a\n3 little\n4 lamb\nrange(0, 10)\n45\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:29.441Z"
+    "durationMs": 26,
+    "capturedAt": "2026-07-06T00:11:22.037Z"
   },
   "python tutorial/Section 4/4.4_break_continue_statements.py": {
     "status": "ok",
     "stdout": "2 * 2 = 4\n2 * 3 = 6\n3 * 2 = 6\n2 * 4 = 8\n4 * 2 = 8\n3 * 3 = 9\n2 * 5 = 10\n5 * 2 = 10\n2 * 6 = 12\n3 * 4 = 12\n4 * 3 = 12\n6 * 2 = 12\n2 * 7 = 14\n7 * 2 = 14\n3 * 5 = 15\n5 * 3 = 15\n2 * 8 = 16\n4 * 4 = 16\n8 * 2 = 16\n2 * 9 = 18\n3 * 6 = 18\n6 * 3 = 18\n9 * 2 = 18\nFound an even number 2\nFound an odd number 3\nFound an even number 4\nFound an odd number 5\nFound an even number 6\nFound an odd number 7\nFound an even number 8\nFound an odd number 9\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:29.469Z"
+    "durationMs": 25,
+    "capturedAt": "2026-07-06T00:11:22.063Z"
   },
   "python tutorial/Section 4/4.5_else_clause_on_loops.py": {
     "status": "ok",
     "stdout": "2 is a prime number\n3 is a prime number\n2 * 2 = 4\n5 is a prime number\n2 * 3 = 6\n7 is a prime number\n2 * 4 = 8\n3 * 3 = 9\n2 * 5 = 10\n11 is a prime number\n2 * 6 = 12\n13 is a prime number\n2 * 7 = 14\n3 * 5 = 15\n2 * 8 = 16\n17 is a prime number\n2 * 9 = 18\n19 is a prime number\n",
     "stderr": "",
-    "durationMs": 27,
-    "capturedAt": "2026-07-06T00:09:29.497Z"
+    "durationMs": 25,
+    "capturedAt": "2026-07-06T00:11:22.089Z"
   },
   "python tutorial/Section 4/4.6_pass_statements.py": {
     "status": "timeout",
     "stdout": "",
     "stderr": "",
-    "durationMs": 15018,
-    "capturedAt": "2026-07-06T00:09:29.524Z"
+    "durationMs": 15003,
+    "capturedAt": "2026-07-06T00:11:22.114Z"
   },
   "python tutorial/Section 4/4.7_match_statements.py": {
     "status": "interactive",
     "stdout": "",
     "stderr": "",
     "durationMs": 0,
-    "capturedAt": "2026-07-06T00:09:44.542Z",
+    "capturedAt": "2026-07-06T00:11:37.118Z",
     "scenarios": [
       {
         "label": "Bad request · origin point",
@@ -295,15 +295,15 @@
     "status": "ok",
     "stdout": "0 1 1 2 3 5 8 13 21 34 55 89 144 \n0 1 1 2 3 5 8 13 21 34 55 89 144 \n0 \nNone\n[0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]\n",
     "stderr": "",
-    "durationMs": 27,
-    "capturedAt": "2026-07-06T00:09:44.650Z"
+    "durationMs": 43,
+    "capturedAt": "2026-07-06T00:11:37.253Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.1_default_argument_values.py": {
     "status": "interactive",
     "stdout": "",
     "stderr": "",
     "durationMs": 0,
-    "capturedAt": "2026-07-06T00:09:44.677Z",
+    "capturedAt": "2026-07-06T00:11:37.297Z",
     "scenarios": [
       {
         "label": "Answer \"yes\"",
@@ -325,155 +325,155 @@
     "status": "ok",
     "stdout": "-- This parrot wouldn't voom if you put 1000 volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's a stiff !\n\n-- This parrot wouldn't voom if you put 1000 volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's a stiff !\n\n-- This parrot wouldn't VOOOOOM if you put 1000000 volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's a stiff !\n\n-- This parrot wouldn't VOOOOOM if you put 1000000 volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's a stiff !\n\n-- This parrot wouldn't jump if you put a million volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's bereft of life !\n\n-- This parrot wouldn't voom if you put a thousand volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's pushing up the daisies !\n\n-- Do you have any Limburger ?\n-- I'm sorry, we're all out of Limburger\nIt's very runny, sir.\nIt's really very, VERY runny, sir.\n----------------------------------------\nshopkeeper : Michael Palin\nclient : John Cleese\nsketch : Cheese Shop Sketch\n\n--- Ordering a Large pizza ---\nPepperoni\nExtra Cheese\nOlives\n------------------------------\nname : John Doe\naddress : 123 Main St\ntip : 5\n",
     "stderr": "",
-    "durationMs": 27,
-    "capturedAt": "2026-07-06T00:09:44.727Z"
+    "durationMs": 43,
+    "capturedAt": "2026-07-06T00:11:37.354Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.3_special_parameters.py": {
     "status": "ok",
     "stdout": "2\n2\n1\n3\n1 2 3\n1 2 3\nTrue\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:44.754Z"
+    "durationMs": 29,
+    "capturedAt": "2026-07-06T00:11:37.397Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.4_arbitrary_argument_lists.py": {
     "status": "ok",
     "stdout": "earth/mars/venus\nearth.mars.venus\n",
     "stderr": "",
-    "durationMs": 34,
-    "capturedAt": "2026-07-06T00:09:44.783Z"
+    "durationMs": 27,
+    "capturedAt": "2026-07-06T00:11:37.426Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.5_unpacking_argument_lists.py": {
     "status": "ok",
     "stdout": "[3, 4, 5]\n[3, 4, 5]\n-- This parrot wouldn't VOOM if you put four million volts through it. E's bleedin' demised !\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:44.817Z"
+    "durationMs": 29,
+    "capturedAt": "2026-07-06T00:11:37.453Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.6_lambda_expressions.py": {
     "status": "ok",
     "stdout": "42\n43\n[(1, 'one'), (2, 'two'), (3, 'three'), (4, 'four')]\n",
     "stderr": "",
-    "durationMs": 27,
-    "capturedAt": "2026-07-06T00:09:44.845Z"
+    "durationMs": 31,
+    "capturedAt": "2026-07-06T00:11:37.482Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.7_documentation_strings.py": {
     "status": "ok",
     "stdout": "Do nothing, but document it.\n\nNo, really, it doesn't do anything:\n\n    >>> my_function()\n    >>>\n\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:44.872Z"
+    "durationMs": 32,
+    "capturedAt": "2026-07-06T00:11:37.513Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.8_function_annotations.py": {
     "status": "ok",
     "stdout": "Annotations: {'ham': <class 'str'>, 'eggs': <class 'str'>, 'return': <class 'str'>}\nArguments: spam eggs\n",
     "stderr": "",
-    "durationMs": 26,
-    "capturedAt": "2026-07-06T00:09:44.900Z"
+    "durationMs": 27,
+    "capturedAt": "2026-07-06T00:11:37.546Z"
   },
   "python tutorial/Section 5/5.1.1_using_lists_as_stacks.py": {
     "status": "ok",
     "stdout": "Initial stack: [3, 4, 5]\nAfter appending 6 and 7: [3, 4, 5, 6, 7]\nPopped item: 7\nStack after one pop: [3, 4, 5, 6]\nPopped item: 6\nPopped item: 5\nFinal stack: [3, 4]\n",
     "stderr": "",
-    "durationMs": 26,
-    "capturedAt": "2026-07-06T00:09:44.927Z"
+    "durationMs": 29,
+    "capturedAt": "2026-07-06T00:11:37.574Z"
   },
   "python tutorial/Section 5/5.1.2_using_lists_as_queues.py": {
     "status": "ok",
     "stdout": "Initial queue: ['Eric', 'John', 'Michael']\nAfter Terry and Graham arrive: ['Eric', 'John', 'Michael', 'Terry', 'Graham']\nServed and left the queue: Eric\nServed and left the queue: John\nRemaining queue: ['Michael', 'Terry', 'Graham']\n",
     "stderr": "",
-    "durationMs": 29,
-    "capturedAt": "2026-07-06T00:09:44.953Z"
+    "durationMs": 36,
+    "capturedAt": "2026-07-06T00:11:37.603Z"
   },
   "python tutorial/Section 5/5.1.3_list_comprehensions.py": {
     "status": "ok",
     "stdout": "Traditional loop: [1, 4, 9, 16, 25, 36, 49, 64, 81]\nMap and Lambda: [1, 4, 9, 16, 25, 36, 49, 64, 81]\nList Comprehension: [1, 4, 9, 16, 25, 36, 49, 64, 81]\n\nNested Loop: [(1, 3), (1, 4), (2, 3), (2, 1), (2, 4), (3, 1), (3, 4)]\nNested Comprehension: [(1, 3), (1, 4), (2, 3), (2, 1), (2, 4), (3, 1), (3, 4)]\n\nDoubled: [-8, -4, 0, 4, 8]\nPositive only: [0, 2, 4]\nAbsolute values: [4, 2, 0, 2, 4]\nStripped strings: ['banana', 'loganberry', 'passion fruit']\nTuples: [(0, 0), (1, 1), (2, 4), (3, 9), (4, 16), (5, 25)]\nFlattened list: [1, 2, 3, 4, 5, 6, 7, 8, 9]\nPi rounded: ['3.1', '3.14', '3.142', '3.1416', '3.14159']\n",
     "stderr": "",
-    "durationMs": 24,
-    "capturedAt": "2026-07-06T00:09:44.983Z"
+    "durationMs": 30,
+    "capturedAt": "2026-07-06T00:11:37.639Z"
   },
   "python tutorial/Section 5/5.1.4_nested_list_comprehensions.py": {
     "status": "ok",
     "stdout": "Original Matrix:\n[1, 2, 3, 4]\n[5, 6, 7, 8]\n[9, 10, 11, 12]\n\nTransposed Matrix:\n[1, 5, 9]\n[2, 6, 10]\n[3, 7, 11]\n[4, 8, 12]\n\nTransposed using zip():\n[(1, 5, 9), (2, 6, 10), (3, 7, 11), (4, 8, 12)]\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:45.007Z"
+    "durationMs": 31,
+    "capturedAt": "2026-07-06T00:11:37.670Z"
   },
   "python tutorial/Section 5/5.1_more_on_lists.py": {
     "status": "ok",
     "stdout": "Original list: ['orange', 'apple', 'pear', 'banana', 'kiwi', 'apple', 'banana']\nCount of 'apple': 2\nCount of 'tangerine': 0\nIndex of 'banana': 3\nIndex of 'banana' starting search at position 4: 6\nAfter .reverse(): ['banana', 'apple', 'kiwi', 'banana', 'pear', 'apple', 'orange']\nAfter .append('grape'): ['banana', 'apple', 'kiwi', 'banana', 'pear', 'apple', 'orange', 'grape']\nAfter .sort(): ['apple', 'apple', 'banana', 'banana', 'grape', 'kiwi', 'orange', 'pear']\nPopped item: pear\nAfter .pop(): ['apple', 'apple', 'banana', 'banana', 'grape', 'kiwi', 'orange']\n",
     "stderr": "",
     "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:45.035Z"
+    "capturedAt": "2026-07-06T00:11:37.701Z"
   },
   "python tutorial/Section 5/5.2_the_del_statement.py": {
     "status": "ok",
     "stdout": "Original: [-1, 1, 66.25, 333, 333, 1234.5]\nDeleted index 0: [1, 66.25, 333, 333, 1234.5]\nDeleted slice [2:4]: [1, 66.25, 1234.5]\nDeleted all elements: []\n\nCrash Avoided! Error caught: NameError(\"name 'a' is not defined\")\n",
     "stderr": "",
-    "durationMs": 30,
-    "capturedAt": "2026-07-06T00:09:45.063Z"
+    "durationMs": 31,
+    "capturedAt": "2026-07-06T00:11:37.729Z"
   },
   "python tutorial/Section 5/5.3_tuples_and_sequences.py": {
     "status": "ok",
     "stdout": "Tuple t: (12345, 54321, 'hello!')\nFirst item in t: 12345\n\nNested tuple u: ((12345, 54321, 'hello!'), (1, 2, 3, 4, 5))\n\nAttempting to change t[0] to 88888...\nCrash Avoided! Error caught: TypeError(\"'tuple' object does not support item assignment\")\n\nTuple containing lists: ([1, 2, 3], [3, 2, 1])\n",
     "stderr": "",
-    "durationMs": 30,
-    "capturedAt": "2026-07-06T00:09:45.093Z"
+    "durationMs": 41,
+    "capturedAt": "2026-07-06T00:11:37.761Z"
   },
   "python tutorial/Section 5/5.4_sets.py": {
     "status": "ok",
-    "stdout": "Basket (duplicates removed!): {'orange', 'banana', 'pear', 'apple'}\nIs 'orange' in basket? True\nIs 'crabgrass' in basket? False\n\nSet A (unique letters in 'abracadabra'): {'r', 'a', 'd', 'c', 'b'}\nSet B (unique letters in 'alacazam'): {'a', 'c', 'l', 'z', 'm'}\n\na - b (Difference): {'b', 'r', 'd'}\na | b (Union): {'r', 'a', 'd', 'c', 'l', 'b', 'z', 'm'}\na & b (Intersection): {'c', 'a'}\na ^ b (Symmetric Difference): {'d', 'r', 'z', 'l', 'b', 'm'}\n",
+    "stdout": "Basket (duplicates removed!): {'pear', 'banana', 'orange', 'apple'}\nIs 'orange' in basket? True\nIs 'crabgrass' in basket? False\n\nSet A (unique letters in 'abracadabra'): {'b', 'a', 'c', 'r', 'd'}\nSet B (unique letters in 'alacazam'): {'a', 'm', 'l', 'c', 'z'}\n\na - b (Difference): {'d', 'b', 'r'}\na | b (Union): {'b', 'a', 'm', 'l', 'c', 'r', 'd', 'z'}\na & b (Intersection): {'c', 'a'}\na ^ b (Symmetric Difference): {'m', 'l', 'b', 'r', 'd', 'z'}\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:45.123Z"
+    "durationMs": 30,
+    "capturedAt": "2026-07-06T00:11:37.802Z"
   },
   "python tutorial/Section 5/5.5_dictionaries.py": {
     "status": "ok",
     "stdout": "Initial Dictionary: {'jack': 4098, 'sape': 4139}\nAfter adding guido: {'jack': 4098, 'sape': 4139, 'guido': 4127}\nJack's number: 4098\nIrv's number (using .get safely): None\nAfter deleting sape and adding irv: {'jack': 4098, 'guido': 4127, 'irv': 4127}\nList of Keys: ['jack', 'guido', 'irv']\nSorted Keys: ['guido', 'irv', 'jack']\nIs 'guido' a key in tel? True\nIs 'jack' NOT a key in tel? False\n\nDict Comprehension: {2: 4, 4: 16, 6: 36}\n",
     "stderr": "",
-    "durationMs": 30,
-    "capturedAt": "2026-07-06T00:09:45.152Z"
+    "durationMs": 31,
+    "capturedAt": "2026-07-06T00:11:37.833Z"
   },
   "python tutorial/Section 5/5.6_looping_techniques.py": {
     "status": "ok",
     "stdout": "--- Dictionary Looping ---\ngallahad the pure\nrobin the brave\n\n--- Enumerate ---\nIndex 0: tic\nIndex 1: tac\nIndex 2: toe\n\n--- Zip ---\nWhat is your name?  It is lancelot.\nWhat is your quest?  It is the holy grail.\nWhat is your favorite color?  It is blue.\n\n--- Reversed ---\n9\n7\n5\n3\n1\n\n--- Sorted ---\napple\napple\nbanana\norange\norange\npear\n\n--- Sorted Set ---\napple\nbanana\norange\npear\n\n--- Filtering NaN ---\nOriginal: [56.2, nan, 51.7, 55.3, 52.5, nan, 47.8]\nFiltered: [56.2, 51.7, 55.3, 52.5, 47.8]\n",
     "stderr": "",
-    "durationMs": 30,
-    "capturedAt": "2026-07-06T00:09:45.182Z"
+    "durationMs": 37,
+    "capturedAt": "2026-07-06T00:11:37.864Z"
   },
   "python tutorial/Section 5/5.7_more_on_conditions.py": {
     "status": "ok",
     "stdout": "The first non-empty string is: Trondheim\n",
     "stderr": "",
-    "durationMs": 26,
-    "capturedAt": "2026-07-06T00:09:45.212Z"
+    "durationMs": 31,
+    "capturedAt": "2026-07-06T00:11:37.902Z"
   },
   "python tutorial/Section 5/5.8_comparing_sequences_and_other_types.py": {
     "status": "ok",
     "stdout": "Tuple comparison: True\nList comparison: True\nString comparison: True\nLength comparison: True\nLength comparison 2: True\nInt vs Float: True\nNested comparison: True\n",
     "stderr": "",
-    "durationMs": 28,
-    "capturedAt": "2026-07-06T00:09:45.238Z"
+    "durationMs": 30,
+    "capturedAt": "2026-07-06T00:11:37.933Z"
   },
   "python tutorial/Section 8/8.1_syntax_errors.py": {
     "status": "empty",
     "stdout": "",
     "stderr": "",
-    "durationMs": 26,
-    "capturedAt": "2026-07-06T00:09:45.266Z"
+    "durationMs": 39,
+    "capturedAt": "2026-07-06T00:11:37.963Z"
   },
   "python tutorial/Section 8/8.2_exceptions.py": {
     "status": "empty",
     "stdout": "",
     "stderr": "",
-    "durationMs": 25,
-    "capturedAt": "2026-07-06T00:09:45.293Z"
+    "durationMs": 31,
+    "capturedAt": "2026-07-06T00:11:38.002Z"
   },
   "python tutorial/Section 8/8.3_handling_exceptions.py": {
     "status": "interactive",
     "stdout": "",
     "stderr": "",
     "durationMs": 0,
-    "capturedAt": "2026-07-06T00:09:45.319Z",
+    "capturedAt": "2026-07-06T00:11:38.033Z",
     "scenarios": [
       {
         "label": "Valid number right away",
@@ -496,35 +496,35 @@
     "status": "ok",
     "stdout": "An exception flew by! (We caught the custom error we just raised)\n",
     "stderr": "",
-    "durationMs": 26,
-    "capturedAt": "2026-07-06T00:09:45.369Z"
+    "durationMs": 27,
+    "capturedAt": "2026-07-06T00:11:38.104Z"
   },
   "python tutorial/Section 8/8.5_exception_chaining.py": {
     "status": "empty",
     "stdout": "",
     "stderr": "",
-    "durationMs": 25,
-    "capturedAt": "2026-07-06T00:09:45.395Z"
+    "durationMs": 40,
+    "capturedAt": "2026-07-06T00:11:38.131Z"
   },
   "python tutorial/Section 8/8.6_user_defined_exceptions.py": {
     "status": "empty",
     "stdout": "",
     "stderr": "",
-    "durationMs": 26,
-    "capturedAt": "2026-07-06T00:09:45.420Z"
+    "durationMs": 33,
+    "capturedAt": "2026-07-06T00:11:38.171Z"
   },
   "python tutorial/Section 8/8.7_defining_clean_up_actions.py": {
     "status": "ok",
     "stdout": "Trying something risky...\nGoodbye, world! (This runs no matter what, even if it crashes)\n",
     "stderr": "",
-    "durationMs": 26,
-    "capturedAt": "2026-07-06T00:09:45.446Z"
+    "durationMs": 30,
+    "capturedAt": "2026-07-06T00:11:38.204Z"
   },
   "python tutorial/Section 8/8.8_predefined_clean_up_actions.py": {
     "status": "empty",
     "stdout": "",
     "stderr": "",
     "durationMs": 33,
-    "capturedAt": "2026-07-06T00:09:45.472Z"
+    "capturedAt": "2026-07-06T00:11:38.234Z"
   }
 }
