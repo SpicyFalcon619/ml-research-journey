@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, FileSpreadsheet } from 'lucide-react'
 import { navGroups, basecamps } from '@/lib/roadmap'
 import type { NavItem } from '@/types'
 import { cn } from '@/lib/cn'
@@ -38,21 +38,26 @@ function NavNode({
           {item.children.map((child) => (
             <NavNode key={child.slug} item={child} depth={depth + 1} expanded={expanded} toggle={toggle} />
           ))}
-          {item.snippets.map((snippet) => (
-            <NavLink
-              key={snippet.id}
-              to={`/s/${snippet.id}`}
-              className={({ isActive }) =>
-                cn(
-                  'block truncate rounded-lg py-1.5 pr-2 text-[13px] text-[var(--color-ink-faint)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]',
-                  isActive && 'bg-[var(--color-accent-glow)]/[0.18] text-[var(--color-accent-soft)]',
-                )
-              }
-              style={{ paddingLeft: `${(depth + 1) * 0.85 + 0.5 + 1.25}rem` }}
-            >
-              {snippet.title}
-            </NavLink>
-          ))}
+          {item.snippets.map((snippet) => {
+            const isData = snippet.filename.endsWith('.csv')
+            return (
+              <NavLink
+                key={snippet.id}
+                to={`/s/${snippet.id}`}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-1.5 truncate rounded-lg py-1.5 pr-2 text-[13px] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]',
+                    isData ? 'text-[var(--color-ember)]/80' : 'text-[var(--color-ink-faint)]',
+                    isActive && 'bg-[var(--color-accent-glow)]/[0.18] text-[var(--color-accent-soft)]',
+                  )
+                }
+                style={{ paddingLeft: `${(depth + 1) * 0.85 + 0.5 + 1.25}rem` }}
+              >
+                {isData && <FileSpreadsheet className="h-3 w-3 shrink-0" />}
+                <span className="truncate">{snippet.title}</span>
+              </NavLink>
+            )
+          })}
         </div>
       )}
     </div>

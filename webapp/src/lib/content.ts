@@ -107,7 +107,7 @@ export function compareOrderKey(a: number[], b: number[]): number {
 }
 
 const rawModules = import.meta.glob(
-  '../../../{NumPy_Basics,Pandas_Basics,Classical_ML,python tutorial}/**/*.{py,csv}',
+  '../../../{NumPy_Basics,Pandas_Basics,Classical_ML,python tutorial,Deep_Learning_PyTorch}/**/*.{py,csv}',
   { query: '?raw', import: 'default', eager: true },
 ) as Record<string, string>
 

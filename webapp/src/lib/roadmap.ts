@@ -21,6 +21,7 @@ export interface Basecamp {
 const BASECAMP_CATEGORY_MAP: Record<string, string[]> = {
   'basecamp-0': ['python-tutorial', 'numpy-basics', 'pandas-basics'],
   'basecamp-1': ['classical-ml'],
+  'basecamp-2': ['deep-learning-pytorch'],
 }
 
 function countChecklist(items: ChecklistItem[]): { done: number; total: number } {

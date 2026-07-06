@@ -6,6 +6,8 @@
 @import "@fontsource/geist/700.css";
 @import "@fontsource/geist-mono/400.css";
 @import "@fontsource/geist-mono/500.css";
+@import "@fontsource/geist-mono/400-italic.css";
+@import "@fontsource/geist-mono/500-italic.css";
 
 @theme {
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
@@ -29,14 +31,10 @@
 
   --color-ember: #f2a65a;
   --color-ember-soft: #f7c78e;
-  --color-mesh-3: #4c4fb0;
 
   --color-scrollbar-thumb: rgba(255, 255, 255, 0.12);
   --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.22);
   --color-mesh-grid: rgba(255, 255, 255, 0.6);
-  --mesh-opacity-1: 0.4;
-  --mesh-opacity-2: 0.3;
-  --mesh-opacity-3: 0.2;
 
   --shadow-glass: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 8px 30px -12px rgba(0, 0, 0, 0.6);
 
@@ -81,14 +79,10 @@
 
   --color-ember: #99ffe4;
   --color-ember-soft: #c3ffef;
-  --color-mesh-3: #3a3a3a;
 
   --color-scrollbar-thumb: rgba(255, 255, 255, 0.12);
   --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.22);
   --color-mesh-grid: rgba(255, 255, 255, 0.6);
-  --mesh-opacity-1: 0.35;
-  --mesh-opacity-2: 0.22;
-  --mesh-opacity-3: 0.16;
 
   --shadow-glass: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset, 0 8px 30px -12px rgba(0, 0, 0, 0.7);
 
@@ -130,14 +124,10 @@
 
   --color-ember: #a2530a;
   --color-ember-soft: #7d4007;
-  --color-mesh-3: #7d74d9;
 
   --color-scrollbar-thumb: rgba(35, 30, 20, 0.2);
   --color-scrollbar-thumb-hover: rgba(35, 30, 20, 0.32);
   --color-mesh-grid: rgba(35, 30, 20, 0.45);
-  --mesh-opacity-1: 0.08;
-  --mesh-opacity-2: 0.07;
-  --mesh-opacity-3: 0.05;
 
   --shadow-glass: 0 1px 0 0 rgba(255, 255, 255, 0.6) inset, 0 8px 24px -12px rgba(35, 30, 20, 0.18);
   color-scheme: light;
@@ -206,22 +196,6 @@ body {
   box-shadow: var(--shadow-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-}
-
-@keyframes mesh-drift {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(-2%, 2%, 0) scale(1.05);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-.gradient-mesh {
-  animation: mesh-drift 34s ease-in-out infinite;
 }
 
 @keyframes fade-up {
@@ -321,4 +295,43 @@ body {
 .line-flash {
   animation: line-flash 1.8s ease-out;
   border-radius: 4px;
+}
+
+/* CSV data-table view — each column gets a cycled accent (computed per-theme
+   in CsvTable.tsx and applied as literal inline colors, not CSS vars, so the
+   wash never depends on custom-property/color-mix() support) so columns stay
+   separable at a glance, capped to a fixed height so a large CSV doesn't
+   balloon the page — its own header stays sticky within that scroll area. */
+.csv-table-scroll {
+  max-height: 32rem;
+  overflow: auto;
+}
+.csv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.csv-table th {
+  position: sticky;
+  top: 0;
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid;
+  white-space: nowrap;
+}
+.csv-table td {
+  padding: 0.55rem 1rem;
+  color: var(--color-code-ink-dim);
+  border-bottom: 1px solid var(--color-code-border);
+  transition: background-color 0.1s ease;
+}
+.csv-table-footnote {
+  padding: 0.6rem 1rem;
+  color: var(--color-code-ink-faint);
+  font-size: 11px;
+  position: sticky;
+  left: 0;
 }

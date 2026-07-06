@@ -46,7 +46,7 @@ A field guide, compiled for one traveler. Follow the path top to bottom. Every n
 ## BASECAMP 2: Deep learning (6-8 weeks)
 *Where it gets fun. Neural networks, and the framework the field has standardized on — PyTorch.*
 
-- [ ] **Practical Deep Learning for Coders (fast.ai):** Project-first: you'll train and deploy a real model by lesson two.
+- [x] **Practical Deep Learning for Coders (fast.ai):** Project-first: you'll train and deploy a real model by lesson two.
 - [ ] **Deep Learning Specialization (Andrew Ng):** More rigorous, theory-first. CNNs, RNNs, and the math.
 - [ ] **Neural Networks: Zero to Hero (Andrej Karpathy):** Builds backprop and a GPT from scratch, in code.
 

@@ -8,6 +8,7 @@ import { computeFoldRanges } from '@/lib/foldRanges'
 import type { CapturedOutput } from '@/lib/outputs'
 import { CopyButton } from './CopyButton'
 import { OutputPanel } from './OutputPanel'
+import { CsvTable } from './CsvTable'
 import { cn } from '@/lib/cn'
 
 interface CodeBlockProps {
@@ -26,33 +27,39 @@ const lineIdTransformer: ShikiTransformer = {
 }
 
 export function CodeBlock({ code, filename, focusLine, className, output }: CodeBlockProps) {
+  const isCsv = filename?.endsWith('.csv') ?? false
   const [siteTheme] = useTheme()
   const [html, setHtml] = useState<string | null>(null)
   const [showOutput, setShowOutput] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (isCsv) return
     let cancelled = false
     getHighlighter().then((highlighter) => {
       if (cancelled) return
       const out = highlighter.codeToHtml(code, {
-        lang: filename?.endsWith('.csv') ? 'csv' : 'python',
+        lang: 'python',
         theme: SHIKI_THEME_BY_SITE_THEME[siteTheme],
         transformers: [lineIdTransformer],
       })
-      setHtml(out)
+      // The Vesper theme italicizes comments to match the real VS Code theme, but
+      // Geist Mono's italic glyphs run tight enough that repeated `#` characters
+      // (like a `### Topic ###` marker) visually collide. Comments stay readable
+      // without it, so drop italic rather than fight font metrics for it.
+      setHtml(out.replace(/font-style:\s*italic;?/g, ''))
     })
     return () => {
       cancelled = true
     }
-  }, [code, siteTheme])
+  }, [code, siteTheme, isCsv])
 
   // Injects a fold toggle on every line that opens a block (def/class/if/for/...),
   // so users can collapse just that block instead of the whole file. This is done
   // imperatively on the Shiki-rendered DOM rather than in JSX, since the highlighted
   // markup is inserted via dangerouslySetInnerHTML.
   useEffect(() => {
-    if (!html || !containerRef.current) return
+    if (isCsv || !html || !containerRef.current) return
     const root = containerRef.current
     const ranges = computeFoldRanges(code)
     const disposers: (() => void)[] = []
@@ -125,7 +132,7 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
           )}
         </div>
         <div className="flex items-center gap-2">
-          {output && !filename?.endsWith('.csv') && (
+          {output && !isCsv && (
             <button
               onClick={() => setShowOutput((v) => !v)}
               className={cn(
@@ -141,8 +148,10 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
           <CopyButton text={code} />
         </div>
       </div>
-      <div ref={containerRef} className="code-scroll overflow-x-auto py-3 text-[13px] leading-relaxed">
-        {html ? (
+      <div ref={containerRef} className={cn(!isCsv && 'code-scroll overflow-x-auto py-3 text-[13px] leading-relaxed')}>
+        {isCsv ? (
+          <CsvTable code={code} />
+        ) : html ? (
           <div dangerouslySetInnerHTML={{ __html: html }} />
         ) : (
           <pre className="px-4 font-mono text-[var(--color-code-ink-dim)]">{code}</pre>
