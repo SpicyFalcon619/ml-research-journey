@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle, Clock, ImageIcon, Keyboard, Terminal, X } from 'lucide-react'
+import { AlertTriangle, Clock, ImageIcon, Keyboard, Maximize2, Terminal, X } from 'lucide-react'
 import type { CapturedOutput } from '@/lib/outputs'
 import { cn } from '@/lib/cn'
 
@@ -9,23 +9,27 @@ function withBase(path: string) {
 
 function OutputImages({ images }: { images: string[] }) {
   return (
-    <div className="border-t border-[var(--color-code-border)] bg-[var(--color-code-bg)] p-4">
-      <div className="mb-3 flex items-center gap-2">
+    <div className="border-t border-[var(--color-code-border)] bg-[var(--color-code-bg)] px-4 py-3">
+      <div className="mb-2 flex items-center gap-2">
         <ImageIcon className="h-3.5 w-3.5 shrink-0 text-[var(--color-code-ink-faint)]" />
         <span className="text-xs font-medium text-[var(--color-code-ink-dim)]">
           {images.length === 1 ? 'Figure' : `Figures (${images.length})`}
         </span>
+        <span className="text-[11px] text-[var(--color-code-ink-faint)]">· click to open full size</span>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap gap-2">
         {images.map((src) => (
           <a
             key={src}
             href={withBase(src)}
             target="_blank"
             rel="noreferrer"
-            className="overflow-hidden rounded-lg border border-[var(--color-code-border)] bg-[var(--color-code-surface)] transition-colors hover:border-[var(--color-code-border-strong)]"
+            className="group relative block h-20 overflow-hidden rounded-lg border border-[var(--color-code-border)] bg-[var(--color-code-surface)] transition-colors hover:border-[var(--color-code-border-strong)]"
           >
-            <img src={withBase(src)} alt="" className="block w-full" />
+            <img src={withBase(src)} alt="" className="h-full w-auto" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-150 group-hover:bg-black/40 group-hover:opacity-100">
+              <Maximize2 className="h-4 w-4 text-white" />
+            </div>
           </a>
         ))}
       </div>
