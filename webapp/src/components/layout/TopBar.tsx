@@ -1,7 +1,8 @@
 import type { SVGProps } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Compass, Search, PanelLeft } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
+import { Logo } from './Logo'
 import { cn } from '@/lib/cn'
 import { isMac } from '@/lib/platform'
 
@@ -13,7 +14,7 @@ function GithubMark(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function TopBar({ onOpenSearch, onToggleSidebar, sidebarOpen = true }: { onOpenSearch: () => void; onToggleSidebar?: () => void; sidebarOpen?: boolean }) {
+export function TopBar({ onOpenSearch, sidebarOpen = true }: { onOpenSearch: () => void; sidebarOpen?: boolean }) {
   const location = useLocation()
   // On snippet pages the code block's own header takes over as the persistent,
   // reachable control (Run/Copy), so the site nav scrolls away instead of
@@ -27,17 +28,8 @@ export function TopBar({ onOpenSearch, onToggleSidebar, sidebarOpen = true }: { 
         !isSnippetPage && 'sticky top-4',
       )}
     >
-      {onToggleSidebar && (
-        <button
-          onClick={onToggleSidebar}
-          className="hidden lg:flex items-center justify-center rounded-lg p-1.5 text-[var(--color-ink-dim)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
-          aria-label="Toggle Sidebar"
-        >
-          <PanelLeft className="h-5 w-5" />
-        </button>
-      )}
       <Link to="/" className="flex shrink-0 items-center gap-2 font-semibold tracking-tight text-[var(--color-ink)]">
-        <Compass className="h-5 w-5 text-[var(--color-accent-soft)]" strokeWidth={1.75} />
+        <Logo className="h-7 w-7 shrink-0" />
         <span className="hidden sm:inline">Field Guide</span>
       </Link>
       

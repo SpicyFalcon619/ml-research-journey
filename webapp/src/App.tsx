@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { GradientMesh } from '@/components/layout/GradientMesh'
 import { Sidebar } from '@/components/layout/Sidebar'
+import { SidebarToggle } from '@/components/layout/SidebarToggle'
 import { TopBar } from '@/components/layout/TopBar'
 import { CommandPalette } from '@/components/search/CommandPalette'
 import { Home } from '@/pages/Home'
@@ -43,11 +44,8 @@ function App() {
           </div>
         </aside>
         <div className="flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out">
-          <TopBar 
-            onOpenSearch={() => setPaletteOpen(true)} 
-            onToggleSidebar={() => setSidebarOpen((v) => !v)} 
-            sidebarOpen={sidebarOpen}
-          />
+          <SidebarToggle open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
+          <TopBar onOpenSearch={() => setPaletteOpen(true)} sidebarOpen={sidebarOpen} />
           <main className="flex-1 px-4 py-8 sm:px-8">
             <Suspense fallback={null}>
               <Routes>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ShikiTransformer } from 'shiki'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
 import { useTheme } from '@/hooks/useTheme'
@@ -9,6 +9,8 @@ import type { CapturedOutput } from '@/lib/outputs'
 import { CopyButton } from './CopyButton'
 import { OutputPanel } from './OutputPanel'
 import { CsvTable } from './CsvTable'
+import { FontSizeControl } from './FontSizeControl'
+import { CaptureButton } from './CaptureButton'
 import { cn } from '@/lib/cn'
 
 interface CodeBlockProps {
@@ -32,6 +34,7 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
   const [html, setHtml] = useState<string | null>(null)
   const [showOutput, setShowOutput] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (isCsv) return
@@ -113,12 +116,13 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
 
   return (
     <div
+      ref={cardRef}
       className={cn(
         'group relative rounded-xl border border-[var(--color-code-border)] bg-[var(--color-code-bg)] shadow-[var(--shadow-code)] transition-colors hover:border-[var(--color-code-border-strong)]',
         className,
       )}
     >
-      <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-xl border-b border-[var(--color-code-border)] bg-[var(--color-code-bg)] px-4 py-2.5">
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-y-2 rounded-t-xl border-b border-[var(--color-code-border)] bg-[var(--color-code-bg)] px-4 py-2.5">
         <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]/70" />
@@ -134,7 +138,7 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div data-code-actions className="flex items-center gap-2">
           {output && !isCsv && (
             <button
               onClick={() => setShowOutput((v) => !v)}
@@ -148,10 +152,12 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
               <Play className="h-3.5 w-3.5" /> Run
             </button>
           )}
+          <FontSizeControl />
           <CopyButton text={code} />
+          <CaptureButton targetRef={cardRef} filename={filename} />
         </div>
       </div>
-      <div ref={containerRef} className={cn(!isCsv && 'code-scroll overflow-x-auto py-3 text-[13px] leading-relaxed')}>
+      <div ref={containerRef} className={cn(!isCsv && 'code-scroll overflow-x-auto py-3 leading-relaxed')}>
         {isCsv ? (
           <CsvTable code={code} />
         ) : html ? (
@@ -161,7 +167,18 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
         )}
       </div>
       <AnimatePresence initial={false}>
-        {showOutput && output && <OutputPanel key="output" output={output} />}
+        {showOutput && output && (
+          <motion.div
+            key="output"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="sticky bottom-0 z-20 overflow-hidden rounded-b-xl bg-[var(--color-code-bg)]"
+          >
+            <OutputPanel output={output} filename={filename} onClose={() => setShowOutput(false)} />
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   )

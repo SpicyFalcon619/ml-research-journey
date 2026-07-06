@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle, Clock, Keyboard, Terminal } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { AlertTriangle, Clock, Keyboard, Terminal, X } from 'lucide-react'
 import type { CapturedOutput } from '@/lib/outputs'
 import { cn } from '@/lib/cn'
 
@@ -59,7 +58,7 @@ function InteractiveScenarioPicker({ output }: { output: CapturedOutput }) {
           <p className="mb-2 font-mono text-[11px] text-[var(--color-code-ink-faint)]">
             typed: <span className="text-[var(--color-code-accent-soft)]">{active.inputs.join('  →  ')}</span>
           </p>
-          <pre className="whitespace-pre font-mono text-[13px] leading-relaxed text-[var(--color-code-ink)]">
+          <pre className="code-font whitespace-pre font-mono leading-relaxed text-[var(--color-code-ink)]">
             {active.stdout}
           </pre>
         </div>
@@ -68,30 +67,45 @@ function InteractiveScenarioPicker({ output }: { output: CapturedOutput }) {
   )
 }
 
-export function OutputPanel({ output }: { output: CapturedOutput }) {
+interface OutputPanelProps {
+  output: CapturedOutput
+  filename?: string
+  onClose?: () => void
+}
+
+export function OutputPanel({ output, filename, onClose }: OutputPanelProps) {
   return (
-    <motion.div
-      initial={{ height: 0, opacity: 0 }}
-      animate={{ height: 'auto', opacity: 1 }}
-      exit={{ height: 0, opacity: 0 }}
-      transition={{ duration: 0.22, ease: 'easeOut' }}
-      className="overflow-hidden border-t border-[var(--color-code-border)]"
-    >
+    <div className="border-t border-[var(--color-code-border)]">
       <div className="flex items-center gap-2 bg-[var(--color-code-surface)] px-4 py-2.5">
         <Terminal className="h-3.5 w-3.5 text-[var(--color-code-ink-faint)]" />
         <span className="text-xs font-medium text-[var(--color-code-ink-dim)]">Output</span>
         <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[output.status]}`} />
+        {filename && (
+          <span className="font-mono text-[11px] text-[var(--color-code-ink-faint)]">{filename}</span>
+        )}
         {output.status === 'ok' && (
-          <span className="ml-auto font-mono text-[10px] text-[var(--color-code-ink-faint)]">
+          <span className={cn('font-mono text-[10px] text-[var(--color-code-ink-faint)]', onClose ? 'ml-auto mr-1' : 'ml-auto')}>
             {output.durationMs}ms
           </span>
         )}
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="Close output"
+            className={cn(
+              'cursor-pointer rounded-md p-1 text-[var(--color-code-ink-faint)] transition-colors hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)]',
+              output.status !== 'ok' && 'ml-auto',
+            )}
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
-      <div className="max-h-96 overflow-auto rounded-b-xl bg-[var(--color-code-terminal-bg)] px-4 py-3">
+      <div className="output-scroll h-40 overflow-auto bg-[var(--color-code-terminal-bg)] px-4 py-3">
         {output.status === 'ok' && (
           <>
-            <pre className="whitespace-pre font-mono text-[13px] leading-relaxed text-[var(--color-code-ink)]">
+            <pre className="code-font whitespace-pre font-mono leading-relaxed text-[var(--color-code-ink)]">
               {output.stdout}
             </pre>
             {output.stderr && (
@@ -125,11 +139,11 @@ export function OutputPanel({ output }: { output: CapturedOutput }) {
         )}
 
         {output.status === 'error' && (
-          <pre className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-rose-300">
+          <pre className="code-font whitespace-pre-wrap font-mono leading-relaxed text-rose-300">
             {output.stderr || 'This script exited with an error.'}
           </pre>
         )}
       </div>
-    </motion.div>
+    </div>
   )
 }

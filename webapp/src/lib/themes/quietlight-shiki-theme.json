@@ -1,0 +1,95 @@
+{
+  "name": "quietlight",
+  "colors": {
+    "editor.background": "#F5F5F5",
+    "editor.foreground": "#333333",
+    "editorLineNumber.foreground": "#6D705B",
+    "editorLineNumber.activeForeground": "#9769dc",
+    "editor.selectionBackground": "#C9D0D9",
+    "editorCursor.foreground": "#54494B"
+  },
+  "tokenColors": [
+    { "settings": { "foreground": "#333333" } },
+    {
+      "scope": [
+        "meta.embedded",
+        "source.groovy.embedded",
+        "string meta.image.inline.markdown",
+        "variable.legacy.builtin.python"
+      ],
+      "settings": { "foreground": "#333333" }
+    },
+    {
+      "name": "Comments",
+      "scope": ["comment", "punctuation.definition.comment"],
+      "settings": { "fontStyle": "italic", "foreground": "#AAAAAA" }
+    },
+    {
+      "name": "Comments: Preprocessor",
+      "scope": "comment.block.preprocessor",
+      "settings": { "fontStyle": "", "foreground": "#AAAAAA" }
+    },
+    {
+      "name": "Comments: Documentation",
+      "scope": [
+        "comment.documentation",
+        "comment.block.documentation",
+        "comment.block.documentation punctuation.definition.comment "
+      ],
+      "settings": { "foreground": "#448C27" }
+    },
+    { "name": "Invalid", "scope": "invalid", "settings": { "foreground": "#cd3131" } },
+    { "name": "Invalid - Illegal", "scope": "invalid.illegal", "settings": { "foreground": "#660000" } },
+    { "name": "Operators", "scope": "keyword.operator", "settings": { "foreground": "#777777" } },
+    { "name": "Keywords", "scope": ["keyword", "storage"], "settings": { "foreground": "#4B69C6" } },
+    { "name": "Types", "scope": ["storage.type", "support.type"], "settings": { "foreground": "#7A3E9D" } },
+    {
+      "name": "Language Constants",
+      "scope": ["constant.language", "support.constant", "variable.language"],
+      "settings": { "foreground": "#9C5D27" }
+    },
+    { "name": "Variables", "scope": ["variable", "support.variable"], "settings": { "foreground": "#7A3E9D" } },
+    {
+      "name": "Functions",
+      "scope": ["entity.name.function", "support.function"],
+      "settings": { "fontStyle": "bold", "foreground": "#AA3731" }
+    },
+    {
+      "name": "Classes",
+      "scope": [
+        "entity.name.type",
+        "entity.name.namespace",
+        "entity.name.scope-resolution",
+        "entity.other.inherited-class",
+        "punctuation.separator.namespace.ruby",
+        "support.class"
+      ],
+      "settings": { "fontStyle": "bold", "foreground": "#7A3E9D" }
+    },
+    { "name": "Exceptions", "scope": "entity.name.exception", "settings": { "foreground": "#660000" } },
+    { "name": "Sections", "scope": "entity.name.section", "settings": { "fontStyle": "bold" } },
+    {
+      "name": "Numbers, Characters",
+      "scope": ["constant.numeric", "constant.character", "constant"],
+      "settings": { "foreground": "#9C5D27" }
+    },
+    { "name": "Strings", "scope": "string", "settings": { "foreground": "#448C27" } },
+    {
+      "name": "Strings: Escape Sequences",
+      "scope": "constant.character.escape",
+      "settings": { "foreground": "#777777" }
+    },
+    {
+      "name": "Strings: Regular Expressions",
+      "scope": "string.regexp",
+      "settings": { "foreground": "#4B69C6" }
+    },
+    {
+      "name": "Strings: Symbols",
+      "scope": "constant.other.symbol",
+      "settings": { "foreground": "#9C5D27" }
+    },
+    { "name": "Punctuation", "scope": "punctuation", "settings": { "foreground": "#777777" } }
+  ],
+  "type": "light"
+}

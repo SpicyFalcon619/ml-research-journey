@@ -54,7 +54,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: -8 }}
             transition={{ duration: 0.16, ease: 'easeOut' }}
-            className="glass-panel w-full max-w-xl overflow-hidden rounded-2xl"
+            className="w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] shadow-[var(--shadow-glass)]"
             onClick={(e) => e.stopPropagation()}
           >
             <Command shouldFilter={false} className="flex flex-col">

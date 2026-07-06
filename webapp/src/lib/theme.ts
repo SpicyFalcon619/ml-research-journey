@@ -9,7 +9,7 @@ export interface ThemeOption {
 export const THEME_OPTIONS: ThemeOption[] = [
   { id: 'dark', label: 'Aurora', description: 'Default dark' },
   { id: 'vesper', label: 'Vesper', description: 'Near-black, peach accent' },
-  { id: 'light', label: 'Daylight', description: 'Light mode' },
+  { id: 'light', label: 'Quiet Light', description: 'Muted purple accent' },
 ]
 
 const STORAGE_KEY = 'mlfg-theme'

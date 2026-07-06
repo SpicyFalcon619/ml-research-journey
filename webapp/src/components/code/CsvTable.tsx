@@ -8,7 +8,7 @@ import type { ThemeId } from '@/lib/theme'
 const CSV_PALETTE: Record<ThemeId, string[]> = {
   dark: ['#a5a9ff', '#5be3c9', '#ffb673', '#ff8fc4', '#7ec2ff', '#c6f27a'],
   vesper: ['#ffc799', '#99ffe4', '#8ab4ff', '#c9a6ff', '#ff9fb0', '#e3e08a'],
-  light: ['#5b3fd6', '#0f766e', '#a2530a', '#b8225e', '#1d5fa8', '#5c7a1d'],
+  light: ['#4b69c6', '#3a7a20', '#aa3731', '#9c5d27', '#7a3e9d', '#1f7690'],
 }
 
 function hexToRgb(hex: string): [number, number, number] {
