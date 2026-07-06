@@ -37,9 +37,9 @@ A field guide, compiled for one traveler. Follow the path top to bottom. Every n
 ## BASECAMP 1: Classical machine learning (4-6 weeks)
 *Where you learn what ML actually is, before deep learning. Regression, classification, trees, the full real workflow.*
 
-- [ ] **Machine Learning Specialization (Andrew Ng):** Still the gold standard for building real intuition.
-- [ ] **scikit-learn Tutorials:** Implement everything from the course above on real data.
-- [ ] **Titanic — Machine Learning from Disaster (Kaggle):** The classic first project.
+- [x] **Machine Learning Specialization (Andrew Ng):** Still the gold standard for building real intuition.
+- [x] **scikit-learn Tutorials:** Implement everything from the course above on real data.
+- [x] **Titanic — Machine Learning from Disaster (Kaggle):** The classic first project.
 
 ---
 
