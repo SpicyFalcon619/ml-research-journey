@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { ChevronRight, FileSpreadsheet } from 'lucide-react'
-import { navGroups, basecamps } from '@/lib/roadmap'
+import { navGroups } from '@/lib/roadmap'
 import type { NavItem } from '@/types'
 import { cn } from '@/lib/cn'
 
@@ -76,18 +76,12 @@ export function Sidebar() {
   return (
     <nav className="flex h-full flex-col gap-6 overflow-y-auto px-3 py-6">
       {navGroups.map((group) => {
-        const basecamp = basecamps.find((b) => b.slug === group.slug)
         return (
           <div key={group.slug}>
-            <div className="mb-2 flex items-center justify-between px-2">
+            <div className="mb-2 px-2">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-faint)]">
                 {group.label.replace(/^BASECAMP \d+:\s*/i, '')}
               </span>
-              {basecamp && (
-                <span className="font-mono text-[10px] text-[var(--color-ink-faint)]">
-                  {basecamp.doneCount}/{basecamp.totalCount}
-                </span>
-              )}
             </div>
             <div className="flex flex-col gap-0.5">
               {group.categories.map((category) => (
