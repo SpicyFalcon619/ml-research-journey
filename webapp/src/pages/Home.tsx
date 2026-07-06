@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Flame, Grid3x3, LineChart, Search, Table2, Terminal } from 'lucide-react'
+import { ArrowRight, CircleCheck, Flame, Grid3x3, LineChart, Search, Table2, Terminal } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { snippets } from '@/lib/content'
 import { navGroups, basecamps, countSnippets } from '@/lib/roadmap'
@@ -86,23 +86,29 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
           Trail Progress
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          {basecamps.map((b) => (
-            <GlassPanel key={b.slug} className="p-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-[var(--color-ink)]">{b.title}</span>
-                <span className="font-mono text-xs text-[var(--color-ink-faint)]">
-                  {b.doneCount}/{b.totalCount}
-                </span>
-              </div>
-              {b.tagline && <p className="mt-1 text-xs text-[var(--color-ink-faint)]">{b.tagline}</p>}
-              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-hover)]">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-ember)] transition-[width] duration-500"
-                  style={{ width: `${b.totalCount ? (b.doneCount / b.totalCount) * 100 : 0}%` }}
-                />
-              </div>
-            </GlassPanel>
-          ))}
+          {basecamps.map((b) => {
+            const cleared = b.totalCount > 0 && b.doneCount === b.totalCount
+            return (
+              <GlassPanel key={b.slug} className="p-4">
+                <div className="flex items-baseline gap-1.5 text-sm">
+                  <span className="font-medium text-[var(--color-ink)]">{b.title}</span>
+                  {cleared && (
+                    <CircleCheck
+                      className="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-[var(--color-accent-soft)]"
+                      strokeWidth={2}
+                    />
+                  )}
+                </div>
+                {b.tagline && <p className="mt-1 text-xs text-[var(--color-ink-faint)]">{b.tagline}</p>}
+                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-surface-hover)]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-ember)] transition-[width] duration-500"
+                    style={{ width: `${b.totalCount ? (b.doneCount / b.totalCount) * 100 : 0}%` }}
+                  />
+                </div>
+              </GlassPanel>
+            )
+          })}
         </div>
       </section>
     </div>
