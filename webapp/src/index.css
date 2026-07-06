@@ -254,7 +254,7 @@ body {
   counter-increment: line;
   display: block;
   min-height: 1.625em;
-  padding-left: 4.25rem; /* Increased padding to give more room for line numbers */
+  padding-left: 5.25rem; /* Massive padding to guarantee no overlap */
   position: relative;
   scroll-margin: 6rem;
 }
@@ -262,7 +262,7 @@ body {
   content: counter(line);
   position: absolute;
   left: 1rem;
-  width: 2.5rem; /* slightly wider box for line numbers */
+  width: 3.25rem; /* Wider box for line numbers */
   text-align: right;
   color: var(--color-code-ink-faint);
   user-select: none;

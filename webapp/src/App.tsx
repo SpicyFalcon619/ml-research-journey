@@ -46,6 +46,7 @@ function App() {
           <TopBar 
             onOpenSearch={() => setPaletteOpen(true)} 
             onToggleSidebar={() => setSidebarOpen((v) => !v)} 
+            sidebarOpen={sidebarOpen}
           />
           <main className="flex-1 px-4 py-8 sm:px-8">
             <Suspense fallback={null}>

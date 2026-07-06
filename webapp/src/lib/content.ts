@@ -107,7 +107,7 @@ export function compareOrderKey(a: number[], b: number[]): number {
 }
 
 const rawModules = import.meta.glob(
-  '../../../{NumPy_Basics,Pandas_Basics,Classical_ML,python tutorial}/**/*.py',
+  '../../../{NumPy_Basics,Pandas_Basics,Classical_ML,python tutorial}/**/*.{py,csv}',
   { query: '?raw', import: 'default', eager: true },
 ) as Record<string, string>
 
@@ -127,13 +127,13 @@ function buildSnippets(): Snippet[] {
     const subSegments = middleSegments.map(prettifySegment)
 
     const docTitle = parseDocstringTitle(code)
-    const title = docTitle ?? prettifySegment(filename.replace(/\.py$/, ''))
+    const title = docTitle ?? prettifySegment(filename.replace(/\.(py|csv)$/, ''))
     const topics = parseTopics(code)
 
     const tagSet = new Set<string>()
     tagSet.add(categoryLabel.toLowerCase())
     subSegments.forEach((s) => tagSet.add(s.toLowerCase()))
-    prettifySegment(filename.replace(/\.py$/, ''))
+    prettifySegment(filename.replace(/\.(py|csv)$/, ''))
       .toLowerCase()
       .split(' ')
       .forEach((w) => w.length > 2 && tagSet.add(w))
@@ -142,7 +142,7 @@ function buildSnippets(): Snippet[] {
       if (pattern.test(code)) tagSet.add(tag)
     })
 
-    const id = slugify(relative.replace(/\.py$/, ''))
+    const id = slugify(relative.replace(/\.(py|csv)$/, ''))
 
     snippets.push({
       id,

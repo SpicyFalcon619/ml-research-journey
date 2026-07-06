@@ -12,7 +12,7 @@ function GithubMark(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function TopBar({ onOpenSearch, onToggleSidebar }: { onOpenSearch: () => void; onToggleSidebar?: () => void }) {
+export function TopBar({ onOpenSearch, onToggleSidebar, sidebarOpen = true }: { onOpenSearch: () => void; onToggleSidebar?: () => void; sidebarOpen?: boolean }) {
   const location = useLocation()
   // On snippet pages the code block's own header takes over as the persistent,
   // reachable control (Run/Copy), so the site nav scrolls away instead of
@@ -29,7 +29,7 @@ export function TopBar({ onOpenSearch, onToggleSidebar }: { onOpenSearch: () => 
       {onToggleSidebar && (
         <button
           onClick={onToggleSidebar}
-          className="hidden lg:flex items-center justify-center rounded-lg p-1.5 text-[var(--color-ink-faint)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
+          className="hidden lg:flex items-center justify-center rounded-lg p-1.5 text-[var(--color-ink-dim)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
           aria-label="Toggle Sidebar"
         >
           <PanelLeft className="h-5 w-5" />
@@ -39,16 +39,23 @@ export function TopBar({ onOpenSearch, onToggleSidebar }: { onOpenSearch: () => 
         <Compass className="h-5 w-5 text-[var(--color-accent-soft)]" strokeWidth={1.75} />
         <span className="hidden sm:inline">Field Guide</span>
       </Link>
-      <button
-        onClick={onOpenSearch}
-        className="flex flex-1 items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink-faint)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink-dim)] cursor-pointer max-w-md"
-      >
-        <Search className="h-4 w-4 shrink-0" />
-        <span className="flex-1 truncate text-left">Search snippets…</span>
-        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-[10px] sm:inline">
-          ⌘K
-        </kbd>
-      </button>
+      
+      <div className={cn("flex flex-1 transition-all duration-300", sidebarOpen ? "justify-start" : "justify-center")}>
+        <button
+          onClick={onOpenSearch}
+          className={cn(
+            "flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink-faint)] transition-all hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink-dim)] cursor-pointer",
+            sidebarOpen ? "w-full max-w-md" : "w-full max-w-2xl"
+          )}
+        >
+          <Search className="h-4 w-4 shrink-0" />
+          <span className="flex-1 truncate text-left">Search snippets…</span>
+          <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-[10px] sm:inline">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
+
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <ThemeToggle />
         <a

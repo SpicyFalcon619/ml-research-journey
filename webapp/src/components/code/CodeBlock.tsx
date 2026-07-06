@@ -36,7 +36,7 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
     getHighlighter().then((highlighter) => {
       if (cancelled) return
       const out = highlighter.codeToHtml(code, {
-        lang: 'python',
+        lang: filename?.endsWith('.csv') ? 'csv' : 'python',
         theme: SHIKI_THEME_BY_SITE_THEME[siteTheme],
         transformers: [lineIdTransformer],
       })
@@ -125,7 +125,7 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
           )}
         </div>
         <div className="flex items-center gap-2">
-          {output && (
+          {output && !filename?.endsWith('.csv') && (
             <button
               onClick={() => setShowOutput((v) => !v)}
               className={cn(
