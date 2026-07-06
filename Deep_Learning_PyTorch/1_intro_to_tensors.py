@@ -45,6 +45,9 @@ print(f"Random tensor is on device: {random_tensor.device}")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"System device selected: {device}")
 
+if device == "cuda":
+    print(f"GPU Name: {torch.cuda.get_device_name(0)}")
+
 # Move the tensor to the device!
 random_tensor = random_tensor.to(device)
 print(f"Tensor is now on device: {random_tensor.device}")
