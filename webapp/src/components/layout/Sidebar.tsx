@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
-import { ChevronRight, FileSpreadsheet } from 'lucide-react'
-import { navGroups } from '@/lib/roadmap'
+import { useEffect, useRef, useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
+import { Check, ChevronRight, FileSpreadsheet, Star } from 'lucide-react'
+import { ancestorSlugs, navGroups, parseBasecampLabel } from '@/lib/roadmap'
+import { getSnippetById } from '@/lib/content'
+import { useLibrary } from '@/hooks/useLibrary'
 import type { NavItem } from '@/types'
 import { cn } from '@/lib/cn'
 
@@ -18,6 +20,7 @@ function NavNode({
   toggle: (slug: string) => void
   onNavigate?: () => void
 }) {
+  const { isFavorite, isDone } = useLibrary()
   const isOpen = expanded[item.slug] ?? false
   const hasContent = item.children.length > 0 || item.snippets.length > 0
 
@@ -65,6 +68,16 @@ function NavNode({
               >
                 {isData && <FileSpreadsheet className="h-3 w-3 shrink-0" />}
                 <span className="truncate">{snippet.title}</span>
+                {(isDone(snippet.id) || isFavorite(snippet.id)) && (
+                  <span className="ml-auto flex shrink-0 items-center gap-1.5">
+                    {isFavorite(snippet.id) && (
+                      <Star aria-label="Saved" className="h-3 w-3 fill-[var(--color-accent)] text-[var(--color-accent)]" />
+                    )}
+                    {isDone(snippet.id) && (
+                      <Check aria-label="Done" className="h-3 w-3 text-[var(--color-accent-soft)]" strokeWidth={3} />
+                    )}
+                  </span>
+                )}
               </NavLink>
             )
           })}
@@ -84,15 +97,55 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   const toggle = (slug: string) => setExpanded((prev) => ({ ...prev, [slug]: !(prev[slug] ?? false) }))
 
+  const location = useLocation()
+  const navRef = useRef<HTMLElement>(null)
+  const { favorites } = useLibrary()
+  const savedLessons = favorites.map(getSnippetById).filter((s) => s !== undefined)
+
+  // Open whichever sections hold the lesson you're on and keep it in view, so
+  // arriving from search or a link shows where you are in the trail.
+  useEffect(() => {
+    const match = location.pathname.match(/^\/s\/(.+)$/)
+    if (!match) return
+    const open = ancestorSlugs(match[1])
+    if (open.length) setExpanded((prev) => ({ ...prev, ...Object.fromEntries(open.map((slug) => [slug, true])) }))
+    const frame = requestAnimationFrame(() => {
+      navRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest' })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [location.pathname])
+
   return (
-    <nav className="flex h-full flex-col gap-6 overflow-y-auto px-3 py-6">
+    <nav ref={navRef} aria-label="Lessons" className="flex h-full flex-col gap-6 overflow-y-auto px-3 py-6">
+      {savedLessons.length > 0 && (
+        <div>
+          <div className="mb-2 flex items-center gap-1.5 px-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-faint)]">
+            <Star className="h-3 w-3" /> Saved
+          </div>
+          <div className="flex flex-col gap-0.5">
+            {savedLessons.map((snippet) => (
+              <NavLink
+                key={snippet.id}
+                to={`/s/${snippet.id}`}
+                onClick={onNavigate}
+                className="truncate rounded-lg px-2 py-1.5 text-[13px] text-[var(--color-ink-dim)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
+              >
+                {snippet.title}
+              </NavLink>
+            ))}
+          </div>
+        </div>
+      )}
       {navGroups.map((group) => {
+        const label = parseBasecampLabel(group.label)
         return (
           <div key={group.slug}>
             <div className="mb-2 px-2">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-faint)]">
-                {group.label.replace(/^BASECAMP \d+:\s*/i, '')}
+              <span className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-faint)]">
+                {label.eyebrow}
+                {label.duration ? ` · ${label.duration}` : ''}
               </span>
+              <span className="mt-0.5 block text-[13px] leading-snug text-[var(--color-ink-dim)]">{label.name}</span>
             </div>
             <div className="flex flex-col gap-0.5">
               {group.categories.map((category) => (

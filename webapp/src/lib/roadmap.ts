@@ -179,11 +179,58 @@ function orderedSnippetsOf(item: NavItem): Snippet[] {
   return [...item.children.flatMap(orderedSnippetsOf), ...item.snippets]
 }
 
-const trailOrder: Snippet[] = navGroups.flatMap((group) => group.categories.flatMap(orderedSnippetsOf))
+/** Every lesson on the trail, in the exact order the sidebar presents them. */
+export const trailOrder: Snippet[] = navGroups.flatMap((group) => group.categories.flatMap(orderedSnippetsOf))
 const trailIndex = new Map(trailOrder.map((snippet, index) => [snippet.id, index]))
 
 export function getAdjacent(id: string): { prev?: Snippet; next?: Snippet } {
   const index = trailIndex.get(id)
   if (index === undefined) return {}
   return { prev: trailOrder[index - 1], next: trailOrder[index + 1] }
+}
+
+/** Slugs of every sidebar section that (transitively) contains this lesson. */
+export function ancestorSlugs(snippetId: string): string[] {
+  const path: string[] = []
+  const visit = (item: NavItem): boolean => {
+    if (item.snippets.some((s) => s.id === snippetId)) {
+      path.push(item.slug)
+      return true
+    }
+    for (const child of item.children) {
+      if (visit(child)) {
+        path.push(item.slug)
+        return true
+      }
+    }
+    return false
+  }
+  for (const group of navGroups) for (const category of group.categories) if (visit(category)) return path
+  return []
+}
+
+export interface BasecampLabel {
+  /** "Basecamp 0" */
+  eyebrow: string
+  /** The title without the number or the duration. */
+  name: string
+  /** "1-2 weeks", when the roadmap heading carries one. */
+  duration?: string
+}
+
+// ROADMAP.md headings read "BASECAMP 0: Python, for someone who already codes (1-2 weeks)".
+// Shown raw in a narrow sidebar that becomes an unreadable all-caps run-on, so
+// split it into the parts the interface actually wants.
+export function parseBasecampLabel(label: string): BasecampLabel {
+  const match = label.match(/^BASECAMP\s+(\d+):\s*(.+)$/i)
+  if (!match) return { eyebrow: '', name: label }
+
+  let rest = match[2].trim()
+  let duration: string | undefined
+  const durationMatch = rest.match(/\s*\(([^)]*week[^)]*)\)\s*$/i)
+  if (durationMatch && durationMatch.index !== undefined) {
+    duration = durationMatch[1].trim()
+    rest = rest.slice(0, durationMatch.index).trim()
+  }
+  return { eyebrow: `Basecamp ${match[1]}`, name: rest.charAt(0).toUpperCase() + rest.slice(1), duration }
 }

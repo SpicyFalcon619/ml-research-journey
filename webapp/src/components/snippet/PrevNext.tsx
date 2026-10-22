@@ -19,7 +19,7 @@ function Card({ snippet, direction }: { snippet: Snippet; direction: 'prev' | 'n
           {next ? 'Next' : 'Previous'}
           {next && <ArrowRight className="h-3 w-3" />}
         </p>
-        <h3 className="mt-1 truncate font-medium text-[var(--color-ink)]">{snippet.title}</h3>
+        <p className="mt-1 truncate font-medium text-[var(--color-ink)]">{snippet.title}</p>
         <p className="mt-0.5 truncate font-mono text-xs text-[var(--color-ink-faint)]">{snippet.filename}</p>
       </GlassPanel>
     </Link>

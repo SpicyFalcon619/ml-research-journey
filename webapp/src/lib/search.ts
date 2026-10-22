@@ -1,6 +1,7 @@
 import Fuse from 'fuse.js'
 import type { Snippet, Topic } from '@/types'
 import { snippets } from '@/lib/content'
+import { navGroups } from '@/lib/roadmap'
 
 export interface FileHit {
   type: 'file'
@@ -44,7 +45,7 @@ const topicFuse = new Fuse(topicEntries, {
 
 // File hits always open the snippet at the top (predictable); topic hits are
 // shown as visually distinct rows and jump straight to that section.
-export function search(query: string, limit = 20): SearchHit[] {
+export function search(query: string, limit = 20, categorySlug?: string): SearchHit[] {
   const trimmed = query.trim()
   if (!trimmed) return []
 
@@ -58,7 +59,18 @@ export function search(query: string, limit = 20): SearchHit[] {
   }))
 
   return [...fileResults, ...topicResults]
+    .filter((r) => !categorySlug || r.hit.snippet.categorySlug === categorySlug)
     .sort((a, b) => a.score - b.score)
     .slice(0, limit)
     .map((r) => r.hit)
 }
+
+export interface SearchCategory {
+  slug: string
+  label: string
+}
+
+/** The tracks a search can be narrowed to, in the order the sidebar lists them. */
+export const searchCategories: SearchCategory[] = navGroups.flatMap((group) =>
+  group.categories.map((category) => ({ slug: category.slug, label: category.label })),
+)

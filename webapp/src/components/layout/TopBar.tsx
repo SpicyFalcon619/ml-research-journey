@@ -33,7 +33,8 @@ export function TopBar({
     <header
       className={cn(
         'glass-panel z-30 mx-4 mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 sm:mx-6',
-        !isSnippetPage && 'sticky top-4',
+        // Both are positioned, so the search box below can be centered against this bar.
+        isSnippetPage ? 'relative' : 'sticky top-4',
       )}
     >
       {/* The sidebar is hidden below the laptop breakpoint, so phones get a menu button for it. */}
@@ -49,12 +50,15 @@ export function TopBar({
         <span className="hidden sm:inline">Field Guide</span>
       </Link>
       
-      <div className="flex flex-1 justify-center transition-all duration-300">
+      {/* On wide screens the search box is pinned to the true middle of the bar. Left in the
+          flex row it sat between the logo and the buttons, and because the buttons are wider
+          than the logo it drifted left of the page's center line. */}
+      <div className="flex min-w-0 flex-1 justify-center transition-all duration-300 xl:absolute xl:top-1/2 xl:left-1/2 xl:-translate-x-1/2 xl:-translate-y-1/2 xl:flex-none">
         <button
           onClick={onOpenSearch}
           className={cn(
             "flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink-faint)] transition-all hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink-dim)] cursor-pointer",
-            sidebarOpen ? "w-full max-w-md" : "w-full max-w-2xl"
+            sidebarOpen ? "w-full max-w-md xl:w-[28rem]" : "w-full max-w-2xl xl:w-[42rem]"
           )}
         >
           <Search className="h-4 w-4 shrink-0" />

@@ -11,6 +11,8 @@ import { OutputPanel } from './OutputPanel'
 import { CsvTable } from './CsvTable'
 import { FontSizeControl } from './FontSizeControl'
 import { CaptureButton } from './CaptureButton'
+import { CaptureDialogButton } from './CaptureDialog'
+import type { Topic } from '@/types'
 import { cn } from '@/lib/cn'
 
 interface CodeBlockProps {
@@ -19,6 +21,8 @@ interface CodeBlockProps {
   focusLine?: number
   className?: string
   output?: CapturedOutput
+  /** The lesson's marked sections, so a capture can be limited to one of them. */
+  topics?: Topic[]
 }
 
 const lineIdTransformer: ShikiTransformer = {
@@ -28,7 +32,7 @@ const lineIdTransformer: ShikiTransformer = {
   },
 }
 
-export function CodeBlock({ code, filename, focusLine, className, output }: CodeBlockProps) {
+export function CodeBlock({ code, filename, focusLine, className, output, topics }: CodeBlockProps) {
   const isCsv = filename?.endsWith('.csv') ?? false
   const [siteTheme] = useTheme()
   const [html, setHtml] = useState<string | null>(null)
@@ -154,7 +158,12 @@ export function CodeBlock({ code, filename, focusLine, className, output }: Code
           )}
           <FontSizeControl />
           <CopyButton text={code} />
-          <CaptureButton targetRef={cardRef} filename={filename} />
+          {/* Code gets the capture dialog (line choice, window style, preview); CSV tables keep the one-click capture. */}
+          {isCsv ? (
+            <CaptureButton targetRef={cardRef} filename={filename} />
+          ) : (
+            <CaptureDialogButton code={code} filename={filename} topics={topics} output={output} />
+          )}
         </div>
       </div>
       <div ref={containerRef} className={cn(!isCsv && 'code-scroll overflow-x-auto py-3 leading-relaxed')}>

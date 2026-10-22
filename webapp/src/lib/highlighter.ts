@@ -3,7 +3,7 @@ import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
 import python from 'shiki/langs/python.mjs'
 import poimandres from 'shiki/themes/poimandres.mjs'
 import tokyoNight from 'shiki/themes/tokyo-night.mjs'
-import solarizedLight from 'shiki/themes/solarized-light.mjs'
+import githubLight from 'shiki/themes/github-light.mjs'
 import vitesseBlack from 'shiki/themes/vitesse-black.mjs'
 import vesper from './themes/vesper-shiki-theme.json'
 import quietlight from './themes/quietlight-shiki-theme.json'
@@ -16,13 +16,13 @@ export const SHIKI_THEME_BY_SITE_THEME: Record<ThemeId, string> = {
   vesper: 'vesper',
   light: 'quietlight',
   midnight: 'tokyo-night',
-  paper: 'solarized-light',
+  paper: 'github-light',
   terminal: 'vitesse-black',
 }
 
-// Tokyo Night and Solarized Light set comments at roughly 2.6:1 contrast, which
-// reads as "disabled" on a site where the comments *are* the lesson. Recolor only
-// the comment rules to a tone that still looks muted but clears 4.5:1.
+// Tokyo Night, GitHub Light and Vitesse Black set comments at 2.6-4.3:1 contrast,
+// which reads as "disabled" on a site where the comments *are* the lesson. Recolor
+// only the comment rules to a tone that still looks muted but clears 4.5:1.
 function withReadableComments(theme: ThemeRegistrationRaw, color: string): ThemeRegistrationRaw {
   const recolor = (rules: NonNullable<ThemeRegistrationRaw['tokenColors']>) =>
     rules.map((rule) => {
@@ -46,8 +46,8 @@ export function getHighlighter(): Promise<HighlighterCore> {
         vesper as unknown as ThemeRegistrationRaw,
         quietlight as unknown as ThemeRegistrationRaw,
         withReadableComments(tokyoNight as unknown as ThemeRegistrationRaw, '#7983b0'),
-        withReadableComments(solarizedLight as unknown as ThemeRegistrationRaw, '#5f7373'),
-        vitesseBlack,
+        withReadableComments(githubLight as unknown as ThemeRegistrationRaw, '#5c636b'),
+        withReadableComments(vitesseBlack as unknown as ThemeRegistrationRaw, '#7f917f'),
       ],
       langs: [python],
       engine: createJavaScriptRegexEngine(),
