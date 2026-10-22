@@ -382,6 +382,26 @@ input:focus-visible,
   -webkit-backdrop-filter: blur(20px);
 }
 
+/* The sticky top bar sits over scrolling text. A see-through panel lets that text show
+   through (phones barely blur it), so this one is the page color with the same faint tint
+   on top: it looks identical over an empty page and stays readable over content. */
+.glass-panel.solid {
+  background-color: var(--color-bg);
+  background-image: linear-gradient(var(--color-surface), var(--color-surface));
+}
+/* The bar floats 1rem below the top edge, and text scrolling through that strip looked like
+   it was cut off by the bar. A page-colored strip behind it hides that. */
+.glass-panel.solid::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: calc(-1rem - 1px); /* the 1px is the bar's border, which the offset is measured inside of */
+  left: -1.5rem;
+  right: -1.5rem;
+  height: 1rem;
+  background: var(--color-bg);
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;

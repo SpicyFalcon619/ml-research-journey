@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check } from 'lucide-react'
+import { Check, ChevronDown, Palette } from 'lucide-react'
 import { THEME_OPTIONS, type ThemeOption, type ThemeSwatch } from '@/lib/theme'
 import { useTheme } from '@/hooks/useTheme'
 import { cn } from '@/lib/cn'
@@ -66,13 +66,17 @@ export function ThemeToggle() {
     <div className="relative" ref={containerRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 pr-3 pl-2.5 text-xs font-medium text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] cursor-pointer"
+        className="flex items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-xs sm:py-2 sm:pr-2.5 sm:pl-2.5 font-medium text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] cursor-pointer"
         aria-label={`Theme: ${activeOption.label}. Change theme`}
         aria-haspopup="true"
+        title="Change the colour theme"
         aria-expanded={open}
       >
-        <ThemeDot option={activeOption} size={16} />
-        {activeOption.label}
+        {/* A palette icon and the word "Theme" say what this is; the dot shows which one is on. */}
+        <Palette className="h-4 w-4 shrink-0" aria-hidden />
+        <ThemeDot option={activeOption} size={14} />
+        <span className="hidden sm:inline">Theme</span>
+        <ChevronDown className={cn('hidden h-3.5 w-3.5 shrink-0 transition-transform sm:block', open && 'rotate-180')} aria-hidden />
       </button>
       <AnimatePresence>
         {open && (
@@ -84,7 +88,7 @@ export function ThemeToggle() {
             className="absolute right-0 top-[calc(100%+8px)] z-40 w-64 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-1 shadow-[var(--shadow-glass)]"
           >
             <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">
-              Pick a look
+              Choose a theme
             </p>
             {THEME_OPTIONS.map((option) => {
               const active = option.id === preference
