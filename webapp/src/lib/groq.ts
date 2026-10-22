@@ -129,7 +129,7 @@ export async function streamChat({ apiKey, model, messages, signal, onToken }: S
         messages,
         stream: true,
         temperature: 0.4,
-        max_completion_tokens: 1000,
+        max_completion_tokens: 1200,
         // The gpt-oss models "think" before answering; a low setting keeps replies quick and cheap.
         ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {}),
       }),

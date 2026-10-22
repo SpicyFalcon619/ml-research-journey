@@ -1,12 +1,18 @@
-import { Fragment, useState, type ReactNode } from 'react'
+import { createContext, Fragment, useContext, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { Check, Copy } from 'lucide-react'
+import { lessonByTitle } from '@/lib/siteIndex'
 import { cn } from '@/lib/cn'
+
+// Called when a lesson link in a reply is followed, so a full-screen panel on a phone can get out of the way.
+const NavigateContext = createContext<() => void>(() => {})
 
 // Renders a model's reply. It understands only what replies actually use (paragraphs, lists,
 // headings, tables, `code`, **bold** and fenced code blocks) and draws everything as React
 // text nodes, never as HTML, so nothing a model writes can inject markup into the page.
 
 function Inline({ text }: { text: string }) {
+  const onNavigate = useContext(NavigateContext)
   const parts = text.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/g)
   return (
     <>
@@ -19,6 +25,21 @@ function Inline({ text }: { text: string }) {
           )
         }
         if (part.length > 4 && part.startsWith('**') && part.endsWith('**')) {
+          // A bold phrase that is exactly one lesson's title links to that lesson.
+          const lesson = lessonByTitle(part.slice(2, -2))
+          if (lesson) {
+            return (
+              <Link
+                key={i}
+                to={`/s/${lesson.id}`}
+                onClick={onNavigate}
+                title={`Open the lesson: ${lesson.title}`}
+                className="font-semibold text-[var(--color-ink)] underline decoration-[var(--color-accent)] underline-offset-4 hover:text-[var(--color-accent-soft)]"
+              >
+                {lesson.title}
+              </Link>
+            )
+          }
           return (
             <strong key={i} className="font-semibold text-[var(--color-ink)]">
               {part.slice(2, -2)}
@@ -147,15 +168,17 @@ function Prose({ text }: { text: string }) {
   return <>{blocks}</>
 }
 
-export function RichText({ text, className }: { text: string; className?: string }) {
+export function RichText({ text, className, onNavigate }: { text: string; className?: string; onNavigate?: () => void }) {
   // Fences split the reply into text (even parts) and code (odd parts). A fence that is
   // still open while the reply streams in is drawn as code until it closes.
   const parts = text.split('```')
   return (
-    <div className={cn('text-sm leading-relaxed text-[var(--color-ink-dim)]', className)}>
-      {parts.map((part, index) =>
-        index % 2 === 1 ? <CodeBlock key={index} code={part.replace(/^[\w+#.-]*\n/, '').replace(/\n$/, '')} /> : <Prose key={index} text={part} />,
-      )}
-    </div>
+    <NavigateContext.Provider value={onNavigate ?? (() => {})}>
+      <div className={cn('text-sm leading-relaxed text-[var(--color-ink-dim)]', className)}>
+        {parts.map((part, index) =>
+          index % 2 === 1 ? <CodeBlock key={index} code={part.replace(/^[\w+#.-]*\n/, '').replace(/\n$/, '')} /> : <Prose key={index} text={part} />,
+        )}
+      </div>
+    </NavigateContext.Provider>
   )
 }
