@@ -1,22 +1,18 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Link, useLocation } from 'react-router-dom'
-import { ArrowUp, Check, Copy, Eye, EyeOff, Link2, RotateCcw, Settings, Square, Trash2, X } from 'lucide-react'
+import { ArrowUp, Check, Copy, Eye, EyeOff, History, Link2, Plus, RotateCcw, Settings, Square, Trash2, X } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
-import { buildMessages, GENERAL_ACTIONS, LESSON_ACTIONS } from '@/lib/assistantPrompts'
-import { GroqError, looksLikeKey, MODELS, setupLink, streamChat, type GroqErrorKind } from '@/lib/groq'
+import { buildMessages, CONTINUE_PROMPT, FOLLOW_UPS, GENERAL_ACTIONS, LESSON_ACTIONS, MAX_QUESTION_CHARS } from '@/lib/assistantPrompts'
+import { BUILT_IN_KEY, GroqError, looksLikeKey, MODELS, modelOrder, setupLink, streamChat } from '@/lib/groq'
+import { timeAgo } from '@/lib/userData'
 import { useAssistant } from '@/hooks/useAssistant'
 import { useLibrary } from '@/hooks/useLibrary'
+import { useChats } from '@/hooks/useChats'
 import { Dropdown } from '@/components/ui/Dropdown'
 import { RichText } from '@/components/ai/RichText'
 import { cn } from '@/lib/cn'
-
-interface Msg {
-  id: number
-  role: 'user' | 'assistant'
-  content: string
-  error?: string
-  errorKind?: GroqErrorKind
-}
+import type { Msg } from '@/lib/chats'
 
 const iconButton =
   'flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-[var(--color-ink-faint)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]'
@@ -24,22 +20,61 @@ const textButton =
   'flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-50'
 
 function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }) {
-  const { personalKey, usingBuiltIn, setApiKey, clearApiKey, model, setModel } = useAssistant()
+  const { apiKey, personalKey, usingBuiltIn, setApiKey, clearApiKey, model, setModel } = useAssistant()
   const [value, setValue] = useState('')
   const [visible, setVisible] = useState(false)
   const [copied, setCopied] = useState(false)
+  // With a key built into the site nobody needs to set anything up, so using your own is tucked away.
+  const [ownOpen, setOwnOpen] = useState(false)
   const valid = looksLikeKey(value)
   const showWarning = value.trim() !== '' && !valid
+  const builtInAvailable = BUILT_IN_KEY !== ''
 
-  return (
-    <div className="flex flex-col gap-5 p-5">
-      {usingBuiltIn && (
-        <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs leading-relaxed text-[var(--color-ink-dim)]">
-          This site comes with a built-in key, so you can just ask. Everyone using the site shares its free daily limit. If that runs out,
-          or you'd rather use your own, add your own key below.
-        </p>
-      )}
-      {!existing && (
+  const keyField = (
+    <div>
+      <label htmlFor="groq-key" className="mb-1.5 block text-xs font-medium text-[var(--color-ink-dim)]">
+        {personalKey ? 'Replace your key' : builtInAvailable ? 'Your Groq API key' : 'Groq API key'}
+      </label>
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <input
+            id="groq-key"
+            type={visible ? 'text' : 'password'}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="gsk_..."
+            autoComplete="off"
+            spellCheck={false}
+            className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pr-9 pl-3 font-mono text-xs text-[var(--color-ink)] outline-none transition-colors placeholder:text-[var(--color-ink-faint)] focus:border-[var(--color-accent)]"
+          />
+          <button type="button" onClick={() => setVisible((v) => !v)} aria-label={visible ? 'Hide key' : 'Show key'} className="absolute top-1/2 right-1.5 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center text-[var(--color-ink-faint)] hover:text-[var(--color-ink)]">
+            {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+        <button
+          type="button"
+          disabled={!valid}
+          onClick={() => {
+            setApiKey(value)
+            setValue('')
+            onDone()
+          }}
+          className="h-9 cursor-pointer rounded-lg bg-[var(--color-accent)] px-4 text-sm font-medium text-[var(--color-accent-ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Save
+        </button>
+      </div>
+      {showWarning && <p className="mt-1.5 text-xs text-[var(--color-ember)]">Groq keys start with gsk_ and are about 56 characters long.</p>}
+      <p className="mt-2 text-xs leading-relaxed text-[var(--color-ink-faint)]">
+        Kept in this browser only and sent only to Groq. It is never put in the site's code, in an export, or on GitHub.
+      </p>
+    </div>
+  )
+
+  // Nothing to connect to yet: the site has no key built in and the visitor hasn't added one.
+  if (!existing) {
+    return (
+      <div className="flex flex-col gap-5 p-5">
         <div>
           <h3 className="text-base font-semibold text-[var(--color-ink)]">Connect Groq</h3>
           <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-dim)]">
@@ -50,120 +85,136 @@ function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }
             , paste it below, and ask away.
           </p>
         </div>
-      )}
+        {keyField}
+      </div>
+    )
+  }
 
+  return (
+    <div className="flex flex-col gap-5 p-5">
       <div>
-        <label htmlFor="groq-key" className="mb-1.5 block text-xs font-medium text-[var(--color-ink-dim)]">
-          {personalKey ? 'Replace your key' : usingBuiltIn ? 'Use your own key instead' : 'Groq API key'}
-        </label>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <input
-              id="groq-key"
-              type={visible ? 'text' : 'password'}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="gsk_..."
-              autoComplete="off"
-              spellCheck={false}
-              className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pr-9 pl-3 font-mono text-xs text-[var(--color-ink)] outline-none transition-colors placeholder:text-[var(--color-ink-faint)] focus:border-[var(--color-accent)]"
-            />
-            <button type="button" onClick={() => setVisible((v) => !v)} aria-label={visible ? 'Hide key' : 'Show key'} className="absolute top-1/2 right-1.5 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center text-[var(--color-ink-faint)] hover:text-[var(--color-ink)]">
-              {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-          <button
-            type="button"
-            disabled={!valid}
-            onClick={() => {
-              setApiKey(value)
-              setValue('')
-              onDone()
-            }}
-            className="h-9 cursor-pointer rounded-lg bg-[var(--color-accent)] px-4 text-sm font-medium text-[var(--color-accent-ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Save
-          </button>
-        </div>
-        {showWarning && <p className="mt-1.5 text-xs text-[var(--color-ember)]">Groq keys start with gsk_ and are about 56 characters long.</p>}
+        <div className="mb-1.5 text-xs font-medium text-[var(--color-ink-dim)]">Model</div>
+        <Dropdown ariaLabel="Model" value={model} onChange={setModel} options={MODELS.map((m) => ({ value: m.id, label: m.label, description: m.note }))} />
         <p className="mt-2 text-xs leading-relaxed text-[var(--color-ink-faint)]">
-          Kept in this browser only and sent only to Groq. It is never put in the site's code, in an export, or on GitHub.
+          If the chosen model reaches its free limit, another one answers instead, so you can keep going.
         </p>
       </div>
 
-      {existing && (
+      {usingBuiltIn && (
+        <p className="text-xs leading-relaxed text-[var(--color-ink-faint)]">
+          This site has an AI key built in, so there is nothing to set up. Everyone using the site shares its free daily limit.
+        </p>
+      )}
+
+      {personalKey && builtInAvailable && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs text-[var(--color-ink-dim)]">
+          <span>You are using your own key.</span>
+          <button
+            type="button"
+            onClick={() => {
+              clearApiKey()
+              onDone()
+            }}
+            className="shrink-0 cursor-pointer text-[var(--color-ink)] underline decoration-[var(--color-border-strong)] underline-offset-4"
+          >
+            Switch back to the site's key
+          </button>
+        </div>
+      )}
+
+      {builtInAvailable && !personalKey && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setOwnOpen((v) => !v)}
+            aria-expanded={ownOpen}
+            className="flex cursor-pointer items-center gap-1 text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
+          >
+            Use my own Groq key instead (optional)
+          </button>
+          {ownOpen && <div className="mt-3">{keyField}</div>}
+        </div>
+      )}
+
+      {/* Without a built-in key the visitor's own key is the only way in: replace or remove it, and share it. */}
+      {!builtInAvailable && (
         <>
-          <div>
-            <div className="mb-1.5 text-xs font-medium text-[var(--color-ink-dim)]">Model</div>
-            <Dropdown
-              ariaLabel="Model"
-              value={model}
-              onChange={setModel}
-              options={MODELS.map((m) => ({ value: m.id, label: m.label, description: m.note }))}
-            />
-          </div>
+          {keyField}
           {personalKey && (
-          <div>
-            <div className="mb-1.5 text-xs font-medium text-[var(--color-ink-dim)]">Set up another device</div>
-            <p className="mb-2 text-xs leading-relaxed text-[var(--color-ink-faint)]">
-              This copies a link that saves your key in whoever opens it, so a friend or your phone is ready in one click. Anyone with the
-              link can use your free quota, so send it only to people you trust.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                void navigator.clipboard?.writeText(setupLink(personalKey)).then(() => {
-                  setCopied(true)
-                  window.setTimeout(() => setCopied(false), 1800)
-                })
-              }}
-              className={textButton}
-            >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />} {copied ? 'Link copied' : 'Copy setup link'}
-            </button>
-          </div>
-          )}
-          <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-4">
-            {personalKey ? (
+            <div>
+              <div className="mb-1.5 text-xs font-medium text-[var(--color-ink-dim)]">Set up another device</div>
+              <p className="mb-2 text-xs leading-relaxed text-[var(--color-ink-faint)]">
+                This copies a link that saves your key in whoever opens it, so a friend or your phone is ready in one click. Anyone with the link
+                can use your free quota, so send it only to people you trust.
+              </p>
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm('Remove your saved Groq key from this browser?')) {
-                    clearApiKey()
-                    onDone()
-                  }
+                  void navigator.clipboard?.writeText(setupLink(apiKey)).then(() => {
+                    setCopied(true)
+                    window.setTimeout(() => setCopied(false), 1800)
+                  })
                 }}
-                className="cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
+                className={textButton}
               >
-                Remove my key
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />} {copied ? 'Link copied' : 'Copy setup link'}
               </button>
-            ) : (
-              <span />
-            )}
-            <button type="button" onClick={onDone} className={textButton}>
-              Back to chat
-            </button>
-          </div>
+            </div>
+          )}
         </>
       )}
+
+      <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-4">
+        {personalKey && !builtInAvailable ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('Remove your saved Groq key from this browser?')) {
+                clearApiKey()
+                onDone()
+              }
+            }}
+            className="cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
+          >
+            Remove my key
+          </button>
+        ) : (
+          <span />
+        )}
+        <button type="button" onClick={onDone} className={textButton}>
+          Back to chat
+        </button>
+      </div>
     </div>
+  )
+}
+
+type View = 'chat' | 'history' | 'settings'
+
+function TypingDots() {
+  return (
+    <span className="inline-flex items-center gap-1 py-1" role="status" aria-label="Thinking">
+      {[0, 1, 2].map((n) => (
+        <span key={n} className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-ink-faint)]" style={{ animationDelay: `${n * 160}ms` }} />
+      ))}
+    </span>
   )
 }
 
 export function AssistantPanel() {
   const { open, pending, apiKey, usingBuiltIn, model, closeAssistant, consumePending } = useAssistant()
-  const { done } = useLibrary()
+  const { done, recent } = useLibrary()
+  const { chats, active, messages, startChat, updateMessages, patchMessage, newChat, openChat, deleteChat, clearAll, makeId } = useChats()
   const { pathname } = useLocation()
+  const reduceMotion = useReducedMotion()
   const lessonId = pathname.startsWith('/s/') ? decodeURIComponent(pathname.slice(3)) : undefined
   const lesson = lessonId ? getSnippetById(lessonId) : undefined
 
-  const [messages, setMessages] = useState<Msg[]>([])
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
-  const [settings, setSettings] = useState(false)
+  const [view, setView] = useState<View>('chat')
   const [useLesson, setUseLesson] = useState(true)
   const abortRef = useRef<AbortController | null>(null)
-  const idRef = useRef(0)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const returnFocusRef = useRef<HTMLElement | null>(null)
@@ -174,39 +225,67 @@ export function AssistantPanel() {
   // A new lesson gets its own context back, even if it was switched off for the last one.
   useEffect(() => setUseLesson(true), [lessonId])
 
+  // `history` replaces the messages from the question onward (used to retry or regenerate);
+  // `asked` is what the model is sent when it differs from what the chat shows (such as "Continue").
   const send = useCallback(
-    async (text: string) => {
-      const content = text.trim()
+    async (text: string, options: { history?: Msg[]; asked?: string } = {}) => {
+      const content = text.trim().slice(0, MAX_QUESTION_CHARS)
       if (!content || busy || !apiKey) return
-      const history = messages.filter((m) => !m.error && m.content).map(({ role, content: c }) => ({ role, content: c }))
-      const userId = ++idRef.current
-      const replyId = ++idRef.current
-      setMessages((prev) => [...prev, { id: userId, role: 'user', content }, { id: replyId, role: 'assistant', content: '' }])
+      const base = options.history ?? messages
+      const chatId = active?.id ?? startChat(content)
+      const prior = base.filter((m) => !m.error && m.content).map(({ role, content: c }) => ({ role, content: c }))
+      const userId = makeId()
+      const replyId = makeId()
+      updateMessages(chatId, (list) => [...(options.history ?? list), { id: userId, role: 'user', content }, { id: replyId, role: 'assistant', content: '' }])
       setDraft('')
+      if (inputRef.current) inputRef.current.style.height = 'auto'
       setBusy(true)
-      setSettings(false)
+      setView('chat')
       const controller = new AbortController()
       abortRef.current = controller
+      const recentTitles = recent
+        .slice(0, 3)
+        .map((entry) => getSnippetById(entry.id)?.title)
+        .filter((title): title is string => !!title)
+      const request = buildMessages([...prior, { role: 'user', content: options.asked ?? content }], activeLesson, done, recentTitles)
+      let received = false
       try {
-        await streamChat({
-          apiKey,
-          model,
-          signal: controller.signal,
-          messages: buildMessages([...history, { role: 'user', content }], activeLesson, done),
-          onToken: (token) => setMessages((prev) => prev.map((m) => (m.id === replyId ? { ...m, content: m.content + token } : m))),
-        })
+        // Each model has its own free limit, so if the chosen one is used up or unavailable the next one answers.
+        const order = modelOrder(model)
+        let finish: string | undefined
+        for (let i = 0; i < order.length; i++) {
+          try {
+            finish = await streamChat({
+              apiKey,
+              model: order[i].id,
+              signal: controller.signal,
+              messages: request,
+              onToken: (token) => {
+                received = true
+                patchMessage(chatId, replyId, (m) => ({ content: m.content + token }))
+              },
+            })
+            if (i > 0) patchMessage(chatId, replyId, { note: `Answered by ${order[i].label}, because ${order[0].label} was at its free limit or unavailable.` })
+            break
+          } catch (error) {
+            const retryable = error instanceof GroqError && (error.kind === 'rate' || error.kind === 'other')
+            if (retryable && !received && i < order.length - 1) continue
+            throw error
+          }
+        }
+        if (finish === 'length') patchMessage(chatId, replyId, { truncated: true })
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           const kind = error instanceof GroqError ? error.kind : 'other'
-          const text = kind === 'auth' && usingBuiltIn ? "The site's built-in key was not accepted. You can use your own key in Settings." : (error as Error).message
-          setMessages((prev) => prev.map((m) => (m.id === replyId ? { ...m, error: text, errorKind: kind } : m)))
+          const message = kind === 'auth' && usingBuiltIn ? "The site's built-in key was not accepted. You can use your own key in Settings." : (error as Error).message
+          patchMessage(chatId, replyId, { error: message, errorKind: kind })
         }
       } finally {
         setBusy(false)
         abortRef.current = null
       }
     },
-    [apiKey, usingBuiltIn, model, messages, busy, activeLesson, done],
+    [apiKey, usingBuiltIn, model, messages, busy, active, activeLesson, done, recent, startChat, updateMessages, patchMessage, makeId],
   )
 
   // A question handed over by an "Ask about this" button is sent once the panel is ready.
@@ -223,30 +302,34 @@ export function AssistantPanel() {
   useEffect(() => {
     if (!open) return
     returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    const timer = window.setTimeout(() => (inputRef.current ?? document.getElementById('groq-key'))?.focus(), 60)
+    const timer = window.setTimeout(() => (inputRef.current ?? document.getElementById('groq-key'))?.focus(), 120)
     return () => {
       window.clearTimeout(timer)
       returnFocusRef.current?.focus?.()
     }
   }, [open])
 
+  // Follow the answer as it is written, and start at the latest message when a chat is opened.
   useEffect(() => {
     if (busy) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
   }, [messages, busy])
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight })
+  }, [active?.id, view, open])
 
-  // Stops a reply that is still arriving when the panel is closed.
+  // Stops a reply that is still arriving when the panel goes away.
   useEffect(() => () => abortRef.current?.abort(), [])
 
   const stop = () => abortRef.current?.abort()
-  const clear = () => {
+  // Switching or deleting a chat while an answer is arriving would write it into the wrong chat.
+  const guard = (action: () => void) => {
     abortRef.current?.abort()
-    setMessages([])
+    action()
   }
   const retry = (index: number) => {
     const question = messages[index - 1]
-    if (!question) return
-    setMessages((prev) => prev.slice(0, index - 1))
-    window.setTimeout(() => void sendRef.current(question.content), 0)
+    if (!question || busy) return
+    void send(question.content, { history: messages.slice(0, index - 1) })
   }
 
   const onPanelKey = (event: KeyboardEvent) => {
@@ -262,162 +345,251 @@ export function AssistantPanel() {
     }
   }
 
-  if (!open) return null
+  const mobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches
+  const motionProps = reduceMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0, transition: { duration: 0.12 } } }
+    : mobile
+      ? { initial: { opacity: 0, y: 56 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: 56, transition: { duration: 0.18, ease: 'easeIn' as const } } }
+      : { initial: { opacity: 0, x: 32, scale: 0.985 }, animate: { opacity: 1, x: 0, scale: 1 }, exit: { opacity: 0, x: 32, scale: 0.985, transition: { duration: 0.17, ease: 'easeIn' as const } } }
+
   const actions = activeLesson ? LESSON_ACTIONS : GENERAL_ACTIONS
-  const showSetup = !hasKey || settings
+  const showSetup = !hasKey || view === 'settings'
+  const lastIndex = messages.length - 1
+  const last = messages[lastIndex]
+  const showFollowUps = !busy && last?.role === 'assistant' && !!last.content && !last.error
+  const sortedChats = [...chats].sort((a, b) => b.updatedAt - a.updatedAt)
+  const modelLabel = MODELS.find((m) => m.id === model)?.label ?? model
 
   return (
-    <div
-      role="dialog"
-      aria-label="Ask AI"
-      onKeyDown={onPanelKey}
-      className="fixed inset-0 z-[70] flex flex-col border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] shadow-[var(--shadow-glass)] lg:inset-auto lg:top-4 lg:right-4 lg:bottom-4 lg:w-[27rem] lg:rounded-2xl lg:border"
-    >
-      <header className="flex items-center justify-between gap-2 border-b border-[var(--color-border)] px-4 py-2.5">
-        <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-[var(--color-ink)]">Ask AI</h2>
-          <p className="truncate font-mono text-[11px] text-[var(--color-ink-faint)]">{hasKey ? MODELS.find((m) => m.id === model)?.label ?? model : 'Not connected yet'}</p>
-        </div>
-        <div className="flex items-center gap-0.5">
-          {hasKey && messages.length > 0 && (
-            <button type="button" onClick={clear} aria-label="Clear the conversation" title="Clear the conversation" className={iconButton}>
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
-          {hasKey && (
-            <button type="button" onClick={() => setSettings((v) => !v)} aria-label="Settings" aria-pressed={settings} title="Model and key" className={cn(iconButton, settings && 'bg-[var(--color-surface-hover)] text-[var(--color-ink)]')}>
-              <Settings className="h-4 w-4" />
-            </button>
-          )}
-          <button type="button" onClick={closeAssistant} aria-label="Close" className={iconButton}>
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      </header>
-
-      {showSetup ? (
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <KeyForm existing={hasKey} onDone={() => setSettings(false)} />
-        </div>
-      ) : (
-        <>
-          <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4" aria-live="polite">
-            {messages.length === 0 ? (
-              <div>
-                <p className="text-sm leading-relaxed text-[var(--color-ink-dim)]">
-                  {activeLesson ? (
-                    <>
-                      Ask anything about <span className="font-medium text-[var(--color-ink)]">{activeLesson.title}</span>, or pick a starter.
-                    </>
-                  ) : (
-                    'Ask about any concept in the guide, paste code you are stuck on, or pick a starter.'
-                  )}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {actions.map((action) => (
-                    <button key={action.id} type="button" onClick={() => void send(action.prompt)} className={textButton}>
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-6 text-xs leading-relaxed text-[var(--color-ink-faint)]">
-                  Answers come from an AI model and can be wrong. Check anything important against the lesson's real output. Your questions go to Groq.
-                  The free plan has a daily limit{usingBuiltIn ? ' that everyone using the site shares' : ''}, so this is for light use.
-                </p>
-              </div>
-            ) : (
-              <ol className="flex flex-col gap-5">
-                {messages.map((message, index) => (
-                  <li key={message.id}>
-                    {message.role === 'user' ? (
-                      <div className="ml-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm whitespace-pre-wrap text-[var(--color-ink)]">{message.content}</div>
-                    ) : (
-                      <div>
-                        {message.content ? (
-                          <RichText text={message.content} onNavigate={() => { if (window.matchMedia('(max-width: 1023px)').matches) closeAssistant() }} />
-                        ) : !message.error ? (
-                          <p className="text-sm text-[var(--color-ink-faint)]" role="status">
-                            Thinking...
-                          </p>
-                        ) : null}
-                        {message.error && (
-                          <div className="mt-2 rounded-lg border border-[var(--color-ember)]/40 px-3 py-2 text-sm text-[var(--color-ember)]" role="alert">
-                            {message.error}
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {message.errorKind === 'auth' ? (
-                                <button type="button" onClick={() => setSettings(true)} className={textButton}>
-                                  Open settings
-                                </button>
-                              ) : (
-                                <button type="button" onClick={() => retry(index)} className={textButton}>
-                                  <RotateCcw className="h-3.5 w-3.5" /> Try again
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        {message.content && !busy && !message.error && <CopyReply text={message.content} />}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-
-          <footer className="border-t border-[var(--color-border)] p-3">
-            {lesson && (
-              <div className="mb-2 flex items-center justify-between gap-2 text-xs text-[var(--color-ink-faint)]">
-                <span className="min-w-0 truncate">
-                  {useLesson ? 'Using this lesson: ' : 'Not using the lesson. '}
-                  {useLesson && <span className="text-[var(--color-ink-dim)]">{lesson.title}</span>}
-                </span>
-                <button type="button" onClick={() => setUseLesson((v) => !v)} className="shrink-0 cursor-pointer underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
-                  {useLesson ? 'Leave out' : 'Use it'}
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="assistant"
+          role="dialog"
+          aria-label="Ask AI"
+          onKeyDown={onPanelKey}
+          {...motionProps}
+          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed inset-0 z-[70] flex flex-col border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] shadow-[var(--shadow-glass)] lg:inset-auto lg:top-4 lg:right-4 lg:bottom-4 lg:w-[27rem] lg:rounded-2xl lg:border"
+        >
+          <header className="flex items-center justify-between gap-2 border-b border-[var(--color-border)] px-4 py-2.5">
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-[var(--color-ink)]">{view === 'history' && hasKey ? 'Conversations' : 'Ask AI'}</h2>
+              <p className="truncate font-mono text-[11px] text-[var(--color-ink-faint)]">{hasKey ? modelLabel : 'Not connected yet'}</p>
+            </div>
+            <div className="flex items-center gap-0.5">
+              {hasKey && (
+                <button type="button" onClick={() => guard(() => { newChat(); setView('chat') })} aria-label="Start a new chat" title="New chat" className={iconButton}>
+                  <Plus className="h-4 w-4" />
                 </button>
-              </div>
-            )}
-            <div className="flex items-end gap-2">
-              <textarea
-                ref={inputRef}
-                value={draft}
-                onChange={(e) => {
-                  setDraft(e.target.value)
-                  e.target.style.height = 'auto'
-                  e.target.style.height = `${Math.min(e.target.scrollHeight, 144)}px`
-                }}
-                onKeyDown={onInputKey}
-                rows={1}
-                placeholder={activeLesson ? 'Ask about this lesson' : 'Ask a question'}
-                aria-label="Your question"
-                className="max-h-36 min-h-9 flex-1 resize-none rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition-colors placeholder:text-[var(--color-ink-faint)] focus:border-[var(--color-accent)]"
-              />
-              {busy ? (
-                <button type="button" onClick={stop} aria-label="Stop" className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--color-border-strong)] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]">
-                  <Square className="h-3.5 w-3.5 fill-current" />
+              )}
+              {hasKey && chats.length > 0 && (
+                <button type="button" onClick={() => setView((v) => (v === 'history' ? 'chat' : 'history'))} aria-label="Past conversations" aria-pressed={view === 'history'} title="Past conversations" className={cn(iconButton, view === 'history' && 'bg-[var(--color-surface-hover)] text-[var(--color-ink)]')}>
+                  <History className="h-4 w-4" />
                 </button>
+              )}
+              {hasKey && (
+                <button type="button" onClick={() => setView((v) => (v === 'settings' ? 'chat' : 'settings'))} aria-label="Settings" aria-pressed={view === 'settings'} title="Model and key" className={cn(iconButton, view === 'settings' && 'bg-[var(--color-surface-hover)] text-[var(--color-ink)]')}>
+                  <Settings className="h-4 w-4" />
+                </button>
+              )}
+              <button type="button" onClick={closeAssistant} aria-label="Close" className={iconButton}>
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </header>
+
+          {showSetup ? (
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <KeyForm existing={hasKey} onDone={() => setView('chat')} />
+            </div>
+          ) : view === 'history' ? (
+            <div className="min-h-0 flex-1 overflow-y-auto p-4">
+              <button type="button" onClick={() => guard(() => { newChat(); setView('chat') })} className={cn(textButton, 'mb-3')}>
+                <Plus className="h-3.5 w-3.5" /> New chat
+              </button>
+              {sortedChats.length === 0 ? (
+                <p className="text-sm text-[var(--color-ink-faint)]">No saved conversations yet.</p>
               ) : (
+                <ul className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
+                  {sortedChats.map((chat) => (
+                    <li key={chat.id} className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => guard(() => { openChat(chat.id); setView('chat') })}
+                        aria-current={chat.id === active?.id}
+                        className="min-w-0 flex-1 cursor-pointer py-2.5 pr-2 text-left"
+                      >
+                        <span className={cn('block truncate text-sm', chat.id === active?.id ? 'font-medium text-[var(--color-ink)]' : 'text-[var(--color-ink-dim)]')}>{chat.title}</span>
+                        <span className="block text-xs text-[var(--color-ink-faint)]">
+                          {chat.messages.length} {chat.messages.length === 1 ? 'message' : 'messages'} · {timeAgo(chat.updatedAt)}
+                        </span>
+                      </button>
+                      <button type="button" onClick={() => guard(() => deleteChat(chat.id))} aria-label={`Delete the conversation "${chat.title}"`} title="Delete" className={iconButton}>
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-4 text-xs leading-relaxed text-[var(--color-ink-faint)]">
+                Saved in this browser only, so they survive a refresh but don't follow you to another device. The latest {15} are kept.
+              </p>
+              {sortedChats.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => void send(draft)}
-                  disabled={!draft.trim()}
-                  aria-label="Send"
-                  className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() => {
+                    if (window.confirm('Delete all saved conversations from this browser?')) guard(() => { clearAll(); setView('chat') })
+                  }}
+                  className="mt-2 cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
                 >
-                  <ArrowUp className="h-4 w-4" />
+                  Delete all conversations
                 </button>
               )}
             </div>
-            <p className="mt-1.5 text-[11px] text-[var(--color-ink-faint)]">
-              Enter to send, Shift+Enter for a new line.{' '}
-              <Link to="/me" onClick={closeAssistant} className="underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
-                Your data
-              </Link>
-            </p>
-          </footer>
-        </>
+          ) : (
+            <>
+              <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4" aria-live="polite">
+                {messages.length === 0 ? (
+                  <div className="animate-fade-up">
+                    <p className="text-sm leading-relaxed text-[var(--color-ink-dim)]">
+                      {activeLesson ? (
+                        <>
+                          Ask anything about <span className="font-medium text-[var(--color-ink)]">{activeLesson.title}</span>, or pick a starter.
+                        </>
+                      ) : (
+                        'Ask about any concept in the guide, paste code you are stuck on, or pick a starter.'
+                      )}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {actions.map((action) => (
+                        <button key={action.id} type="button" onClick={() => void send(action.prompt)} className={textButton}>
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-6 text-xs leading-relaxed text-[var(--color-ink-faint)]">
+                      Answers come from an AI model and can be wrong. Check anything important against the lesson's real output. Your questions go to Groq.
+                      The free plan has a daily limit{usingBuiltIn ? ' that everyone using the site shares' : ''}, so this is for light use. Conversations are saved in this browser.
+                    </p>
+                  </div>
+                ) : (
+                  <ol className="flex flex-col gap-5">
+                    {messages.map((message, index) => (
+                      <li key={message.id} className="animate-fade-up">
+                        {message.role === 'user' ? (
+                          <div className="ml-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm whitespace-pre-wrap text-[var(--color-ink)]">{message.content}</div>
+                        ) : (
+                          <div>
+                            {message.content ? (
+                              <RichText text={message.content} onNavigate={() => { if (window.matchMedia('(max-width: 1023px)').matches) closeAssistant() }} />
+                            ) : !message.error ? (
+                              <TypingDots />
+                            ) : null}
+                            {message.error && (
+                              <div className="mt-2 rounded-lg border border-[var(--color-ember)]/40 px-3 py-2 text-sm text-[var(--color-ember)]" role="alert">
+                                {message.error}
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {message.errorKind === 'auth' ? (
+                                    <button type="button" onClick={() => setView('settings')} className={textButton}>
+                                      Open settings
+                                    </button>
+                                  ) : (
+                                    <button type="button" onClick={() => retry(index)} disabled={busy} className={textButton}>
+                                      <RotateCcw className="h-3.5 w-3.5" /> Try again
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {message.note && <p className="mt-1.5 text-[11px] text-[var(--color-ink-faint)]">{message.note}</p>}
+                            {message.content && !(busy && index === lastIndex) && !message.error && (
+                              <div className="mt-1 flex items-center gap-3">
+                                <CopyReply text={message.content} />
+                                {index === lastIndex && (
+                                  <button type="button" onClick={() => retry(index)} disabled={busy} className="flex cursor-pointer items-center gap-1 text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-ink)] disabled:opacity-50">
+                                    <RotateCcw className="h-3 w-3" /> Regenerate
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                {showFollowUps && (
+                  <div className="mt-4 flex flex-wrap gap-2 animate-fade-up">
+                    {last.truncated && (
+                      <button type="button" onClick={() => void send('Continue', { asked: CONTINUE_PROMPT })} className={cn(textButton, 'border-[var(--color-accent)] text-[var(--color-ink)]')}>
+                        Continue the answer
+                      </button>
+                    )}
+                    {FOLLOW_UPS.map((action) => (
+                      <button key={action.id} type="button" onClick={() => void send(action.prompt)} className={textButton}>
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <footer className="border-t border-[var(--color-border)] p-3">
+                {lesson && (
+                  <div className="mb-2 flex items-center justify-between gap-2 text-xs text-[var(--color-ink-faint)]">
+                    <span className="min-w-0 truncate">
+                      {useLesson ? 'Using this lesson: ' : 'Not using the lesson. '}
+                      {useLesson && <span className="text-[var(--color-ink-dim)]">{lesson.title}</span>}
+                    </span>
+                    <button type="button" onClick={() => setUseLesson((v) => !v)} className="shrink-0 cursor-pointer underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+                      {useLesson ? 'Leave out' : 'Use it'}
+                    </button>
+                  </div>
+                )}
+                <div className="flex items-end gap-2">
+                  <textarea
+                    ref={inputRef}
+                    value={draft}
+                    onChange={(e) => {
+                      setDraft(e.target.value)
+                      e.target.style.height = 'auto'
+                      e.target.style.height = `${Math.min(e.target.scrollHeight, 144)}px`
+                    }}
+                    onKeyDown={onInputKey}
+                    rows={1}
+                    placeholder={activeLesson ? 'Ask about this lesson' : 'Ask a question'}
+                    aria-label="Your question"
+                    className="max-h-36 min-h-9 flex-1 resize-none rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none transition-colors placeholder:text-[var(--color-ink-faint)] focus:border-[var(--color-accent)]"
+                  />
+                  {busy ? (
+                    <button type="button" onClick={stop} aria-label="Stop" className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--color-border-strong)] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]">
+                      <Square className="h-3.5 w-3.5 fill-current" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void send(draft)}
+                      disabled={!draft.trim()}
+                      aria-label="Send"
+                      className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <p className="mt-1.5 text-[11px] text-[var(--color-ink-faint)]">
+                  Enter to send, Shift+Enter for a new line.{' '}
+                  <Link to="/me" onClick={closeAssistant} className="underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+                    Your data
+                  </Link>
+                </p>
+              </footer>
+            </>
+          )}
+        </motion.div>
       )}
-    </div>
+    </AnimatePresence>
   )
 }
 
@@ -432,7 +604,7 @@ function CopyReply({ text }: { text: string }) {
           window.setTimeout(() => setCopied(false), 1400)
         })
       }}
-      className="mt-1 flex cursor-pointer items-center gap-1 text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-ink)]"
+      className="flex cursor-pointer items-center gap-1 text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-ink)]"
     >
       {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />} {copied ? 'Copied' : 'Copy answer'}
     </button>

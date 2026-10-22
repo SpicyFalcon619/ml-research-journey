@@ -1,7 +1,7 @@
 import type { Snippet } from '@/types'
 import { getOutput } from '@/lib/outputs'
 import { siteMap } from '@/lib/siteIndex'
-import { nextUpLesson, overallProgress } from '@/lib/progress'
+import { nextUpLesson, overallProgress, trackProgress } from '@/lib/progress'
 import type { ChatMessage } from '@/lib/groq'
 
 // The free plan allows roughly 8K tokens a minute, so what is sent is capped: about 1.5K
@@ -29,26 +29,43 @@ function clip(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max)}\n... (cut off to keep this short)` : text
 }
 
+function numbered(code: string): string {
+  return code
+    .split('\n')
+    .map((line, index) => `${index + 1} ${line}`)
+    .join('\n')
+}
+
 function lessonContext(snippet: Snippet): string {
   const output = getOutput(snippet.path)
   const printed = output && output.status !== 'empty' ? output.stdout || output.stderr : ''
   return [
     `The learner is looking at this lesson: "${snippet.title}" (${snippet.filename}) in the track "${snippet.categoryLabel}".`,
-    `Code:\n\`\`\`\n${clip(snippet.code, MAX_CODE_CHARS)}\n\`\`\``,
+    // Numbered, so the model can say "line 12" and the learner can find it in the lesson.
+    `Code (each line starts with its line number; refer to lines as "line N"):\n\`\`\`\n${clip(numbered(snippet.code), MAX_CODE_CHARS)}\n\`\`\``,
     printed ? `Output it produced:\n\`\`\`\n${clip(printed, MAX_OUTPUT_CHARS)}\n\`\`\`` : '',
   ]
     .filter(Boolean)
     .join('\n')
 }
 
-function progressContext(done: string[]): string {
+function progressContext(done: string[], recentTitles: string[]): string {
   const overall = overallProgress(done)
   const next = nextUpLesson(done)
-  return `The learner has finished ${overall.done} of ${overall.total} lessons.${next ? ` The next lesson on the trail is "${next.title}" (${next.categoryLabel}).` : ''}`
+  const tracks = trackProgress(done)
+    .map((t) => `${t.label} ${t.done}/${t.total}`)
+    .join(', ')
+  return [
+    `The learner has finished ${overall.done} of ${overall.total} lessons (${tracks}).`,
+    next ? `The next lesson on the trail is "${next.title}" (${next.categoryLabel}).` : 'They have finished every lesson.',
+    recentTitles.length ? `Lessons they opened most recently: ${recentTitles.map((t) => `"${t}"`).join(', ')}.` : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
 }
 
-export function buildMessages(history: ChatMessage[], lesson: Snippet | undefined, done: string[]): ChatMessage[] {
-  const system = [SYSTEM, siteMap(), progressContext(done), lesson ? lessonContext(lesson) : ''].filter(Boolean).join('\n\n')
+export function buildMessages(history: ChatMessage[], lesson: Snippet | undefined, done: string[], recentTitles: string[] = []): ChatMessage[] {
+  const system = [SYSTEM, siteMap(), progressContext(done, recentTitles), lesson ? lessonContext(lesson) : ''].filter(Boolean).join('\n\n')
   // Newest messages first until the budget is used, then restore the order.
   const kept: ChatMessage[] = []
   let used = 0
@@ -83,3 +100,20 @@ export const GENERAL_ACTIONS: QuickAction[] = [
   { id: 'concept', label: 'Explain a concept', prompt: 'I want to understand a concept. Ask me which one, and then explain it simply with a small example.' },
   { id: 'debug', label: 'Help with my code', prompt: 'I will paste some code and an error. Ask me for them, then help me find the problem.' },
 ]
+
+/** Short buttons shown under the latest answer. */
+export const FOLLOW_UPS: QuickAction[] = [
+  { id: 'example', label: 'Give an example', prompt: 'Give a short, concrete example of that I can run.' },
+  { id: 'simpler', label: 'Explain more simply', prompt: 'Explain that again more simply, as if I am new to it.' },
+  { id: 'deeper', label: 'Go deeper', prompt: 'Go deeper: explain the details and the edge cases.' },
+  { id: 'quiz', label: 'Quiz me on this', prompt: 'Quiz me on that with 2 short questions, without the answers.' },
+]
+
+export const CONTINUE_PROMPT = 'Your last answer was cut off. Continue from exactly where it stopped, without repeating what you already wrote.'
+
+/** A question about a piece of code the visitor highlighted on the page. */
+export const askAboutSelection = (text: string): string =>
+  `Explain this part of the code, and why it is written this way:\n\`\`\`\n${text.slice(0, 2500)}\n\`\`\``
+
+// Longest question accepted, so one huge paste can't use up the free plan's token allowance.
+export const MAX_QUESTION_CHARS = 6000

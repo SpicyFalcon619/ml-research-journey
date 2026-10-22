@@ -9,6 +9,7 @@ import { ROADMAP_PREFIX, KEYS, computeStreak, eraseAll, exportData, localDay, pa
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useLibrary } from '@/hooks/useLibrary'
 import { useAssistant } from '@/hooks/useAssistant'
+import { loadChats } from '@/lib/chats'
 import { useTheme } from '@/hooks/useTheme'
 import { useCodeFontSize } from '@/hooks/useCodeFontSize'
 import { GlassPanel } from '@/components/ui/GlassPanel'
@@ -42,6 +43,7 @@ export function ProgressPage() {
   useDocumentTitle('Your progress')
   const lib = useLibrary()
   const assistant = useAssistant()
+  const chatCount = loadChats().chats.length
   const [theme, setTheme, themePreference] = useTheme()
   const [codeSize, setCodeSize] = useCodeFontSize()
   const importRef = useRef<HTMLInputElement>(null)
@@ -111,6 +113,7 @@ export function ProgressPage() {
       clearLabel: 'Reset',
       onClear: captureSaved ? () => { window.localStorage.removeItem(KEYS.capture); window.location.reload() } : undefined,
     },
+    { label: 'AI conversations', detail: `${chatCount}`, onClear: () => { window.localStorage.removeItem(KEYS.aiChats); window.location.reload() } },
     { label: 'Your own AI key (never exported)', detail: assistant.personalKey ? 'saved' : 'none', clearLabel: 'Remove', onClear: assistant.personalKey ? assistant.clearApiKey : undefined },
     { label: 'Roadmap steps ticked', detail: `${roadmapTicks}` },
   ]

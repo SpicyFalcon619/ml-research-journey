@@ -1,4 +1,5 @@
 import { GROQ_KEY_STORAGE, MODEL_STORAGE } from '@/lib/groq'
+import { CHATS_KEY } from '@/lib/chats'
 
 // Everything a visitor can personalize lives in their own browser (localStorage). This
 // module is the single list of those keys, plus the helpers that show, export, import
@@ -15,6 +16,7 @@ export const KEYS = {
   theme: 'mlfg-theme',
   codeSize: 'mlfg-code-font-size',
   capture: 'mlfg-capture-style-v1',
+  aiChats: CHATS_KEY,
 } as const
 
 /** The roadmap page (same site, so same storage) saves one `roadmap-<id>` key per ticked step. */
