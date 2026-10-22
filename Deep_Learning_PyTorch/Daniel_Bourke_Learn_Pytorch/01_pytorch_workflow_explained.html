@@ -1,0 +1,1448 @@
+<title>Gradient Descent, Backprop &amp; Your PyTorch Workflow</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --surface-raised: #ffffff;
+    --ink: #0b0b0b;
+    --ink-dim: #52514e;
+    --ink-faint: #898781;
+    --border: rgba(11,11,11,0.10);
+    --border-strong: rgba(11,11,11,0.18);
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --forward: #2a78d6;
+    --forward-soft: rgba(42,120,214,0.12);
+    --backward: #c85a1f;
+    --backward-soft: rgba(200,90,31,0.12);
+    --train: #2a78d6;
+    --test: #008300;
+    --pred: #e34948;
+    --code-bg: #f1f0ea;
+    --code-ink: #2b2a27;
+    --shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 24px -14px rgba(11,11,11,0.25);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface: #1a1a19;
+      --surface-raised: #202020;
+      --ink: #ffffff;
+      --ink-dim: #c3c2b7;
+      --ink-faint: #898781;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.18);
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --forward: #3987e5;
+      --forward-soft: rgba(57,135,229,0.16);
+      --backward: #e07a3f;
+      --backward-soft: rgba(224,122,63,0.16);
+      --train: #3987e5;
+      --test: #00b300;
+      --pred: #e66767;
+      --code-bg: #14140f22;
+      --code-bg: #232320;
+      --code-ink: #e7e6df;
+      --shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 24px -14px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --surface-raised: #202020;
+    --ink: #ffffff;
+    --ink-dim: #c3c2b7;
+    --ink-faint: #898781;
+    --border: rgba(255,255,255,0.10);
+    --border-strong: rgba(255,255,255,0.18);
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --forward: #3987e5;
+    --forward-soft: rgba(57,135,229,0.16);
+    --backward: #e07a3f;
+    --backward-soft: rgba(224,122,63,0.16);
+    --train: #3987e5;
+    --test: #00b300;
+    --pred: #e66767;
+    --code-bg: #232320;
+    --code-ink: #e7e6df;
+    --shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 24px -14px rgba(0,0,0,0.6);
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --page: #f9f9f7; --surface: #fcfcfb; --surface-raised: #ffffff;
+    --ink: #0b0b0b; --ink-dim: #52514e; --ink-faint: #898781;
+    --border: rgba(11,11,11,0.10); --border-strong: rgba(11,11,11,0.18);
+    --grid: #e1e0d9; --baseline: #c3c2b7;
+    --forward: #2a78d6; --forward-soft: rgba(42,120,214,0.12);
+    --backward: #c85a1f; --backward-soft: rgba(200,90,31,0.12);
+    --train: #2a78d6; --test: #008300; --pred: #e34948;
+    --code-bg: #f1f0ea; --code-ink: #2b2a27;
+    --shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 24px -14px rgba(11,11,11,0.25);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  ::selection { background: var(--forward-soft); }
+  code, pre, .mono, .tabular { font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace; }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  a { color: var(--forward); }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 780px);
+    justify-content: center;
+    gap: 56px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 24px 120px;
+  }
+  @media (max-width: 980px) {
+    .shell { grid-template-columns: minmax(0,1fr); padding: 28px 18px 90px; }
+    .toc { display: none; }
+  }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+    background: var(--forward); z-index: 200; transition: width .08s linear;
+  }
+
+  .float-controls {
+    position: fixed; right: 20px; bottom: 20px; z-index: 150;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .float-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--surface-raised); border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow); color: var(--ink-dim);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 16px; transition: transform .12s, color .12s;
+  }
+  .float-btn:hover { color: var(--forward); transform: translateY(-1px); }
+  .float-btn.totop { opacity: 0; pointer-events: none; transition: opacity .2s, transform .12s; }
+  .float-btn.totop.visible { opacity: 1; pointer-events: auto; }
+
+  .toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    font-size: 13px;
+  }
+  .toc-title {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .toc-search {
+    width: 100%; box-sizing: border-box; margin-bottom: 12px;
+    padding: 6px 10px; font-size: 12.5px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); color: var(--ink);
+    outline: none;
+  }
+  .toc-search:focus { border-color: var(--forward); }
+  .toc a {
+    display: block;
+    color: var(--ink-dim);
+    text-decoration: none;
+    padding: 5px 0 5px 12px;
+    border-left: 2px solid var(--border);
+    transition: color .15s, border-color .15s;
+  }
+  .toc a:hover { color: var(--ink); border-color: var(--border-strong); }
+  .toc a.active { color: var(--forward); border-color: var(--forward); font-weight: 600; }
+  .toc a.hidden { display: none; }
+
+  main { min-width: 0; }
+
+  header.hero { margin-bottom: 44px; }
+  .eyebrow {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--forward); margin-bottom: 10px;
+  }
+  h1 { font-size: 34px; line-height: 1.15; letter-spacing: -0.01em; margin: 0 0 14px; text-wrap: balance; }
+  .lede { font-size: 17px; color: var(--ink-dim); max-width: 62ch; margin: 0; }
+
+  section { margin: 64px 0; scroll-margin-top: 24px; }
+  section:first-of-type { margin-top: 0; }
+  h2 {
+    font-size: 24px; letter-spacing: -0.005em; margin: 0 0 6px;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  h2 .num { color: var(--ink-faint); font-weight: 500; font-size: 17px; }
+  .section-dek { color: var(--ink-dim); margin: 0 0 28px; max-width: 62ch; }
+  h3 { font-size: 17px; margin: 32px 0 10px; }
+  h4 { font-size: 14.5px; margin: 26px 0 8px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .03em; }
+  p { max-width: 68ch; }
+  p.wide { max-width: none; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+    margin: 20px 0;
+  }
+  .figure { margin: 26px 0; }
+  .figure-cap {
+    font-size: 13px; color: var(--ink-faint); margin-top: 10px; max-width: 68ch;
+  }
+  .figure-cap b { color: var(--ink-dim); font-weight: 600; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 3px 10px 3px 8px; border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .pill.forward { color: var(--forward); background: var(--forward-soft); border-color: transparent; }
+  .pill.backward { color: var(--backward); background: var(--backward-soft); border-color: transparent; }
+  .pill .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .legend-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 4px; }
+
+  .callout {
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 22px 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; gap: 14px;
+  }
+  .callout.insight { border-color: color-mix(in oklab, var(--forward) 35%, var(--border)); }
+  .callout.mystery { border-color: color-mix(in oklab, var(--backward) 45%, var(--border)); background: color-mix(in oklab, var(--backward-soft) 45%, var(--surface)); }
+  .callout-icon {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700;
+  }
+  .callout.insight .callout-icon { background: var(--forward-soft); color: var(--forward); }
+  .callout.mystery .callout-icon { background: var(--backward-soft); color: var(--backward); }
+  .callout-body p { margin: 0 0 8px; max-width: none; }
+  .callout-body p:last-child { margin-bottom: 0; }
+  .callout-title { font-weight: 700; margin-bottom: 4px; display:block; }
+
+  pre.code {
+    background: var(--code-bg); color: var(--code-ink);
+    border-radius: 10px; padding: 14px 16px; overflow-x: auto;
+    font-size: 13px; line-height: 1.55; margin: 14px 0;
+    border: 1px solid var(--border);
+  }
+  pre.code .c { color: var(--ink-faint); font-style: italic; }
+  pre.code .fwd { background: var(--forward-soft); border-radius: 3px; }
+  pre.code .bwd { background: var(--backward-soft); border-radius: 3px; }
+  code.kw { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 0.92em; }
+
+  .steps5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 22px 0; }
+  @media (max-width: 700px) { .steps5 { grid-template-columns: repeat(2, 1fr); } }
+  .step-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 12px; font-size: 13px; position: relative;
+  }
+  .step-card .n {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--forward); color: white;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; margin-bottom: 8px;
+  }
+  .step-card.bwd .n { background: var(--backward); }
+  .step-card code { display:block; font-size: 11.5px; color: var(--ink-dim); margin-top: 6px; word-break: break-word; }
+
+  table.ref { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 18px 0; }
+  table.ref th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border-strong); }
+  table.ref td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.ref tr:last-child td { border-bottom: none; }
+  table.ref code { color: var(--forward); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .lr-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin: 18px 0; }
+  @media (max-width: 700px) { .lr-grid { grid-template-columns: 1fr; } }
+  .lr-card h4 { margin: 0 0 2px; font-size: 13.5px; }
+  .lr-card .sub { font-size: 12px; color: var(--ink-faint); margin-bottom: 8px; }
+
+  svg text { font-family: system-ui, sans-serif; fill: var(--ink-faint); }
+  svg .axis-line { stroke: var(--baseline); stroke-width: 1; }
+  svg .grid-line { stroke: var(--grid); stroke-width: 1; }
+  svg .val-label { fill: var(--ink-dim); font-size: 11px; }
+
+  footer.tail { margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--ink-faint); font-size: 13px; }
+
+  ::-webkit-scrollbar { height: 8px; width: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
+</style>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="float-controls">
+  <button class="float-btn" id="themeToggleBtn" title="Toggle light/dark" aria-label="Toggle light/dark theme">◐</button>
+  <button class="float-btn totop" id="toTopBtn" title="Back to top" aria-label="Back to top">↑</button>
+</div>
+
+<div class="shell">
+  <nav class="toc" id="toc">
+    <div class="toc-title">Contents</div>
+    <input class="toc-search" id="tocSearch" type="text" placeholder="Filter topics…" autocomplete="off" />
+    <a href="#start-here">0. Start here: what's a model?</a>
+    <a href="#big-picture">1. The big picture</a>
+    <a href="#gradient-descent">2. Gradient descent</a>
+    <a href="#backprop">3. Backpropagation</a>
+    <a href="#loop">4. The 5-step loop</a>
+    <a href="#classes-primer">4.5 Python classes, from zero</a>
+    <a href="#notebook">5. Your notebook, line by line</a>
+    <a href="#mystery">5.5 Why "Epoch 0" isn't really 0</a>
+    <a href="#cheatsheet">6. Cheat sheet</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">01_pytorch_workflow.ipynb — annotated</div>
+      <h1>Gradient descent, backpropagation, and your PyTorch workflow — from the ground up</h1>
+      <p class="lede">
+        Every chart on this page is computed from <b>your actual data and your actual model</b> —
+        <code class="mono">weight = 0.7</code>, <code class="mono">bias = 0.3</code>, the same 50 points,
+        the same 40/10 train/test split. Nothing here is a generic textbook example; it's your notebook,
+        made visible.
+      </p>
+      <p class="lede" style="margin-top:12px;">
+        <b>If you've never built a model before, this is genuinely a big jump from just knowing tensors</b> —
+        that's completely normal, not a sign you missed something. This page starts from zero: no assumed
+        knowledge of what a "model" is, and (since it comes up almost immediately in the code) a plain-English
+        detour on Python classes too. Take it in order, slowly — everything later reuses everything earlier.
+      </p>
+    </header>
+
+    <section id="start-here">
+      <h2><span class="num">0</span> Start here — what is a "model," actually?</h2>
+      <p class="section-dek">Before touching PyTorch at all: forget the word "model" for a second. You
+      already know exactly what one is.</p>
+
+      <p>Remember the equation of a line from school?</p>
+      <div class="card" style="text-align:center; font-size: 17px;">
+        <code class="mono">y &nbsp;=&nbsp; m&times;x &nbsp;+&nbsp; b</code>
+      </div>
+      <p><code class="mono">m</code> is the slope, <code class="mono">b</code> is where the line crosses the
+      y-axis. Pick any <code class="mono">m</code> and <code class="mono">b</code>, and you get a specific
+      line. <b>That's it — that's what "a model" means in this notebook.</b> Your model is just this exact
+      same formula, with different letters:</p>
+      <div class="card" style="text-align:center; font-size: 17px;">
+        <code class="mono">y_pred &nbsp;=&nbsp; weights&times;x &nbsp;+&nbsp; bias</code>
+      </div>
+      <p>Two numbers you're allowed to adjust: <code class="mono">weights</code> (the slope) and
+      <code class="mono">bias</code> (the y-intercept). That's the entire "model" — not some mysterious AI
+      black box, just a line with two knobs on it.</p>
+
+      <p><b>So what does "training" mean?</b> You start with the two knobs set to random, wrong values. Then
+      you look at real data (points that <i>do</i> sit on the "correct" line) and nudge the knobs, over and
+      over, until your line's predictions land as close as possible to those real points. That's the whole
+      idea. Every term you're about to meet — loss, gradient, backpropagation, optimizer — is just a piece of
+      machinery for doing that nudging automatically, in code, instead of you eyeballing a graph and adjusting
+      sliders by hand.</p>
+
+      <div class="callout insight">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          <span class="callout-title">Where tensors fit into this</span>
+          <p>A tensor is just PyTorch's word for "a grid of numbers" (you already know this part). A model is
+          the <i>first time</i> you use tensors for something more than storing data — here, two very small
+          tensors (<code class="mono">weights</code> and <code class="mono">bias</code>, each holding a single
+          number) are being treated as <b>knobs that PyTorch is allowed to adjust by itself</b>. Everything
+          below is about how PyTorch decides <i>which direction</i> to turn each knob, and by how much.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="big-picture">
+      <h2><span class="num">1</span> The big picture, before any code</h2>
+      <p class="section-dek">One mental model to hold onto for everything below: a model is just a guessing
+      machine with dials on it. Training is the process of turning those dials so the guesses get less wrong.</p>
+
+      <div class="card figure" id="bigpic-wrap"></div>
+      <p class="figure-cap">
+        <b>Forward pass</b> (blue) — data flows through the model to produce a guess, then the guess is
+        compared to reality to get a <b>loss</b> number. <b>Backward pass</b> (amber) — that loss number
+        flows back through the same path to figure out which dial (weight? bias?) is most to blame, and by
+        how much. The optimizer then nudges each dial a little in the direction that reduces the loss. Repeat
+        hundreds of times.
+      </p>
+
+      <div class="callout insight">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          <span class="callout-title">Why two passes?</span>
+          <p>The forward pass answers "what does the model currently think?" The backward pass answers
+          "if I nudge weight up a hair, does the loss get better or worse — and by how much? Same question
+          for bias." Gradient descent is just: nudge each dial in whichever direction the backward pass says
+          helps, by an amount scaled by the <b>learning rate</b>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="gradient-descent">
+      <h2><span class="num">2</span> Gradient descent, from scratch</h2>
+      <p class="section-dek">Forget PyTorch for a minute. This is a general idea that shows up everywhere in
+      machine learning, not just here.</p>
+
+      <p><b>The analogy:</b> you're standing on a hillside in thick fog. You can't see the bottom of the
+      valley, but you can feel which way the ground slopes under your feet. So you take a small step
+      downhill. Then you feel the slope again, and take another small step. Repeat enough times and you end
+      up at the bottom — without ever having seen the whole hill.</p>
+
+      <p>The "hill" here is the <b>loss</b> — a single number that says how wrong your model currently is.
+      The "slope you feel" is the <b>gradient</b> — the direction and steepness of the loss with respect to
+      one of the model's numbers (weight, or bias). The "step" is:</p>
+
+      <div class="card" style="text-align:center; font-size: 17px;">
+        <code class="mono">new_value&nbsp; =&nbsp; old_value&nbsp; &minus;&nbsp; learning_rate&nbsp; &times;&nbsp; gradient</code>
+      </div>
+
+      <p>That's the entire algorithm. Everything else — PyTorch, neural networks, GPT — is this one line,
+      applied millions of times to millions of numbers.</p>
+
+      <h3>What the "hill" actually looks like for your model</h3>
+      <p>Your model only has two dials: <code class="mono">weights</code> and <code class="mono">bias</code>.
+      To make this drawable, freeze <code class="mono">bias</code> at its true value (0.3) and only look at
+      what happens to the loss as <code class="mono">weights</code> changes. That gives you an actual,
+      real curve — computed from your 40 training points:</p>
+
+      <div class="figure" id="loss1d-wrap"></div>
+      <p class="figure-cap">
+        The loss for your model as <b>weights</b> varies, with <b>bias</b> pinned at the true 0.3.
+        The bottom of the V sits exactly at <code class="mono">weights = 0.7</code> — the true value used to
+        generate your data. Notice it's a sharp <b>V</b>, not a smooth curve — that's a direct consequence of
+        the loss function your notebook uses (<code class="mono">nn.L1Loss</code>), which we'll come back to.
+      </p>
+
+      <h3>The learning rate is the size of your step</h3>
+      <p>Take that same V-shaped hill and roll a ball down it three times, changing only the learning rate.
+      Same starting point each time — your model's actual random initial weight, 0.3367:</p>
+
+      <div class="lr-grid" id="lr-grid"></div>
+      <p class="figure-cap">
+        <b>Left (lr = 0.002):</b> tiny, cautious steps — safe, but would take hundreds of epochs to arrive.
+        <b>Middle (lr = 0.01 — your notebook's actual value):</b> steady progress, still climbing after 30
+        steps. <b>Right (lr = 0.08):</b> steps so big it jumps clean over the target and lands on the other
+        side, then jumps back over again next step, forever. It never crashes or diverges to infinity — it
+        just orbits the target, overshooting every single time.
+      </p>
+
+      <div class="callout insight">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          <span class="callout-title">The learning rate is a trade-off, not a "bigger is worse" dial</span>
+          <p>Too small and training is needlessly slow. Too big and you overshoot the minimum every step —
+          which, depending on the shape of the hill, can mean gentle oscillation (harmless) or wild
+          divergence (fatal). <code class="mono">lr = 0.01</code> in your notebook is a completely reasonable,
+          conservative default — this is exactly why courses tell you to start around there for a simple
+          problem like this one.</p>
+        </div>
+      </div>
+
+      <h3>Both dials at once: the real picture</h3>
+      <p>Your model actually tunes <b>two</b> numbers together, so the real "hill" is a 3D surface over
+      <code class="mono">(weights, bias)</code> — here shown from above as a contour map, darker = lower loss.
+      The path is the <b>exact sequence of steps your optimizer actually takes</b>, computed with your real
+      learning rate (0.01), starting from your model's real random initial values.</p>
+
+      <div class="figure" id="contour-wrap"></div>
+      <p class="figure-cap">
+        <span class="pill forward"><span class="dot"></span>start</span> is the random initial guess
+        PyTorch drew for you (<code class="mono">weights=0.3367, bias=0.3904</code>).
+        The path spirals down the valley toward <code class="mono">weights=0.7, bias=0.3</code> — the exact
+        values used to generate your data — then, once it gets close, starts circling tightly around the
+        target instead of settling exactly on it. That's the same overshooting behavior from the panel
+        above, just in two dimensions at once.
+      </p>
+    </section>
+
+    <section id="backprop">
+      <h2><span class="num">3</span> Backpropagation: how the gradient actually gets computed</h2>
+      <p class="section-dek">Gradient descent tells you what to do once you have a gradient. Backpropagation
+      is the algorithm that computes that gradient in the first place — and it's just the chain rule from
+      calculus, applied mechanically.</p>
+
+      <p>Your model's forward pass is a short chain of simple operations:</p>
+      <div class="figure" id="compgraph-wrap"></div>
+      <p class="figure-cap">
+        <b>Top row, blue — the forward pass:</b> data flows left to right through each operation, ending in a
+        single loss number. <b>Bottom row, amber — the backward pass:</b> starting from the loss, each
+        operation is asked "given how much you contributed to the error, how much of that blame belongs to
+        your inputs?" — and that question gets passed backward, operation by operation, all the way to
+        <code class="mono">weights</code> and <code class="mono">bias</code>.
+      </p>
+
+      <h3>A single data point, by hand</h3>
+      <p>Full batches are tedious to trace by hand, so let's do exactly one training point and watch every
+      number. Take the point where <code class="mono">x = 0.1</code> (so the true answer is
+      <code class="mono">y = 0.7&times;0.1 + 0.3 = 0.37</code>), using your model's real starting dials
+      <code class="mono">weights = 0.3367, bias = 0.3904</code>.</p>
+
+      <div class="card">
+        <b>Forward pass</b>
+        <table class="ref">
+          <tr><th>Step</th><th>Computation</th><th>Result</th></tr>
+          <tr><td>Prediction</td><td class="mono">y_pred = weights&times;x + bias = 0.3367&times;0.1 + 0.3904</td><td class="mono tabular">0.4241</td></tr>
+          <tr><td>Error</td><td class="mono">y_pred &minus; y_true = 0.4241 &minus; 0.37</td><td class="mono tabular">+0.0541</td></tr>
+          <tr><td>Loss (L1)</td><td class="mono">|error|</td><td class="mono tabular">0.0541</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <b>Backward pass — the chain rule, one link at a time</b>
+        <table class="ref">
+          <tr><th>Question</th><th>Answer</th><th>Value</th></tr>
+          <tr><td>If <code class="mono">y_pred</code> goes up a hair, does loss go up or down?</td>
+              <td class="mono">d(loss)/d(y_pred) = sign(error)</td><td class="mono tabular">+1</td></tr>
+          <tr><td>If <code class="mono">weights</code> goes up a hair, how much does <code class="mono">y_pred</code> move?</td>
+              <td class="mono">d(y_pred)/d(weights) = x</td><td class="mono tabular">0.1</td></tr>
+          <tr><td>If <code class="mono">bias</code> goes up a hair, how much does <code class="mono">y_pred</code> move?</td>
+              <td class="mono">d(y_pred)/d(bias) = 1</td><td class="mono tabular">1</td></tr>
+          <tr><td><b>Chained: d(loss)/d(weights)</b></td>
+              <td class="mono">d(loss)/d(y_pred) &times; d(y_pred)/d(weights)</td><td class="mono tabular"><b>+0.1</b></td></tr>
+          <tr><td><b>Chained: d(loss)/d(bias)</b></td>
+              <td class="mono">d(loss)/d(y_pred) &times; d(y_pred)/d(bias)</td><td class="mono tabular"><b>+1.0</b></td></tr>
+        </table>
+      </div>
+
+      <p>That's it — that's backpropagation for this point. Multiplying local derivatives together along the
+      path from loss back to a parameter <i>is</i> the chain rule, and doing it mechanically, operation by
+      operation, is all <code class="mono">loss.backward()</code> does.</p>
+
+      <div class="callout insight">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          <span class="callout-title">One point can't tell the whole story</span>
+          <p>Notice the gradient above says "increase weights, increase bias" — pushing bias up even though
+          it's already slightly too high (0.3904 vs the true 0.3). That's not a mistake: with only one data
+          point, gradient descent can't distinguish "weights is too low" from "bias is too low" — it just
+          finds <i>some</i> direction that reduces error on <i>this</i> point. This is exactly why real
+          training uses the <b>average</b> gradient over the whole batch (all 40 training points, each with a
+          different <code class="mono">x</code>) — averaging over many points with different <code class="mono">x</code>
+          values is what lets the optimizer tell the two dials apart and converge on the right combination of both.</p>
+        </div>
+      </div>
+
+      <h3>Where PyTorch actually stores this</h3>
+      <pre class="code"><span class="c"># 3. zero the gradients from the LAST iteration</span>
+optimizer.zero_grad()
+
+<span class="c"># 4. backprop: walks the graph backward, computes d(loss)/d(param)</span>
+<span class="c">#    for every param with requires_grad=True, and STORES it in param.grad</span>
+loss.backward()  <span class="c">&larr; this is everything in the table above, done automatically</span>
+
+<span class="c"># at this point: model.weights.grad and model.bias.grad now hold real numbers</span></pre>
+
+      <p>Every <code class="mono">nn.Parameter</code> (your <code class="mono">weights</code> and
+      <code class="mono">bias</code>) has a hidden <code class="mono">.grad</code> attribute. Before
+      <code class="mono">backward()</code>, it's empty. After, it holds exactly the numbers from the
+      "chained" row of the table above — averaged across however many data points you passed through the
+      model. <code class="mono">requires_grad=True</code> is the flag that tells PyTorch "track every
+      operation this number goes through, so I can differentiate through it later."</p>
+
+      <h3>Why <code class="mono">zero_grad()</code> has to come first</h3>
+      <p>PyTorch <b>accumulates</b> (adds) new gradients onto whatever is already sitting in
+      <code class="mono">.grad</code>, rather than replacing it. This is useful in advanced setups (splitting
+      a huge batch into pieces), but for a normal loop it means: if you forget
+      <code class="mono">zero_grad()</code>, epoch 2's gradient gets added on top of epoch 1's leftover
+      gradient, epoch 3 adds a third copy on top of that, and your updates silently blow up. That's why it's
+      step 3, before step 4 (backward) every single time through the loop.</p>
+    </section>
+
+    <section id="loop">
+      <h2><span class="num">4</span> The 5-step loop, tied to your exact code</h2>
+      <p class="section-dek">This is the block your notebook repeats <code class="mono">epochs</code> times.
+      Every training loop you will ever write in PyTorch — for a two-parameter toy model or a
+      billion-parameter transformer — is a variation on these same five lines.</p>
+
+      <div class="steps5">
+        <div class="step-card">
+          <div class="n">1</div><b>Forward pass</b>
+          <div>Run the data through the model to get a prediction.</div>
+          <code>y_pred = model(X_train)</code>
+        </div>
+        <div class="step-card">
+          <div class="n">2</div><b>Calculate loss</b>
+          <div>Compare the prediction to the real answer — one number, "how wrong."</div>
+          <code>loss = loss_fn(y_pred, y_train)</code>
+        </div>
+        <div class="step-card bwd">
+          <div class="n">3</div><b>Zero the gradients</b>
+          <div>Clear out last iteration's leftover <code class="mono">.grad</code> values.</div>
+          <code>zero_grad()</code>
+        </div>
+        <div class="step-card bwd">
+          <div class="n">4</div><b>Backward pass</b>
+          <div>Chain rule, walked backward — fills in fresh <code class="mono">.grad</code> values.</div>
+          <code>backward()</code>
+        </div>
+        <div class="step-card bwd">
+          <div class="n">5</div><b>Optimizer step</b>
+          <div>Gradient descent update, applied to every parameter at once.</div>
+          <code>step()</code>
+        </div>
+      </div>
+      <p class="figure-cap">Steps 1&ndash;2 are the <span class="pill forward"><span class="dot"></span>forward pass</span> from Part 1.
+      Steps 3&ndash;5 are the <span class="pill backward"><span class="dot"></span>backward pass + descent</span> from Parts 2&ndash;3.
+      Then the loop repeats from step 1 with the newly-updated weights and bias.</p>
+
+      <div class="callout insight">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          <span class="callout-title">What <code class="mono">optimizer.step()</code> is actually doing</span>
+          <p>Your notebook sets up <code class="mono">optimizer = torch.optim.SGD(params=model.parameters(), lr=0.01)</code>.
+          When you call <code class="mono">optimizer.step()</code>, for every parameter it was given, it runs
+          exactly the update rule from Part 2:</p>
+          <pre class="code" style="margin-bottom:0">param.data &minus;= lr &times; param.grad</pre>
+        </div>
+      </div>
+
+      <h3>The other two switches: <code class="mono">.train()</code>, <code class="mono">.eval()</code>, <code class="mono">inference_mode()</code></h3>
+      <table class="ref">
+        <tr><th>Call</th><th>What it's for</th></tr>
+        <tr><td><code>model.train()</code></td><td>Puts layers that behave differently during training (dropout, batch norm — not used in this simple model, but you'll meet them soon) into "training" mode. Doesn't touch gradients by itself.</td></tr>
+        <tr><td><code>model.eval()</code></td><td>The opposite switch, for those same layers, used whenever you're checking performance instead of training.</td></tr>
+        <tr><td><code>with torch.inference_mode():</code></td><td>Tells PyTorch "don't bother tracking operations for backprop in this block" — since you're only predicting, not training, this saves memory and time. Always wrap test-time predictions in this.</td></tr>
+      </table>
+    </section>
+
+    <section id="classes-primer">
+      <h2><span class="num">4.5</span> Wait — what's a class? A 5-minute Python refresher</h2>
+      <p class="section-dek">You're about to see <code class="mono">class LinearRegressionModel(nn.Module):</code>
+      in real code. If you've never written a Python class before, that line is genuinely unfamiliar syntax —
+      not something you forgot, something new. Here's the whole idea, with no PyTorch in it yet.</p>
+
+      <p>Everything you've written in Python so far has probably been: variables holding data, and functions
+      that take some input and return some output. A <b>class</b> is a third thing: a blueprint for creating
+      "objects" that bundle <i>data</i> and <i>the functions that act on that data</i> together, into one
+      package.</p>
+
+      <p>A tiny, non-PyTorch example:</p>
+      <pre class="code">class Dog:                        <span class="c"># the blueprint</span>
+    def __init__(self, name):     <span class="c"># runs automatically when you MAKE a dog</span>
+        self.name = name          <span class="c"># this dog remembers its own name</span>
+
+    def bark(self):               <span class="c"># something every dog can DO</span>
+        print(f"{self.name} says woof!")
+
+my_dog = Dog("Rex")   <span class="c"># actually create one real dog from the blueprint</span>
+my_dog.bark()         <span class="c"># -&gt; "Rex says woof!"</span></pre>
+
+      <table class="ref">
+        <tr><th>Piece</th><th>What it means</th></tr>
+        <tr><td><code>class Dog:</code></td><td>Declares a new blueprint named <code class="mono">Dog</code>. No actual dog exists yet — this just defines what a dog <i>would</i> look like.</td></tr>
+        <tr><td><code>def __init__(self, name):</code></td><td>The setup method. Python runs this <i>automatically, once</i>, the moment you write <code class="mono">Dog("Rex")</code> — it's where a brand-new object gets its starting data.</td></tr>
+        <tr><td><code>self</code></td><td>Means "this particular object, right here." Every dog you create gets its <i>own</i> <code class="mono">self</code> — <code class="mono">Dog("Rex")</code> and <code class="mono">Dog("Biscuit")</code> are two separate objects, each with their own <code class="mono">self.name</code>.</td></tr>
+        <tr><td><code>self.name = name</code></td><td>"This dog remembers its own name from now on." Anything stored on <code class="mono">self</code> sticks around for the object's whole lifetime, not just while <code class="mono">__init__</code> is running.</td></tr>
+        <tr><td><code>my_dog = Dog("Rex")</code></td><td>Actually creates one real object from the blueprint. This is the only line that produces an actual dog.</td></tr>
+        <tr><td><code>my_dog.bark()</code></td><td>Calls the <code class="mono">bark</code> action <i>on that specific dog</i> — inside <code class="mono">bark</code>, <code class="mono">self</code> automatically refers to <code class="mono">my_dog</code>.</td></tr>
+      </table>
+
+      <h3>Now the PyTorch version — same idea, different data</h3>
+      <p>Your model needs to (a) <b>remember</b> two numbers of its own (<code class="mono">weights</code>,
+      <code class="mono">bias</code> — like the dog remembering its <code class="mono">name</code>), and (b)
+      <b>know how to do one thing</b> (turn an <code class="mono">x</code> into a <code class="mono">y_pred</code> —
+      like the dog knowing how to <code class="mono">bark</code>). That's exactly what a class is for, so
+      that's exactly what PyTorch uses.</p>
+
+      <pre class="code">class LinearRegressionModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.weights = nn.Parameter(torch.randn(1, requires_grad=True, dtype=torch.float))
+        self.bias = nn.Parameter(torch.rand(1, requires_grad=True, dtype=torch.float))
+
+    def forward(self, x):
+        return self.weights * x + self.bias</pre>
+
+      <table class="ref">
+        <tr><th>Piece</th><th>In terms of the Dog example</th></tr>
+        <tr><td><code>class LinearRegressionModel(nn.Module):</code></td><td>A new blueprint, but written to start <i>from</i> an existing blueprint called <code class="mono">nn.Module</code> — the <code class="mono">(nn.Module)</code> part means "reuse everything <code class="mono">nn.Module</code> already knows how to do, and add my own stuff on top." This is called <b>inheritance</b>. PyTorch's <code class="mono">nn.Module</code> is a blueprint that already knows a lot of useful bookkeeping for "being a trainable model" — this line borrows all of it for free.</td></tr>
+        <tr><td><code>def __init__(self):</code></td><td>Same setup method as <code class="mono">Dog</code> — runs once, when you write <code class="mono">LinearRegressionModel()</code>.</td></tr>
+        <tr><td><code>super().__init__()</code></td><td>Because this blueprint is built <i>from</i> <code class="mono">nn.Module</code>, this line means "before I set up my own stuff, run <code class="mono">nn.Module</code>'s own setup first." Skipping this line would silently break PyTorch's internal bookkeeping — always the first line inside <code class="mono">__init__</code> when inheriting from something.</td></tr>
+        <tr><td><code>self.weights = ...</code> / <code>self.bias = ...</code></td><td>Exactly like <code class="mono">self.name = name</code> — "this model remembers these two numbers as its own."</td></tr>
+        <tr><td><code>def forward(self, x):</code></td><td>This model's version of <code class="mono">bark()</code> — the one action it knows how to perform, using the numbers it remembers about itself (<code class="mono">self.weights</code>, <code class="mono">self.bias</code>).</td></tr>
+      </table>
+
+      <p>And later in the notebook:</p>
+      <pre class="code">model_0 = LinearRegressionModel()   <span class="c"># same as my_dog = Dog("Rex") — makes one real model</span>
+y_pred = model_0(X_train)           <span class="c"># same idea as my_dog.bark() — runs forward() for you</span></pre>
+      <p>One shortcut worth knowing: writing <code class="mono">model_0(X_train)</code> is PyTorch's way of
+      calling <code class="mono">forward()</code> for you automatically — you almost never call
+      <code class="mono">model_0.forward(X_train)</code> directly, even though that's technically what
+      happens underneath.</p>
+
+      <div class="callout insight">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          <span class="callout-title">Why does any of this need to be a class at all?</span>
+          <p>Because the two numbers (<code class="mono">weights</code>, <code class="mono">bias</code>) have to
+          <i>persist</i> between calls — the model needs to still remember its (possibly already-partly-trained)
+          numbers the next time you call it, not start fresh every time. A plain function can't remember
+          anything between calls; an object built from a class can, on <code class="mono">self</code>. That's
+          the entire reason this pattern exists — it's not PyTorch being needlessly fancy, it's the minimum
+          structure needed for "a thing that remembers numbers and updates them over time."</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="notebook">
+      <h2><span class="num">5</span> Your notebook, cell by cell</h2>
+      <p class="section-dek">Now the concepts above, mapped directly onto <code class="mono">01_pytorch_workflow.ipynb</code>.</p>
+
+      <div class="card" style="display:flex; flex-wrap:wrap; gap:8px 20px;">
+        <div style="flex:1 1 100%; font-size:13px; color:var(--ink-faint); margin-bottom:2px;">
+          Your notebook's own first cell lists 6 things this workflow covers — here's where each one stands:
+        </div>
+        <span class="pill" style="color:var(--test); background:color-mix(in oklab, var(--test) 14%, transparent);">✓ 1. data</span>
+        <span class="pill" style="color:var(--test); background:color-mix(in oklab, var(--test) 14%, transparent);">✓ 2. build model</span>
+        <span class="pill" style="color:var(--test); background:color-mix(in oklab, var(--test) 14%, transparent);">✓ 3. training</span>
+        <span class="pill" style="color:var(--ink-faint); background:var(--surface-raised); border:1px solid var(--border);">4. predictions/evaluating</span>
+        <span class="pill" style="color:var(--ink-faint); background:var(--surface-raised); border:1px solid var(--border);">5. save/load a model</span>
+        <span class="pill" style="color:var(--ink-faint); background:var(--surface-raised); border:1px solid var(--border);">6. putting it together</span>
+      </div>
+      <p style="font-size:13px; color:var(--ink-faint);">Sections 4&ndash;6 aren't in the notebook yet — this page covers exactly what exists right now
+      (through section 3, training) and will get new sections added here once you reach that part of the video.</p>
+
+      <h3>1. The data</h3>
+      <pre class="code">weight = 0.7
+bias = 0.3
+X = torch.arange(0, 1, 0.02).unsqueeze(dim=1)   <span class="c"># 50 points, 0.00 to 0.98</span>
+y = weight * X + bias                           <span class="c"># the "ground truth" line</span></pre>
+      <p>This is the one piece of the whole notebook where you, the author, get to play God: you already know
+      the exact rule (<code class="mono">weight=0.7, bias=0.3</code>) that generates <code class="mono">y</code>
+      from <code class="mono">X</code>. The entire rest of the notebook is about seeing whether a randomly
+      initialized model can rediscover these two numbers <i>without ever being told them</i> — purely from
+      watching (X, y) pairs.</p>
+
+      <div class="figure" id="scatter-before-wrap"></div>
+      <p class="figure-cap">
+        <span class="pill" style="color:var(--train); background:color-mix(in oklab, var(--train) 14%, transparent);"><span class="dot"></span>Training data</span> (first 40 points) and
+        <span class="pill" style="color:var(--test); background:color-mix(in oklab, var(--test) 14%, transparent);"><span class="dot"></span>test data</span> (last 10 points) both sit exactly on the true
+        line — there's no noise in this toy dataset, on purpose, so you can see the model's own error clearly
+        without wondering whether it's the data's fault.
+      </p>
+
+      <h3>2. The model</h3>
+      <p style="margin-top:0;">This is the exact class from the Python-classes refresher in Part 4.5, in its
+      real, complete form:</p>
+      <pre class="code">class LinearRegressionModel(nn.Module):  <span class="c"># almost everything in PyTorch inherits from nn.Module</span>
+    def __init__(self):
+        super().__init__()
+        self.weights = nn.Parameter(torch.randn(1, requires_grad=True, dtype=torch.float))
+        self.bias = nn.Parameter(torch.rand(1, requires_grad=True, dtype=torch.float))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.weights * x + self.bias   <span class="c"># same formula as the data, but with GUESSED numbers</span></pre>
+
+      <table class="ref">
+        <tr><th>Piece</th><th>What it means</th></tr>
+        <tr><td><code>nn.Module</code></td><td>The base class for anything that can hold learnable numbers and define a computation. Subclassing it and writing <code class="mono">forward()</code> is the standard shape of every PyTorch model, from this to GPT-4-scale networks.</td></tr>
+        <tr><td><code>super().__init__()</code></td><td>Must be the first line — it runs <code>nn.Module</code>'s own setup so the class can track parameters, move to GPU, save/load, etc. Skipping it silently breaks all of that.</td></tr>
+        <tr><td><code>nn.Parameter(...)</code></td><td>Wraps a tensor and tells PyTorch "this is a learnable dial — track its gradient, and include it when someone asks for <code class="mono">model.parameters()</code>."</td></tr>
+        <tr><td><code>requires_grad=True</code></td><td>The actual switch that turns on gradient tracking for this tensor — <code class="mono">nn.Parameter</code> sets this for you by default, but it's the mechanism underneath.</td></tr>
+        <tr><td><code>torch.randn(1)</code> / <code>torch.rand(1)</code></td><td>Random starting guesses — <code class="mono">randn</code> draws from a standard normal distribution (can be negative), <code class="mono">rand</code> draws uniformly from [0, 1). Neither knows anything about the true weight/bias.</td></tr>
+        <tr><td><code>forward(self, x)</code></td><td>The only method you're required to write. Defines what happens when you call <code class="mono">model(X)</code> — here, literally the linear regression formula, with the model's own (currently wrong) numbers.</td></tr>
+      </table>
+
+      <div class="grid2">
+        <div class="card">
+          <b>Checking what's inside</b>
+          <pre class="code" style="margin-top:8px">torch.manual_seed(42)
+model_0 = LinearRegressionModel()
+list(model_0.parameters())</pre>
+          <pre class="code">[Parameter(<span class="mono">0.3367</span>), Parameter(<span class="mono">0.3904</span>)]</pre>
+        </div>
+        <div class="card">
+          <b>Same thing, with names</b>
+          <pre class="code" style="margin-top:8px">model_0.state_dict()</pre>
+          <pre class="code">OrderedDict(weights=0.3367, bias=0.3904)</pre>
+        </div>
+      </div>
+      <p><code class="mono">torch.manual_seed(42)</code> makes the "random" numbers reproducible — anyone who
+      runs this exact code gets the exact same starting guess, <code class="mono">weights=0.3367,
+      bias=0.3904</code>. Compare that to the true values (0.7, 0.3): the model starts off meaningfully
+      wrong on both counts, by design.</p>
+
+      <h3>Before any training — predictions on the test set</h3>
+      <pre class="code">with torch.inference_mode():
+    y_preds = model_0(X_test)</pre>
+      <div class="figure" id="scatter-untrained-wrap"></div>
+      <p class="figure-cap">
+        <span class="pill" style="color:var(--pred); background:color-mix(in oklab, var(--pred) 14%, transparent);"><span class="dot"></span>Predictions</span> from the untrained model, plotted against the real test data. This gap
+        <i>is</i> the loss, visually — training is the process of pulling the red dots onto the green ones.
+      </p>
+
+      <h3>3. Loss function and optimizer</h3>
+      <pre class="code">loss_fn = nn.L1Loss()                                    <span class="c"># mean absolute error: mean(|y_pred - y_true|)</span>
+optimizer = torch.optim.SGD(params=model_0.parameters(), lr=0.01)</pre>
+      <p><code class="mono">nn.L1Loss()</code> is Mean Absolute Error — average the absolute difference
+      between every prediction and its true answer. It's what produced the sharp <b>V</b> shape back in
+      Part 2, instead of a smooth bowl: the penalty for being wrong grows in a straight line, not a curve,
+      and its gradient's <i>size</i> never shrinks as you get close to the right answer — only its
+      <i>sign</i> flips. That single fact is the entire explanation for the oscillation you saw in the
+      contour plot, and it's the entire explanation for the "frozen loss" puzzle below.</p>
+
+      <h3>4. The training loop, for real</h3>
+      <pre class="code">torch.manual_seed(42)
+epochs = 100
+
+for epoch in range(epochs):
+    model_0.train()
+    y_pred = model_0(<span class="fwd">X_train</span>)              <span class="c"># 1. forward pass</span>
+    loss = loss_fn(y_pred, y_train)         <span class="c"># 2. calculate loss</span>
+    optimizer.zero_grad()                   <span class="bwd"><span class="c"># 3. zero grad</span></span>
+    loss.backward()                         <span class="bwd"><span class="c"># 4. backward pass</span></span>
+    optimizer.step()                        <span class="bwd"><span class="c"># 5. gradient descent step</span></span>
+
+    model_0.eval()
+    with torch.inference_mode():
+        test_pred = model_0(X_test)
+        test_loss = loss_fn(test_pred, y_test)</pre>
+
+      <div class="figure" id="losscurve-wrap"></div>
+      <p class="figure-cap">
+        A genuinely fresh run of your exact loop, for the first 100 epochs — computed just now to make sure
+        this chart is accurate. Loss drops steadily from about <b class="tabular">0.082</b> to
+        <b class="tabular">0.038</b>, and weights climbs from <b class="tabular">0.3367</b> toward <b class="tabular">0.53</b>,
+        still well short of the true <b class="tabular">0.7</b> at epoch 100 — it needs quite a few more
+        epochs to fully arrive, which is exactly what the next section is about.
+      </p>
+    </section>
+
+    <section id="mystery">
+      <h3 style="font-size:22px; margin-top:0;">Why your printed "Epoch 0" doesn't start at 0.0817</h3>
+      <p>Look closely at your notebook's real output: it starts with <code class="mono">Epoch: 0 | Loss:
+      0.034646838903427124</code>. But earlier on this page, a genuinely fresh run of this exact code showed
+      epoch 0's loss as roughly <code class="mono">0.0817</code>. Your printed "epoch 0" is already almost
+      three times better than that. That's not a bug — it's proof of something worth understanding
+      mechanically, verified by literally re-running your code.</p>
+
+      <h4 style="margin-bottom:6px;">First, what "running a cell again" actually means</h4>
+      <p>A Jupyter notebook has <b>one Python process running behind the scenes</b>, called the kernel. Every
+      cell you run executes <i>inside that same process</i>, sharing the same variables. Running a cell isn't
+      like restarting a program — Python has no idea "this code already ran before." It just sees whatever
+      objects currently exist and keeps going.</p>
+      <p>Your notebook creates <code class="mono">model_0</code> once, in an earlier cell, with random starting
+      values (<code class="mono">weights=0.3367, bias=0.3904</code>). The training-loop cell below it does
+      <b>not</b> recreate <code class="mono">model_0</code> — it just trains whatever <code class="mono">model_0</code>
+      currently is. So the first time you run that cell, it trains the fresh random model for 100 epochs. Run
+      the exact same cell a second time, and Python trains <i>that already-partially-trained model</i> for
+      another 100 epochs — the local loop counter resets to 0 and prints "epoch 0" again, but the model's
+      actual weights and bias just keep moving from wherever the first run left them. Nothing about "epoch 0"
+      in the print statement means "the model is back to its original random values" — it only means "this is
+      iteration 1 of <i>this particular execution</i> of the cell."</p>
+
+      <div class="callout insight">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          <span class="callout-title">Does <code class="mono">torch.manual_seed(42)</code> at the top of the cell reset anything?</span>
+          <p>No — and this is a common point of confusion. <code class="mono">manual_seed</code> only controls
+          <i>future random number generation</i> (the next <code class="mono">torch.randn(...)</code> or
+          <code class="mono">torch.rand(...)</code> call). Your training loop never draws new random numbers —
+          it only reads and updates the <code class="mono">weights</code>/<code class="mono">bias</code>
+          tensors that already exist on <code class="mono">model_0</code>. Re-running <code class="mono">torch.manual_seed(42)</code>
+          has literally zero effect on a model that already exists; it's a leftover from copying the line into
+          this cell, not a reset switch.</p>
+        </div>
+      </div>
+
+      <h4>The exact timeline, reconstructed</h4>
+      <p>I ran your exact code, back to back, for 300 real epochs without stopping, and recorded
+      <code class="mono">weights</code> after every single one. Below is that real trajectory — the dashed
+      vertical lines mark where a 100-epoch <code class="mono">for epoch in range(100):</code> cell would end
+      if you hit "Run" again right there. The highlighted stretch is exactly what your notebook's last training
+      output shows:</p>
+
+      <div class="figure" id="timeline-wrap"></div>
+      <p class="figure-cap">
+        Notice the curve doesn't care where the dashed lines are — it's one continuous, uninterrupted process.
+        The dashed lines only mark <i>where your local "epoch 0, 1, 2..." counter would reset</i> each time you
+        pressed Run on the loop cell. Your printed output sits entirely inside the second run — real epochs
+        100&ndash;190 — even though it's locally labeled "epoch 0" through "epoch 90."
+      </p>
+
+      <h4>The proof: your printed numbers match real epochs 100 and 190, digit for digit</h4>
+      <p>I searched all 300 real epochs for the closest match to your notebook's two exact printed lines. Both
+      results are exact, not approximate:</p>
+      <table class="ref">
+        <tr><th>Your notebook printed</th><th>Real cumulative epoch</th><th>loss</th><th>weights</th><th>bias</th></tr>
+        <tr><td><code class="mono">"Epoch: 0"</code></td><td class="tabular">100</td><td class="mono tabular">0.034646838903427124</td><td class="tabular">0.5293</td><td class="tabular">0.3714</td></tr>
+        <tr><td><code class="mono">"Epoch: 90"</code></td><td class="tabular">190</td><td class="mono tabular">0.003741039428859949</td><td class="tabular">0.6831</td><td class="tabular">0.3069</td></tr>
+      </table>
+      <p>Every digit matches, loss included, out to 15 decimal places. That's the literal fingerprint of
+      <b>exactly one prior 100-epoch run</b> having already happened to your model before this training block
+      executed — the training-loop cell was run twice, back to back, on the same <code class="mono">model_0</code>,
+      and what you're looking at in the notebook is entirely the second run.</p>
+
+      <div class="callout insight">
+        <div class="callout-icon">i</div>
+        <div class="callout-body">
+          <span class="callout-title">What happens if you run it a third time?</span>
+          <p>Your model is currently sitting at real epoch 190 (<code class="mono">weights=0.6831, bias=0.3069</code>) —
+          very close to the true <code class="mono">weights=0.7, bias=0.3</code>, but not there yet. If you run
+          the training-loop cell again without restarting the kernel, the next 100 epochs push it past real
+          epoch 199 — and from there, something specific happens: because <code class="mono">nn.L1Loss</code>'s
+          gradient never shrinks as the model gets closer to the answer (only its <i>sign</i> flips), fixed-size
+          steps <i>always</i> overshoot the exact minimum once they're close enough, landing in a stable
+          back-and-forth between two fixed values instead of settling on one. I confirmed this by running the
+          simulation much further — from real epoch ~199 onward it locks into alternating between exactly these
+          two states, forever:</p>
+          <table class="ref" style="margin: 10px 0 8px;">
+            <tr><th>Phase</th><th>loss</th><th>weights</th><th>bias</th></tr>
+            <tr><td>"even" phase</td><td class="tabular">0.004964</td><td class="tabular">0.6923</td><td class="tabular">0.2964</td></tr>
+            <tr><td>"odd" phase</td><td class="tabular">0.006557</td><td class="tabular">0.6962</td><td class="tabular">0.3064</td></tr>
+          </table>
+          <p>So if a third run makes your loss suddenly look "frozen" at exactly <code class="mono">0.006557</code>
+          no matter how many more times you press Run afterward — that's not broken, it's this exact mechanism:
+          a length-2 cycle can only be escaped by an <i>odd</i> number of extra steps, and your loop always adds
+          a fixed 100 (even), so every further re-run lands you back on the identical phase.</p>
+        </div>
+      </div>
+
+      <p>The practical takeaway for working in notebooks generally: <b>re-running a training cell continues
+      training instead of restarting it</b>, because the model object persists in the kernel for as long as
+      that kernel is alive. If you want a truly fresh run, re-run the cell that creates <code class="mono">model_0</code>
+      first (or restart the kernel via Jupyter's "Restart Kernel" command), not just the loop cell.</p>
+
+      <h3>Where your model stands right now</h3>
+      <div class="figure" id="scatter-trained-wrap"></div>
+      <p class="figure-cap">
+        Using your model's actual current state (<code class="mono">weights=0.6831, bias=0.3069</code>, real
+        epoch 190) — the red prediction dots now sit almost exactly on top of the green test data. This is
+        your notebook's real current progress, not a hypothetical fresh run.
+      </p>
+    </section>
+
+    <section id="cheatsheet">
+      <h2><span class="num">6</span> Quick-reference cheat sheet</h2>
+      <p class="section-dek">Every method and parameter from the notebook, in one place.</p>
+      <table class="ref">
+        <tr><th>Call</th><th>What it does</th></tr>
+        <tr><td><code>nn.Module</code></td><td>Base class for any model. Subclass it, write <code class="mono">forward()</code>.</td></tr>
+        <tr><td><code>nn.Parameter(tensor)</code></td><td>Marks a tensor as a learnable dial; auto-registers it in <code class="mono">.parameters()</code>.</td></tr>
+        <tr><td><code>requires_grad=True</code></td><td>Turns on gradient tracking for a tensor.</td></tr>
+        <tr><td><code>model.parameters()</code></td><td>Returns every learnable tensor in the model — this is exactly what you hand to the optimizer.</td></tr>
+        <tr><td><code>model.state_dict()</code></td><td>Same parameters, as a named dict — used for saving/loading/inspecting.</td></tr>
+        <tr><td><code>loss_fn</code></td><td>A function that scores "how wrong" — <code class="mono">nn.L1Loss()</code> here (mean absolute error), <code class="mono">nn.BCELoss()</code> for yes/no classification.</td></tr>
+        <tr><td><code>optimizer</code></td><td><code class="mono">torch.optim.SGD(params, lr)</code> — applies the gradient-descent update rule to every given parameter.</td></tr>
+        <tr><td><code>lr</code> (learning rate)</td><td>Step size in the update rule. Too small: slow. Too big: overshoot/diverge. Arguably the single most important number you choose.</td></tr>
+        <tr><td><code>epoch</code></td><td>One full pass through the training data. A hyperparameter — you choose how many.</td></tr>
+        <tr><td><code>optimizer.zero_grad()</code></td><td>Clears leftover gradients before computing new ones — PyTorch accumulates by default.</td></tr>
+        <tr><td><code>loss.backward()</code></td><td>Runs backpropagation — fills in <code class="mono">.grad</code> on every parameter with <code class="mono">requires_grad=True</code>.</td></tr>
+        <tr><td><code>optimizer.step()</code></td><td>Applies <code class="mono">param -= lr * param.grad</code> to every parameter — the actual gradient-descent update.</td></tr>
+        <tr><td><code>model.train()</code> / <code>model.eval()</code></td><td>Switches layers like dropout/batch-norm between training and evaluation behavior.</td></tr>
+        <tr><td><code>torch.inference_mode()</code></td><td>Context manager that disables gradient tracking — use whenever you're only predicting, never training.</td></tr>
+      </table>
+    </section>
+
+    <footer class="tail">
+      Built directly from <code class="mono">Deep_Learning_PyTorch/Daniel_Bourke_Learn_Pytorch/01_pytorch_workflow.ipynb</code> —
+      every number above was computed by actually re-running your code, not estimated.
+    </footer>
+  </main>
+</div>
+
+<script>
+const DATA = {"X_train": [0.0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22, 0.24, 0.26, 0.28, 0.3, 0.32, 0.34, 0.36, 0.38, 0.4, 0.42, 0.44, 0.46, 0.48, 0.5, 0.52, 0.54, 0.56, 0.58, 0.6, 0.62, 0.64, 0.66, 0.68, 0.7, 0.72, 0.74, 0.76, 0.78], "y_train": [0.3, 0.314, 0.328, 0.342, 0.356, 0.37, 0.384, 0.398, 0.412, 0.426, 0.44, 0.454, 0.468, 0.482, 0.496, 0.51, 0.524, 0.538, 0.552, 0.566, 0.58, 0.594, 0.608, 0.622, 0.636, 0.65, 0.664, 0.678, 0.692, 0.706, 0.72, 0.734, 0.748, 0.762, 0.776, 0.79, 0.804, 0.818, 0.832, 0.846], "X_test": [0.8, 0.82, 0.84, 0.86, 0.88, 0.9, 0.92, 0.94, 0.96, 0.98], "y_test": [0.86, 0.874, 0.888, 0.902, 0.916, 0.93, 0.944, 0.958, 0.972, 0.986], "init_test_preds": [0.6598, 0.6665, 0.6732, 0.68, 0.6867, 0.6934, 0.7002, 0.7069, 0.7136, 0.7204], "ws_1d": [0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3, 0.31, 0.32, 0.33, 0.34, 0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.41, 0.42, 0.43, 0.44, 0.45, 0.46, 0.47, 0.48, 0.49, 0.5, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.57, 0.58, 0.59, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95], "loss_1d": [0.2535, 0.2496, 0.2457, 0.2418, 0.2379, 0.234, 0.2301, 0.2262, 0.2223, 0.2184, 0.2145, 0.2106, 0.2067, 0.2028, 0.1989, 0.195, 0.1911, 0.1872, 0.1833, 0.1794, 0.1755, 0.1716, 0.1677, 0.1638, 0.1599, 0.156, 0.1521, 0.1482, 0.1443, 0.1404, 0.1365, 0.1326, 0.1287, 0.1248, 0.1209, 0.117, 0.1131, 0.1092, 0.1053, 0.1014, 0.0975, 0.0936, 0.0897, 0.0858, 0.0819, 0.078, 0.0741, 0.0702, 0.0663, 0.0624, 0.0585, 0.0546, 0.0507, 0.0468, 0.0429, 0.039, 0.0351, 0.0312, 0.0273, 0.0234, 0.0195, 0.0156, 0.0117, 0.0078, 0.0039, 0.0, 0.0039, 0.0078, 0.0117, 0.0156, 0.0195, 0.0234, 0.0273, 0.0312, 0.0351, 0.039, 0.0429, 0.0468, 0.0507, 0.0546, 0.0585, 0.0624, 0.0663, 0.0702, 0.0741, 0.078, 0.0819, 0.0858, 0.0897, 0.0936, 0.0975], "lr_small": [0.3367, 0.3375, 0.3383, 0.339, 0.3398, 0.3406, 0.3414, 0.3422, 0.3429, 0.3437, 0.3445, 0.3453, 0.3461, 0.3468, 0.3476, 0.3484, 0.3492, 0.35, 0.3507, 0.3515, 0.3523, 0.3531, 0.3539, 0.3546, 0.3554, 0.3562, 0.357, 0.3578, 0.3585, 0.3593, 0.3601], "lr_mid": [0.3367, 0.3406, 0.3445, 0.3484, 0.3523, 0.3562, 0.3601, 0.364, 0.3679, 0.3718, 0.3757, 0.3796, 0.3835, 0.3874, 0.3913, 0.3952, 0.3991, 0.403, 0.4069, 0.4108, 0.4147, 0.4186, 0.4225, 0.4264, 0.4303, 0.4342, 0.4381, 0.442, 0.4459, 0.4498, 0.4537], "lr_big": [0.3367, 0.3679, 0.3991, 0.4303, 0.4615, 0.4927, 0.5239, 0.5551, 0.5863, 0.6175, 0.6487, 0.6799, 0.7111, 0.6799, 0.7111, 0.6799, 0.7111, 0.6799, 0.7111, 0.6799, 0.7111, 0.6799, 0.7111, 0.6799, 0.7111, 0.6799, 0.7111, 0.6799, 0.7111, 0.6799, 0.7111], "W_grid": [0.15, 0.1645, 0.1791, 0.1936, 0.2082, 0.2227, 0.2373, 0.2518, 0.2664, 0.2809, 0.2955, 0.31, 0.3245, 0.3391, 0.3536, 0.3682, 0.3827, 0.3973, 0.4118, 0.4264, 0.4409, 0.4555, 0.47, 0.4845, 0.4991, 0.5136, 0.5282, 0.5427, 0.5573, 0.5718, 0.5864, 0.6009, 0.6155, 0.63, 0.6445, 0.6591, 0.6736, 0.6882, 0.7027, 0.7173, 0.7318, 0.7464, 0.7609, 0.7755, 0.79, 0.8045, 0.8191, 0.8336, 0.8482, 0.8627, 0.8773, 0.8918, 0.9064, 0.9209, 0.9355, 0.95], "B_grid": [0.0, 0.0113, 0.0225, 0.0338, 0.0451, 0.0564, 0.0676, 0.0789, 0.0902, 0.1015, 0.1127, 0.124, 0.1353, 0.1465, 0.1578, 0.1691, 0.1804, 0.1916, 0.2029, 0.2142, 0.2255, 0.2367, 0.248, 0.2593, 0.2705, 0.2818, 0.2931, 0.3044, 0.3156, 0.3269, 0.3382, 0.3495, 0.3607, 0.372, 0.3833, 0.3945, 0.4058, 0.4171, 0.4284, 0.4396, 0.4509, 0.4622, 0.4735, 0.4847, 0.496, 0.5073, 0.5185, 0.5298, 0.5411, 0.5524, 0.5636, 0.5749, 0.5862, 0.5975, 0.6087, 0.62], "surface": [[0.5145, 0.50883, 0.50315, 0.49748, 0.49181, 0.48614, 0.48046, 0.47479, 0.46912, 0.46345, 0.45777, 0.4521, 0.44643, 0.44075, 0.43508, 0.42941, 0.42374, 0.41806, 0.41239, 0.40672, 0.40105, 0.39537, 0.3897, 0.38403, 0.37835, 0.37268, 0.36701, 0.36134, 0.35566, 0.34999, 0.34432, 0.33865, 0.33297, 0.3273, 0.32163, 0.31595, 0.31028, 0.30461, 0.29894, 0.29326, 0.28759, 0.28192, 0.27625, 0.27057, 0.2649, 0.25923, 0.25355, 0.24788, 0.24221, 0.23654, 0.23086, 0.22519, 0.21952, 0.21385, 0.20817, 0.2025], [0.50323, 0.49755, 0.49188, 0.48621, 0.48054, 0.47486, 0.46919, 0.46352, 0.45785, 0.45217, 0.4465, 0.44083, 0.43515, 0.42948, 0.42381, 0.41814, 0.41246, 0.40679, 0.40112, 0.39545, 0.38977, 0.3841, 0.37843, 0.37275, 0.36708, 0.36141, 0.35574, 0.35006, 0.34439, 0.33872, 0.33305, 0.32737, 0.3217, 0.31603, 0.31035, 0.30468, 0.29901, 0.29334, 0.28766, 0.28199, 0.27632, 0.27065, 0.26497, 0.2593, 0.25363, 0.24795, 0.24228, 0.23661, 0.23094, 0.22526, 0.21959, 0.21392, 0.20825, 0.20257, 0.1969, 0.19123], [0.49195, 0.48628, 0.48061, 0.47494, 0.46926, 0.46359, 0.45792, 0.45225, 0.44657, 0.4409, 0.43523, 0.42955, 0.42388, 0.41821, 0.41254, 0.40686, 0.40119, 0.39552, 0.38985, 0.38417, 0.3785, 0.37283, 0.36715, 0.36148, 0.35581, 0.35014, 0.34446, 0.33879, 0.33312, 0.32745, 0.32177, 0.3161, 0.31043, 0.30475, 0.29908, 0.29341, 0.28774, 0.28206, 0.27639, 0.27072, 0.26505, 0.25937, 0.2537, 0.24803, 0.24235, 0.23668, 0.23101, 0.22534, 0.21966, 0.21399, 0.20832, 0.20265, 0.19697, 0.1913, 0.18563, 0.17995], [0.48068, 0.47501, 0.46934, 0.46366, 0.45799, 0.45232, 0.44665, 0.44097, 0.4353, 0.42963, 0.42395, 0.41828, 0.41261, 0.40694, 0.40126, 0.39559, 0.38992, 0.38425, 0.37857, 0.3729, 0.36723, 0.36155, 0.35588, 0.35021, 0.34454, 0.33886, 0.33319, 0.32752, 0.32185, 0.31617, 0.3105, 0.30483, 0.29915, 0.29348, 0.28781, 0.28214, 0.27646, 0.27079, 0.26512, 0.25945, 0.25377, 0.2481, 0.24243, 0.23675, 0.23108, 0.22541, 0.21974, 0.21406, 0.20839, 0.20272, 0.19705, 0.19137, 0.1857, 0.18003, 0.17435, 0.16868], [0.46941, 0.46374, 0.45806, 0.45239, 0.44672, 0.44105, 0.43537, 0.4297, 0.42403, 0.41835, 0.41268, 0.40701, 0.40134, 0.39566, 0.38999, 0.38432, 0.37865, 0.37297, 0.3673, 0.36163, 0.35595, 0.35028, 0.34461, 0.33894, 0.33326, 0.32759, 0.32192, 0.31625, 0.31057, 0.3049, 0.29923, 0.29355, 0.28788, 0.28221, 0.27654, 0.27086, 0.26519, 0.25952, 0.25385, 0.24817, 0.2425, 0.23683, 0.23115, 0.22548, 0.21981, 0.21414, 0.20846, 0.20279, 0.19712, 0.19145, 0.18577, 0.1801, 0.17443, 0.16875, 0.16308, 0.15741], [0.45814, 0.45246, 0.44679, 0.44112, 0.43545, 0.42977, 0.4241, 0.41843, 0.41275, 0.40708, 0.40141, 0.39574, 0.39006, 0.38439, 0.37872, 0.37305, 0.36737, 0.3617, 0.35603, 0.35035, 0.34468, 0.33901, 0.33334, 0.32766, 0.32199, 0.31632, 0.31065, 0.30497, 0.2993, 0.29363, 0.28795, 0.28228, 0.27661, 0.27094, 0.26526, 0.25959, 0.25392, 0.24825, 0.24257, 0.2369, 0.23123, 0.22555, 0.21988, 0.21421, 0.20854, 0.20286, 0.19719, 0.19152, 0.18585, 0.18017, 0.1745, 0.16883, 0.16315, 0.15748, 0.15181, 0.14614], [0.44686, 0.44119, 0.43552, 0.42985, 0.42417, 0.4185, 0.41283, 0.40715, 0.40148, 0.39581, 0.39014, 0.38446, 0.37879, 0.37312, 0.36745, 0.36177, 0.3561, 0.35043, 0.34475, 0.33908, 0.33341, 0.32774, 0.32206, 0.31639, 0.31072, 0.30505, 0.29937, 0.2937, 0.28803, 0.28235, 0.27668, 0.27101, 0.26534, 0.25966, 0.25399, 0.24832, 0.24265, 0.23697, 0.2313, 0.22563, 0.21995, 0.21428, 0.20861, 0.20294, 0.19726, 0.19159, 0.18592, 0.18025, 0.17457, 0.1689, 0.16323, 0.15755, 0.15188, 0.14621, 0.14054, 0.13486], [0.43559, 0.42992, 0.42425, 0.41857, 0.4129, 0.40723, 0.40155, 0.39588, 0.39021, 0.38454, 0.37886, 0.37319, 0.36752, 0.36185, 0.35617, 0.3505, 0.34483, 0.33915, 0.33348, 0.32781, 0.32214, 0.31646, 0.31079, 0.30512, 0.29945, 0.29377, 0.2881, 0.28243, 0.27675, 0.27108, 0.26541, 0.25974, 0.25406, 0.24839, 0.24272, 0.23705, 0.23137, 0.2257, 0.22003, 0.21435, 0.20868, 0.20301, 0.19734, 0.19166, 0.18599, 0.18032, 0.17465, 0.16897, 0.1633, 0.15763, 0.15195, 0.14628, 0.14061, 0.13494, 0.12926, 0.12359], [0.42432, 0.41865, 0.41297, 0.4073, 0.40163, 0.39595, 0.39028, 0.38461, 0.37894, 0.37326, 0.36759, 0.36192, 0.35625, 0.35057, 0.3449, 0.33923, 0.33355, 0.32788, 0.32221, 0.31654, 0.31086, 0.30519, 0.29952, 0.29385, 0.28817, 0.2825, 0.27683, 0.27115, 0.26548, 0.25981, 0.25414, 0.24846, 0.24279, 0.23712, 0.23145, 0.22577, 0.2201, 0.21443, 0.20875, 0.20308, 0.19741, 0.19174, 0.18606, 0.18039, 0.17472, 0.16905, 0.16337, 0.1577, 0.15203, 0.14635, 0.14068, 0.13501, 0.12934, 0.12366, 0.11799, 0.11232], [0.41305, 0.40737, 0.4017, 0.39603, 0.39035, 0.38468, 0.37901, 0.37334, 0.36766, 0.36199, 0.35632, 0.35065, 0.34497, 0.3393, 0.33363, 0.32795, 0.32228, 0.31661, 0.31094, 0.30526, 0.29959, 0.29392, 0.28825, 0.28257, 0.2769, 0.27123, 0.26555, 0.25988, 0.25421, 0.24854, 0.24286, 0.23719, 0.23152, 0.22585, 0.22017, 0.2145, 0.20883, 0.20315, 0.19748, 0.19181, 0.18614, 0.18046, 0.17479, 0.16912, 0.16345, 0.15777, 0.1521, 0.14643, 0.14075, 0.13508, 0.12941, 0.12374, 0.11806, 0.11239, 0.10672, 0.10105], [0.40177, 0.3961, 0.39043, 0.38475, 0.37908, 0.37341, 0.36774, 0.36206, 0.35639, 0.35072, 0.34505, 0.33937, 0.3337, 0.32803, 0.32235, 0.31668, 0.31101, 0.30534, 0.29966, 0.29399, 0.28832, 0.28265, 0.27697, 0.2713, 0.26563, 0.25995, 0.25428, 0.24861, 0.24294, 0.23726, 0.23159, 0.22592, 0.22025, 0.21457, 0.2089, 0.20323, 0.19755, 0.19188, 0.18621, 0.18054, 0.17486, 0.16919, 0.16352, 0.15785, 0.15217, 0.1465, 0.14083, 0.13515, 0.12948, 0.12381, 0.11814, 0.11246, 0.10679, 0.10112, 0.09545, 0.0903], [0.3905, 0.38483, 0.37915, 0.37348, 0.36781, 0.36214, 0.35646, 0.35079, 0.34512, 0.33945, 0.33377, 0.3281, 0.32243, 0.31675, 0.31108, 0.30541, 0.29974, 0.29406, 0.28839, 0.28272, 0.27705, 0.27137, 0.2657, 0.26003, 0.25435, 0.24868, 0.24301, 0.23734, 0.23166, 0.22599, 0.22032, 0.21465, 0.20897, 0.2033, 0.19763, 0.19195, 0.18628, 0.18061, 0.17494, 0.16926, 0.16359, 0.15792, 0.15225, 0.14657, 0.1409, 0.13523, 0.12955, 0.12388, 0.11821, 0.11254, 0.10686, 0.10119, 0.09552, 0.08985, 0.0847, 0.0808], [0.37923, 0.37355, 0.36788, 0.36221, 0.35654, 0.35086, 0.34519, 0.33952, 0.33385, 0.32817, 0.3225, 0.31683, 0.31115, 0.30548, 0.29981, 0.29414, 0.28846, 0.28279, 0.27712, 0.27145, 0.26577, 0.2601, 0.25443, 0.24875, 0.24308, 0.23741, 0.23174, 0.22606, 0.22039, 0.21472, 0.20905, 0.20337, 0.1977, 0.19203, 0.18635, 0.18068, 0.17501, 0.16934, 0.16366, 0.15799, 0.15232, 0.14665, 0.14097, 0.1353, 0.12963, 0.12395, 0.11828, 0.11261, 0.10694, 0.10126, 0.09559, 0.08992, 0.08425, 0.07911, 0.07528, 0.07257], [0.36795, 0.36228, 0.35661, 0.35094, 0.34526, 0.33959, 0.33392, 0.32825, 0.32257, 0.3169, 0.31123, 0.30555, 0.29988, 0.29421, 0.28854, 0.28286, 0.27719, 0.27152, 0.26585, 0.26017, 0.2545, 0.24883, 0.24315, 0.23748, 0.23181, 0.22614, 0.22046, 0.21479, 0.20912, 0.20345, 0.19777, 0.1921, 0.18643, 0.18075, 0.17508, 0.16941, 0.16374, 0.15806, 0.15239, 0.14672, 0.14105, 0.13537, 0.1297, 0.12403, 0.11835, 0.11268, 0.10701, 0.10134, 0.09566, 0.08999, 0.08432, 0.07865, 0.07352, 0.0698, 0.06725, 0.06565], [0.35668, 0.35101, 0.34534, 0.33966, 0.33399, 0.32832, 0.32265, 0.31697, 0.3113, 0.30563, 0.29995, 0.29428, 0.28861, 0.28294, 0.27726, 0.27159, 0.26592, 0.26025, 0.25457, 0.2489, 0.24323, 0.23755, 0.23188, 0.22621, 0.22054, 0.21486, 0.20919, 0.20352, 0.19785, 0.19217, 0.1865, 0.18083, 0.17515, 0.16948, 0.16381, 0.15814, 0.15246, 0.14679, 0.14112, 0.13545, 0.12977, 0.1241, 0.11843, 0.11275, 0.10708, 0.10141, 0.09574, 0.09006, 0.08439, 0.07872, 0.07305, 0.06792, 0.06433, 0.06193, 0.06054, 0.05998], [0.34541, 0.33974, 0.33406, 0.32839, 0.32272, 0.31705, 0.31137, 0.3057, 0.30003, 0.29435, 0.28868, 0.28301, 0.27734, 0.27166, 0.26599, 0.26032, 0.25465, 0.24897, 0.2433, 0.23763, 0.23195, 0.22628, 0.22061, 0.21494, 0.20926, 0.20359, 0.19792, 0.19225, 0.18657, 0.1809, 0.17523, 0.16955, 0.16388, 0.15821, 0.15254, 0.14686, 0.14119, 0.13552, 0.12985, 0.12417, 0.1185, 0.11283, 0.10715, 0.10148, 0.09581, 0.09014, 0.08446, 0.07879, 0.07312, 0.06745, 0.06235, 0.05886, 0.05667, 0.05551, 0.05519, 0.05557], [0.33414, 0.32846, 0.32279, 0.31712, 0.31145, 0.30577, 0.3001, 0.29443, 0.28875, 0.28308, 0.27741, 0.27174, 0.26606, 0.26039, 0.25472, 0.24905, 0.24337, 0.2377, 0.23203, 0.22635, 0.22068, 0.21501, 0.20934, 0.20366, 0.19799, 0.19232, 0.18665, 0.18097, 0.1753, 0.16963, 0.16395, 0.15828, 0.15261, 0.14694, 0.14126, 0.13559, 0.12992, 0.12425, 0.11857, 0.1129, 0.10723, 0.10155, 0.09588, 0.09021, 0.08454, 0.07886, 0.07319, 0.06752, 0.06185, 0.05678, 0.05343, 0.05145, 0.05053, 0.05051, 0.0512, 0.05243], [0.32286, 0.31719, 0.31152, 0.30585, 0.30017, 0.2945, 0.28883, 0.28315, 0.27748, 0.27181, 0.26614, 0.26046, 0.25479, 0.24912, 0.24345, 0.23777, 0.2321, 0.22643, 0.22075, 0.21508, 0.20941, 0.20374, 0.19806, 0.19239, 0.18672, 0.18105, 0.17537, 0.1697, 0.16403, 0.15835, 0.15268, 0.14701, 0.14134, 0.13566, 0.12999, 0.12432, 0.11865, 0.11297, 0.1073, 0.10163, 0.09595, 0.09028, 0.08461, 0.07894, 0.07326, 0.06759, 0.06192, 0.05625, 0.05121, 0.04803, 0.0463, 0.04569, 0.04598, 0.04697, 0.04851, 0.05059], [0.31159, 0.30592, 0.30025, 0.29457, 0.2889, 0.28323, 0.27755, 0.27188, 0.26621, 0.26054, 0.25486, 0.24919, 0.24352, 0.23785, 0.23217, 0.2265, 0.22083, 0.21515, 0.20948, 0.20381, 0.19814, 0.19246, 0.18679, 0.18112, 0.17545, 0.16977, 0.1641, 0.15843, 0.15275, 0.14708, 0.14141, 0.13574, 0.13006, 0.12439, 0.11872, 0.11305, 0.10737, 0.1017, 0.09603, 0.09035, 0.08468, 0.07901, 0.07334, 0.06766, 0.06199, 0.05632, 0.05065, 0.04564, 0.04266, 0.04122, 0.04096, 0.0416, 0.04294, 0.04483, 0.04724, 0.05], [0.30032, 0.29465, 0.28897, 0.2833, 0.27763, 0.27195, 0.26628, 0.26061, 0.25494, 0.24926, 0.24359, 0.23792, 0.23225, 0.22657, 0.2209, 0.21523, 0.20955, 0.20388, 0.19821, 0.19254, 0.18686, 0.18119, 0.17552, 0.16985, 0.16417, 0.1585, 0.15283, 0.14715, 0.14148, 0.13581, 0.13014, 0.12446, 0.11879, 0.11312, 0.10745, 0.10177, 0.0961, 0.09043, 0.08475, 0.07908, 0.07341, 0.06774, 0.06206, 0.05639, 0.05072, 0.04505, 0.04008, 0.03734, 0.03625, 0.03638, 0.03741, 0.03915, 0.04144, 0.04418, 0.04727, 0.05067], [0.28905, 0.28337, 0.2777, 0.27203, 0.26635, 0.26068, 0.25501, 0.24934, 0.24366, 0.23799, 0.23232, 0.22665, 0.22097, 0.2153, 0.20963, 0.20395, 0.19828, 0.19261, 0.18694, 0.18126, 0.17559, 0.16992, 0.16425, 0.15857, 0.1529, 0.14723, 0.14155, 0.13588, 0.13021, 0.12454, 0.11886, 0.11319, 0.10752, 0.10185, 0.09617, 0.0905, 0.08483, 0.07915, 0.07348, 0.06781, 0.06214, 0.05646, 0.05079, 0.04512, 0.03945, 0.03455, 0.0321, 0.03142, 0.032, 0.03348, 0.03564, 0.03836, 0.04147, 0.04493, 0.04866, 0.05261], [0.27777, 0.2721, 0.26643, 0.26075, 0.25508, 0.24941, 0.24374, 0.23806, 0.23239, 0.22672, 0.22105, 0.21537, 0.2097, 0.20403, 0.19835, 0.19268, 0.18701, 0.18134, 0.17566, 0.16999, 0.16432, 0.15865, 0.15297, 0.1473, 0.14163, 0.13595, 0.13028, 0.12461, 0.11894, 0.11326, 0.10759, 0.10192, 0.09625, 0.09057, 0.0849, 0.07923, 0.07355, 0.06788, 0.06221, 0.05654, 0.05086, 0.04519, 0.03952, 0.03385, 0.02902, 0.02696, 0.02679, 0.02789, 0.02989, 0.03255, 0.03569, 0.03923, 0.04306, 0.04714, 0.05142, 0.05585], [0.2665, 0.26083, 0.25515, 0.24948, 0.24381, 0.23814, 0.23246, 0.22679, 0.22112, 0.21545, 0.20977, 0.2041, 0.19843, 0.19275, 0.18708, 0.18141, 0.17574, 0.17006, 0.16439, 0.15872, 0.15305, 0.14737, 0.1417, 0.13603, 0.13035, 0.12468, 0.11901, 0.11334, 0.10766, 0.10199, 0.09632, 0.09065, 0.08497, 0.0793, 0.07363, 0.06795, 0.06228, 0.05661, 0.05094, 0.04526, 0.03959, 0.03392, 0.02825, 0.02353, 0.02196, 0.02241, 0.02414, 0.02673, 0.02992, 0.03354, 0.03752, 0.04175, 0.04619, 0.05077, 0.05549, 0.06035], [0.25523, 0.24955, 0.24388, 0.23821, 0.23254, 0.22686, 0.22119, 0.21552, 0.20985, 0.20417, 0.1985, 0.19283, 0.18715, 0.18148, 0.17581, 0.17014, 0.16446, 0.15879, 0.15312, 0.14745, 0.14177, 0.1361, 0.13043, 0.12475, 0.11908, 0.11341, 0.10774, 0.10206, 0.09639, 0.09072, 0.08505, 0.07937, 0.0737, 0.06803, 0.06235, 0.05668, 0.05101, 0.04534, 0.03966, 0.03399, 0.02832, 0.02265, 0.01809, 0.0172, 0.01844, 0.02091, 0.02415, 0.02794, 0.03209, 0.03652, 0.04115, 0.04593, 0.05083, 0.05585, 0.06095, 0.0661], [0.24395, 0.23828, 0.23261, 0.22694, 0.22126, 0.21559, 0.20992, 0.20425, 0.19857, 0.1929, 0.18723, 0.18155, 0.17588, 0.17021, 0.16454, 0.15886, 0.15319, 0.14752, 0.14185, 0.13617, 0.1305, 0.12483, 0.11915, 0.11348, 0.10781, 0.10214, 0.09646, 0.09079, 0.08512, 0.07945, 0.07377, 0.0681, 0.06243, 0.05675, 0.05108, 0.04541, 0.03974, 0.03406, 0.02839, 0.02272, 0.01705, 0.01276, 0.01285, 0.01509, 0.01844, 0.02243, 0.02685, 0.03152, 0.0364, 0.04141, 0.04655, 0.05177, 0.05703, 0.06237, 0.06774, 0.07313], [0.23268, 0.22701, 0.22134, 0.21566, 0.20999, 0.20432, 0.19865, 0.19297, 0.1873, 0.18163, 0.17595, 0.17028, 0.16461, 0.15894, 0.15326, 0.14759, 0.14192, 0.13625, 0.13057, 0.1249, 0.11923, 0.11355, 0.10788, 0.10221, 0.09654, 0.09086, 0.08519, 0.07952, 0.07385, 0.06817, 0.0625, 0.05683, 0.05115, 0.04548, 0.03981, 0.03414, 0.02846, 0.02279, 0.01712, 0.01145, 0.00767, 0.00927, 0.01281, 0.01718, 0.02197, 0.02701, 0.0322, 0.03749, 0.04286, 0.0483, 0.05375, 0.05925, 0.06478, 0.07031, 0.07587, 0.08145], [0.22141, 0.21574, 0.21006, 0.20439, 0.19872, 0.19305, 0.18737, 0.1817, 0.17603, 0.17035, 0.16468, 0.15901, 0.15334, 0.14766, 0.14199, 0.13632, 0.13065, 0.12497, 0.1193, 0.11363, 0.10795, 0.10228, 0.09661, 0.09094, 0.08526, 0.07959, 0.07392, 0.06825, 0.06257, 0.0569, 0.05123, 0.04555, 0.03988, 0.03421, 0.02854, 0.02286, 0.01719, 0.01152, 0.00585, 0.00345, 0.00755, 0.01264, 0.018, 0.02349, 0.02903, 0.03462, 0.04022, 0.04584, 0.05147, 0.0571, 0.06274, 0.0684, 0.07406, 0.07972, 0.08537, 0.09103], [0.21035, 0.20468, 0.19901, 0.19334, 0.18766, 0.18199, 0.17632, 0.17065, 0.16497, 0.1593, 0.15363, 0.14795, 0.14228, 0.13661, 0.13094, 0.12526, 0.11959, 0.11392, 0.10825, 0.10257, 0.0969, 0.09123, 0.08555, 0.07988, 0.07423, 0.06857, 0.06291, 0.05725, 0.05159, 0.04594, 0.04028, 0.03464, 0.02901, 0.02339, 0.0178, 0.01229, 0.00693, 0.00237, 0.00543, 0.0111, 0.01677, 0.02245, 0.02812, 0.03379, 0.03946, 0.04514, 0.05081, 0.05648, 0.06215, 0.06783, 0.0735, 0.07917, 0.08485, 0.09052, 0.09619, 0.10186], [0.19988, 0.19422, 0.18856, 0.1829, 0.17724, 0.17159, 0.16593, 0.16027, 0.15461, 0.14895, 0.1433, 0.13764, 0.13201, 0.12638, 0.12075, 0.11512, 0.10949, 0.10386, 0.09824, 0.09261, 0.08698, 0.0814, 0.07581, 0.07023, 0.06464, 0.05909, 0.05356, 0.04804, 0.04258, 0.03714, 0.03177, 0.02649, 0.02135, 0.01643, 0.0119, 0.00818, 0.00663, 0.01103, 0.0167, 0.02237, 0.02805, 0.03372, 0.03939, 0.04506, 0.05074, 0.05641, 0.06208, 0.06775, 0.07343, 0.0791, 0.08477, 0.09045, 0.09612, 0.10179, 0.10746, 0.11314], [0.18998, 0.18435, 0.17872, 0.17309, 0.16746, 0.16183, 0.1562, 0.15057, 0.14499, 0.1394, 0.13382, 0.12823, 0.12265, 0.11706, 0.11148, 0.10591, 0.10038, 0.09485, 0.08933, 0.0838, 0.07832, 0.07287, 0.06741, 0.06201, 0.05664, 0.05132, 0.04605, 0.04087, 0.03579, 0.03083, 0.02605, 0.02156, 0.01745, 0.014, 0.01172, 0.01185, 0.01663, 0.0223, 0.02797, 0.03365, 0.03932, 0.04499, 0.05066, 0.05634, 0.06201, 0.06768, 0.07335, 0.07903, 0.0847, 0.09037, 0.09605, 0.10172, 0.10739, 0.11306, 0.11874, 0.12441], [0.18065, 0.17507, 0.16948, 0.1639, 0.15831, 0.15273, 0.1472, 0.14167, 0.13615, 0.13062, 0.12509, 0.11956, 0.11407, 0.10861, 0.10316, 0.0977, 0.09226, 0.08689, 0.08152, 0.07615, 0.07088, 0.06562, 0.06042, 0.05527, 0.05022, 0.04525, 0.0404, 0.03571, 0.03122, 0.02699, 0.02314, 0.01982, 0.01731, 0.01611, 0.01727, 0.02223, 0.0279, 0.03357, 0.03925, 0.04492, 0.05059, 0.05626, 0.06194, 0.06761, 0.07328, 0.07895, 0.08463, 0.0903, 0.09597, 0.10165, 0.10732, 0.11299, 0.11866, 0.12434, 0.13001, 0.13568], [0.17191, 0.16638, 0.16085, 0.15533, 0.14981, 0.14436, 0.1389, 0.13345, 0.128, 0.12254, 0.11713, 0.11176, 0.1064, 0.10103, 0.09571, 0.09045, 0.08518, 0.07997, 0.07482, 0.06968, 0.06466, 0.05967, 0.0548, 0.05003, 0.04537, 0.04089, 0.0366, 0.03257, 0.02888, 0.02564, 0.02301, 0.02128, 0.02092, 0.02276, 0.02783, 0.0335, 0.03917, 0.04485, 0.05052, 0.05619, 0.06186, 0.06754, 0.07321, 0.07888, 0.08455, 0.09023, 0.0959, 0.10157, 0.10725, 0.11292, 0.11859, 0.12426, 0.12994, 0.13561, 0.14128, 0.14695], [0.16374, 0.15829, 0.15283, 0.14738, 0.14201, 0.13664, 0.13127, 0.12591, 0.12054, 0.11527, 0.11001, 0.10474, 0.09951, 0.09436, 0.08921, 0.08411, 0.0791, 0.07409, 0.06921, 0.06437, 0.05965, 0.05504, 0.05055, 0.04622, 0.0421, 0.03823, 0.03465, 0.03145, 0.02877, 0.02676, 0.02569, 0.02597, 0.02829, 0.03343, 0.0391, 0.04477, 0.05045, 0.05612, 0.06179, 0.06746, 0.07314, 0.07881, 0.08448, 0.09015, 0.09583, 0.1015, 0.10717, 0.11285, 0.11852, 0.12419, 0.12986, 0.13554, 0.14121, 0.14688, 0.15255, 0.15823], [0.15615, 0.15078, 0.14542, 0.1401, 0.13484, 0.12957, 0.12431, 0.11906, 0.11391, 0.10876, 0.10361, 0.09855, 0.09353, 0.08851, 0.08363, 0.07876, 0.074, 0.06928, 0.06471, 0.06022, 0.05587, 0.0517, 0.0477, 0.04393, 0.04042, 0.03727, 0.03453, 0.03235, 0.03088, 0.03035, 0.03115, 0.03385, 0.03903, 0.0447, 0.05037, 0.05605, 0.06172, 0.06739, 0.07306, 0.07874, 0.08441, 0.09008, 0.09575, 0.10143, 0.1071, 0.11277, 0.11845, 0.12412, 0.12979, 0.13546, 0.14114, 0.14681, 0.15248, 0.15815, 0.16383, 0.1695], [0.14914, 0.14387, 0.13861, 0.13345, 0.1283, 0.12315, 0.11801, 0.11299, 0.10797, 0.10295, 0.09805, 0.09318, 0.08834, 0.08363, 0.07892, 0.07438, 0.06988, 0.06553, 0.06131, 0.05723, 0.05332, 0.04963, 0.04621, 0.04309, 0.04033, 0.03802, 0.03628, 0.03528, 0.03521, 0.03644, 0.03942, 0.04463, 0.0503, 0.05597, 0.06165, 0.06732, 0.07299, 0.07866, 0.08434, 0.09001, 0.09568, 0.10135, 0.10703, 0.1127, 0.11837, 0.12405, 0.12972, 0.13539, 0.14106, 0.14674, 0.15241, 0.15808, 0.16375, 0.16943, 0.1751, 0.18077], [0.1427, 0.13755, 0.13244, 0.12742, 0.1224, 0.11739, 0.11247, 0.1076, 0.10272, 0.09797, 0.09325, 0.08859, 0.08405, 0.07955, 0.0752, 0.07093, 0.06679, 0.06283, 0.05902, 0.0554, 0.05201, 0.04891, 0.04613, 0.04371, 0.04181, 0.04048, 0.03988, 0.0402, 0.04178, 0.04499, 0.05023, 0.0559, 0.06157, 0.06725, 0.07292, 0.07859, 0.08426, 0.08994, 0.09561, 0.10128, 0.10695, 0.11263, 0.1183, 0.12397, 0.12965, 0.13532, 0.14099, 0.14666, 0.15234, 0.15801, 0.16368, 0.16935, 0.17503, 0.1807, 0.18637, 0.19205], [0.13684, 0.13182, 0.12689, 0.12201, 0.11714, 0.11231, 0.1076, 0.10288, 0.09826, 0.09372, 0.08921, 0.08486, 0.08055, 0.0764, 0.07235, 0.06843, 0.06471, 0.06116, 0.05782, 0.05473, 0.05193, 0.04946, 0.04738, 0.04585, 0.04487, 0.04464, 0.04531, 0.04718, 0.05056, 0.05583, 0.0615, 0.06717, 0.07285, 0.07852, 0.08419, 0.08986, 0.09554, 0.10121, 0.10688, 0.11255, 0.11823, 0.1239, 0.12957, 0.13525, 0.14092, 0.14659, 0.15226, 0.15794, 0.16361, 0.16928, 0.17495, 0.18063, 0.1863, 0.19197, 0.19765, 0.20332], [0.13156, 0.12669, 0.12194, 0.11723, 0.11251, 0.10793, 0.10339, 0.09888, 0.09453, 0.09018, 0.08602, 0.08188, 0.07795, 0.07411, 0.07041, 0.06693, 0.06363, 0.06055, 0.05773, 0.05522, 0.05306, 0.0513, 0.05008, 0.04942, 0.0495, 0.0505, 0.0526, 0.05616, 0.06143, 0.0671, 0.07277, 0.07845, 0.08412, 0.08979, 0.09546, 0.10114, 0.10681, 0.11248, 0.11815, 0.12383, 0.1295, 0.13517, 0.14085, 0.14652, 0.15219, 0.15786, 0.16354, 0.16921, 0.17488, 0.18055, 0.18623, 0.1919, 0.19757, 0.20325, 0.20892, 0.21459], [0.12685, 0.12214, 0.1176, 0.11306, 0.10854, 0.1042, 0.09985, 0.09564, 0.0915, 0.08748, 0.08355, 0.07981, 0.07615, 0.0727, 0.06944, 0.06636, 0.06353, 0.06097, 0.05874, 0.05687, 0.05541, 0.05446, 0.05411, 0.05449, 0.05572, 0.05807, 0.06175, 0.06703, 0.0727, 0.07837, 0.08405, 0.08972, 0.09539, 0.10106, 0.10674, 0.11241, 0.11808, 0.12375, 0.12943, 0.1351, 0.14077, 0.14645, 0.15212, 0.15779, 0.16346, 0.16914, 0.17481, 0.18048, 0.18615, 0.19183, 0.1975, 0.20317, 0.20885, 0.21452, 0.22019, 0.22586], [0.12273, 0.11821, 0.11386, 0.10951, 0.10526, 0.10111, 0.09701, 0.09308, 0.0892, 0.0855, 0.08191, 0.07847, 0.07524, 0.07218, 0.06933, 0.06672, 0.06441, 0.06244, 0.06085, 0.05968, 0.05898, 0.05892, 0.05955, 0.06103, 0.06354, 0.06734, 0.07263, 0.0783, 0.08397, 0.08965, 0.09532, 0.10099, 0.10666, 0.11234, 0.11801, 0.12368, 0.12935, 0.13503, 0.1407, 0.14637, 0.15205, 0.15772, 0.16339, 0.16906, 0.17474, 0.18041, 0.18608, 0.19175, 0.19743, 0.2031, 0.20877, 0.21445, 0.22012, 0.22579, 0.23146, 0.23714], [0.11918, 0.11488, 0.11073, 0.10659, 0.10261, 0.09868, 0.0949, 0.0912, 0.08768, 0.08424, 0.08105, 0.078, 0.07513, 0.07251, 0.07016, 0.0681, 0.06635, 0.06497, 0.06406, 0.06365, 0.0638, 0.06466, 0.06635, 0.06902, 0.07293, 0.07823, 0.0839, 0.08957, 0.09525, 0.10092, 0.10659, 0.11226, 0.11794, 0.12361, 0.12928, 0.13495, 0.14063, 0.1463, 0.15197, 0.15765, 0.16332, 0.16899, 0.17466, 0.18034, 0.18601, 0.19168, 0.19735, 0.20303, 0.2087, 0.21437, 0.22005, 0.22572, 0.23139, 0.23706, 0.24274, 0.24841], [0.1162, 0.11214, 0.10821, 0.10429, 0.10059, 0.0969, 0.09345, 0.09004, 0.08686, 0.08382, 0.08093, 0.07831, 0.07592, 0.07377, 0.07192, 0.07041, 0.06928, 0.06857, 0.06837, 0.06878, 0.06985, 0.07171, 0.07455, 0.07853, 0.08383, 0.0895, 0.09517, 0.10085, 0.10652, 0.11219, 0.11786, 0.12354, 0.12921, 0.13488, 0.14055, 0.14623, 0.1519, 0.15757, 0.16325, 0.16892, 0.17459, 0.18026, 0.18594, 0.19161, 0.19728, 0.20295, 0.20863, 0.2143, 0.21997, 0.22565, 0.23132, 0.23699, 0.24266, 0.24834, 0.25401, 0.25968], [0.11381, 0.10999, 0.10629, 0.10266, 0.09922, 0.09585, 0.09266, 0.08964, 0.08673, 0.08411, 0.08167, 0.07945, 0.07749, 0.07585, 0.07455, 0.07365, 0.07319, 0.07321, 0.07379, 0.07507, 0.07711, 0.08007, 0.08412, 0.08943, 0.0951, 0.10077, 0.10645, 0.11212, 0.11779, 0.12346, 0.12914, 0.13481, 0.14048, 0.14615, 0.15183, 0.1575, 0.16317, 0.16885, 0.17452, 0.18019, 0.18586, 0.19154, 0.19721, 0.20288, 0.20855, 0.21423, 0.2199, 0.22557, 0.23125, 0.23692, 0.24259, 0.24826, 0.25394, 0.25961, 0.26528, 0.27095], [0.11199, 0.10843, 0.10498, 0.10166, 0.09847, 0.09545, 0.09255, 0.08991, 0.08742, 0.08512, 0.08313, 0.08141, 0.07997, 0.07888, 0.07816, 0.07787, 0.07809, 0.0789, 0.0803, 0.08252, 0.0856, 0.08971, 0.09503, 0.1007, 0.10637, 0.11205, 0.11772, 0.12339, 0.12906, 0.13474, 0.14041, 0.14608, 0.15175, 0.15743, 0.1631, 0.16877, 0.17445, 0.18012, 0.18579, 0.19146, 0.19714, 0.20281, 0.20848, 0.21415, 0.21983, 0.2255, 0.23117, 0.23685, 0.24252, 0.24819, 0.25386, 0.25954, 0.26521, 0.27088, 0.27655, 0.28223], [0.11075, 0.10746, 0.10428, 0.10127, 0.09836, 0.09571, 0.09317, 0.09086, 0.08881, 0.08698, 0.08541, 0.08415, 0.08324, 0.08273, 0.08266, 0.08307, 0.084, 0.08562, 0.08792, 0.09113, 0.0953, 0.10063, 0.1063, 0.11197, 0.11765, 0.12332, 0.12899, 0.13466, 0.14034, 0.14601, 0.15168, 0.15735, 0.16303, 0.1687, 0.17437, 0.18005, 0.18572, 0.19139, 0.19706, 0.20274, 0.20841, 0.21408, 0.21975, 0.22543, 0.2311, 0.23677, 0.24245, 0.24812, 0.25379, 0.25946, 0.26514, 0.27081, 0.27648, 0.28215, 0.28783, 0.2935], [0.11009, 0.10709, 0.10418, 0.10151, 0.09893, 0.09661, 0.09448, 0.09255, 0.09089, 0.08954, 0.08848, 0.08776, 0.08741, 0.0875, 0.08805, 0.08919, 0.09094, 0.0934, 0.09665, 0.1009, 0.10623, 0.1119, 0.11757, 0.12325, 0.12892, 0.13459, 0.14026, 0.14594, 0.15161, 0.15728, 0.16295, 0.16863, 0.1743, 0.17997, 0.18565, 0.19132, 0.19699, 0.20266, 0.20834, 0.21401, 0.21968, 0.22535, 0.23103, 0.2367, 0.24237, 0.24805, 0.25372, 0.25939, 0.26506, 0.27074, 0.27641, 0.28208, 0.28775, 0.29343, 0.2991, 0.30477], [0.11, 0.10731, 0.10469, 0.10237, 0.10016, 0.09817, 0.09646, 0.09497, 0.09375, 0.09284, 0.09227, 0.09211, 0.09238, 0.09313, 0.09441, 0.09626, 0.09887, 0.10221, 0.10649, 0.11183, 0.1175, 0.12317, 0.12885, 0.13452, 0.14019, 0.14586, 0.15154, 0.15721, 0.16288, 0.16855, 0.17423, 0.1799, 0.18557, 0.19125, 0.19692, 0.20259, 0.20826, 0.21394, 0.21961, 0.22528, 0.23095, 0.23663, 0.2423, 0.24797, 0.25365, 0.25932, 0.26499, 0.27066, 0.27634, 0.28201, 0.28768, 0.29335, 0.29903, 0.3047, 0.31037, 0.31605], [0.11049, 0.10812, 0.10584, 0.10384, 0.10203, 0.10041, 0.0991, 0.09808, 0.09735, 0.09696, 0.09695, 0.09736, 0.09824, 0.09963, 0.10164, 0.10434, 0.10778, 0.11208, 0.11743, 0.1231, 0.12877, 0.13445, 0.14012, 0.14579, 0.15146, 0.15714, 0.16281, 0.16848, 0.17415, 0.17983, 0.1855, 0.19117, 0.19685, 0.20252, 0.20819, 0.21386, 0.21954, 0.22521, 0.23088, 0.23655, 0.24223, 0.2479, 0.25357, 0.25925, 0.26492, 0.27059, 0.27626, 0.28194, 0.28761, 0.29328, 0.29895, 0.30463, 0.3103, 0.31597, 0.32165, 0.32732], [0.11156, 0.10952, 0.1076, 0.10594, 0.10454, 0.10335, 0.10243, 0.10186, 0.10164, 0.10179, 0.10234, 0.10335, 0.1049, 0.10705, 0.10981, 0.11335, 0.11768, 0.12303, 0.1287, 0.13437, 0.14005, 0.14572, 0.15139, 0.15706, 0.16274, 0.16841, 0.17408, 0.17975, 0.18543, 0.1911, 0.19677, 0.20245, 0.20812, 0.21379, 0.21946, 0.22514, 0.23081, 0.23648, 0.24215, 0.24783, 0.2535, 0.25917, 0.26485, 0.27052, 0.27619, 0.28186, 0.28754, 0.29321, 0.29888, 0.30455, 0.31023, 0.3159, 0.32157, 0.32725, 0.33292, 0.33859], [0.1132, 0.11151, 0.10997, 0.10866, 0.10768, 0.10694, 0.1065, 0.10639, 0.10667, 0.10737, 0.10854, 0.11022, 0.11245, 0.11529, 0.11891, 0.12328, 0.12863, 0.1343, 0.13997, 0.14565, 0.15132, 0.15699, 0.16266, 0.16834, 0.17401, 0.17968, 0.18535, 0.19103, 0.1967, 0.20237, 0.20805, 0.21372, 0.21939, 0.22506, 0.23074, 0.23641, 0.24208, 0.24775, 0.25343, 0.2591, 0.26477, 0.27045, 0.27612, 0.28179, 0.28746, 0.29314, 0.29881, 0.30448, 0.31015, 0.31583, 0.3215, 0.32717, 0.33285, 0.33852, 0.34419, 0.34986], [0.11543, 0.1141, 0.11295, 0.11202, 0.11145, 0.11118, 0.11123, 0.11165, 0.11248, 0.11376, 0.11554, 0.11786, 0.1208, 0.12448, 0.12888, 0.13423, 0.1399, 0.14557, 0.15125, 0.15692, 0.16259, 0.16826, 0.17394, 0.17961, 0.18528, 0.19095, 0.19663, 0.2023, 0.20797, 0.21365, 0.21932, 0.22499, 0.23066, 0.23634, 0.24201, 0.24768, 0.25335, 0.25903, 0.2647, 0.27037, 0.27605, 0.28172, 0.28739, 0.29306, 0.29874, 0.30441, 0.31008, 0.31575, 0.32143, 0.3271, 0.33277, 0.33845, 0.34412, 0.34979, 0.35546, 0.36114], [0.11823, 0.11728, 0.11653, 0.11604, 0.11587, 0.11607, 0.11663, 0.11759, 0.11898, 0.12086, 0.12326, 0.12633, 0.13005, 0.13448, 0.13983, 0.1455, 0.15117, 0.15685, 0.16252, 0.16819, 0.17386, 0.17954, 0.18521, 0.19088, 0.19655, 0.20223, 0.2079, 0.21357, 0.21925, 0.22492, 0.23059, 0.23626, 0.24194, 0.24761, 0.25328, 0.25895, 0.26463, 0.2703, 0.27597, 0.28165, 0.28732, 0.29299, 0.29866, 0.30434, 0.31001, 0.31568, 0.32135, 0.32703, 0.3327, 0.33837, 0.34405, 0.34972, 0.35539, 0.36106, 0.36674, 0.37241], [0.12161, 0.12105, 0.12072, 0.12068, 0.12096, 0.12161, 0.1227, 0.1242, 0.12618, 0.12872, 0.13185, 0.13561, 0.14009, 0.14543, 0.1511, 0.15677, 0.16245, 0.16812, 0.17379, 0.17946, 0.18514, 0.19081, 0.19648, 0.20215, 0.20783, 0.2135, 0.21917, 0.22485, 0.23052, 0.23619, 0.24186, 0.24754, 0.25321, 0.25888, 0.26455, 0.27023, 0.2759, 0.28157, 0.28725, 0.29292, 0.29859, 0.30426, 0.30994, 0.31561, 0.32128, 0.32695, 0.33263, 0.3383, 0.34397, 0.34965, 0.35532, 0.36099, 0.36666, 0.37234, 0.37801, 0.38368], [0.12558, 0.12541, 0.12552, 0.12594, 0.12671, 0.12788, 0.12949, 0.13158, 0.1342, 0.13738, 0.14118, 0.14569, 0.15103, 0.1567, 0.16237, 0.16805, 0.17372, 0.17939, 0.18506, 0.19074, 0.19641, 0.20208, 0.20775, 0.21343, 0.2191, 0.22477, 0.23045, 0.23612, 0.24179, 0.24746, 0.25314, 0.25881, 0.26448, 0.27015, 0.27583, 0.2815, 0.28717, 0.29285, 0.29852, 0.30419, 0.30986, 0.31554, 0.32121, 0.32688, 0.33255, 0.33823, 0.3439, 0.34957, 0.35525, 0.36092, 0.36659, 0.37226, 0.37794, 0.38361, 0.38928, 0.39495], [0.13013, 0.13036, 0.13092, 0.13182, 0.1331, 0.13481, 0.13698, 0.13967, 0.14291, 0.14675, 0.1513, 0.15663, 0.1623, 0.16797, 0.17365, 0.17932, 0.18499, 0.19066, 0.19634, 0.20201, 0.20768, 0.21335, 0.21903, 0.2247, 0.23037, 0.23605, 0.24172, 0.24739, 0.25306, 0.25874, 0.26441, 0.27008, 0.27575, 0.28143, 0.2871, 0.29277, 0.29845, 0.30412, 0.30979, 0.31546, 0.32114, 0.32681, 0.33248, 0.33815, 0.34383, 0.3495, 0.35517, 0.36085, 0.36652, 0.37219, 0.37786, 0.38354, 0.38921, 0.39488, 0.40055, 0.40623], [0.13525, 0.1359, 0.13693, 0.13833, 0.14013, 0.14239, 0.14514, 0.14844, 0.15232, 0.1569, 0.16223, 0.1679, 0.17357, 0.17925, 0.18492, 0.19059, 0.19626, 0.20194, 0.20761, 0.21328, 0.21895, 0.22463, 0.2303, 0.23597, 0.24165, 0.24732, 0.25299, 0.25866, 0.26434, 0.27001, 0.27568, 0.28135, 0.28703, 0.2927, 0.29837, 0.30405, 0.30972, 0.31539, 0.32106, 0.32674, 0.33241, 0.33808, 0.34375, 0.34943, 0.3551, 0.36077, 0.36645, 0.37212, 0.37779, 0.38346, 0.38914, 0.39481, 0.40048, 0.40615, 0.41183, 0.4175]], "path_wb": [[0.3367, 0.3904], [0.3398, 0.3939], [0.3428, 0.3969], [0.3458, 0.3999], [0.3487, 0.4024], [0.3515, 0.4049], [0.3542, 0.4069], [0.3569, 0.4089], [0.3596, 0.4109], [0.3621, 0.4124], [0.3647, 0.4139], [0.3672, 0.4154], [0.3696, 0.4164], [0.372, 0.4174], [0.3743, 0.4184], [0.3765, 0.4189], [0.3787, 0.4194], [0.3809, 0.4199], [0.3831, 0.4204], [0.3853, 0.4209], [0.3873, 0.4209], [0.3893, 0.4209], [0.3913, 0.4209], [0.3933, 0.4209], [0.3953, 0.4209], [0.3973, 0.4209], [0.3993, 0.4209], [0.4011, 0.4204], [0.4029, 0.4199], [0.4047, 0.4194], [0.4065, 0.4189], [0.4083, 0.4184], [0.4101, 0.4179], [0.4119, 0.4174], [0.4137, 0.4169], [0.4155, 0.4164], [0.4173, 0.4159], [0.4191, 0.4154], [0.4209, 0.4149], [0.4227, 0.4144], [0.4245, 0.4139], [0.4263, 0.4134], [0.4281, 0.4129], [0.4299, 0.4124], [0.4317, 0.4119], [0.4335, 0.4114], [0.4353, 0.4109], [0.4371, 0.4104], [0.4389, 0.4099], [0.4405, 0.4089], [0.4423, 0.4084], [0.4439, 0.4074], [0.4457, 0.4069], [0.4473, 0.4059], [0.4491, 0.4054], [0.4506, 0.4044], [0.4524, 0.4039], [0.4542, 0.4034], [0.4558, 0.4024], [0.4576, 0.4019], [0.4592, 0.4009], [0.461, 0.4004], [0.4626, 0.3994], [0.4644, 0.3989], [0.4662, 0.3984], [0.4678, 0.3974], [0.4696, 0.3969], [0.4712, 0.3959], [0.473, 0.3954], [0.4746, 0.3944], [0.4764, 0.3939], [0.4782, 0.3934], [0.4798, 0.3924], [0.4816, 0.3919], [0.4832, 0.3909], [0.485, 0.3904], [0.4866, 0.3894], [0.4884, 0.3889], [0.4899, 0.3879], [0.4917, 0.3874], [0.4935, 0.3869], [0.4951, 0.3859], [0.4969, 0.3854], [0.4985, 0.3844], [0.5003, 0.3839], [0.5019, 0.3829], [0.5037, 0.3824], [0.5055, 0.3819], [0.5071, 0.3809], [0.5089, 0.3804], [0.5105, 0.3794], [0.5123, 0.3789], [0.5139, 0.3779], [0.5157, 0.3774], [0.5175, 0.3769], [0.5191, 0.3759], [0.5209, 0.3754], [0.5225, 0.3744], [0.5243, 0.3739], [0.5259, 0.3729], [0.5277, 0.3724], [0.5292, 0.3714], [0.531, 0.3709], [0.5328, 0.3704], [0.5344, 0.3694], [0.5362, 0.3689], [0.5378, 0.3679], [0.5396, 0.3674], [0.5412, 0.3664], [0.543, 0.3659], [0.5448, 0.3654], [0.5464, 0.3644], [0.5482, 0.3639], [0.5498, 0.3629], [0.5516, 0.3624], [0.5532, 0.3614], [0.555, 0.3609], [0.5568, 0.3604], [0.5584, 0.3594], [0.5602, 0.3589], [0.5618, 0.3579], [0.5636, 0.3574], [0.5652, 0.3564], [0.567, 0.3559], [0.5685, 0.3549], [0.5703, 0.3544], [0.5721, 0.3539], [0.5737, 0.3529], [0.5755, 0.3524], [0.5771, 0.3514], [0.5789, 0.3509], [0.5805, 0.3499], [0.5823, 0.3494], [0.5841, 0.3489], [0.5857, 0.3479], [0.5875, 0.3474], [0.5891, 0.3464], [0.5909, 0.3459], [0.5925, 0.3449], [0.5943, 0.3444], [0.5961, 0.3439], [0.5977, 0.3429], [0.5995, 0.3424], [0.6011, 0.3414], [0.6029, 0.3409], [0.6045, 0.3399], [0.6063, 0.3394], [0.6078, 0.3384], [0.6096, 0.3379], [0.6114, 0.3374], [0.613, 0.3364], [0.6148, 0.3359], [0.6164, 0.3349], [0.6182, 0.3344], [0.6198, 0.3334], [0.6216, 0.3329], [0.6234, 0.3324], [0.625, 0.3314], [0.6268, 0.3309], [0.6284, 0.3299], [0.6302, 0.3294], [0.6318, 0.3284], [0.6336, 0.3279], [0.6352, 0.3269], [0.637, 0.3264], [0.6388, 0.3259], [0.6404, 0.3249], [0.6422, 0.3244], [0.6438, 0.3234], [0.6456, 0.3229], [0.6471, 0.3219], [0.6489, 0.3214], [0.6507, 0.3209], [0.6523, 0.3199], [0.6541, 0.3194], [0.6557, 0.3184], [0.6575, 0.3179], [0.6591, 0.3169], [0.6609, 0.3164], [0.6627, 0.3159], [0.6643, 0.3149], [0.6661, 0.3144], [0.6677, 0.3134], [0.6695, 0.3129], [0.6711, 0.3119], [0.6729, 0.3114], [0.6745, 0.3104], [0.6763, 0.3099], [0.6781, 0.3094], [0.6797, 0.3084], [0.6815, 0.3079], [0.6831, 0.3069], [0.6849, 0.3064], [0.6864, 0.3054], [0.6884, 0.3054], [0.6896, 0.3034], [0.6921, 0.3049], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089], [0.6911, 0.2989], [0.695, 0.3089]], "loss_curve_full": [0.08171, 0.079524, 0.07773, 0.075972, 0.074535, 0.073115, 0.071986, 0.070857, 0.069827, 0.068956, 0.068086, 0.067329, 0.066667, 0.066005, 0.065402, 0.064897, 0.064393, 0.063888, 0.063383, 0.062944, 0.062544, 0.062144, 0.061744, 0.061344, 0.060944, 0.060544, 0.060175, 0.059826, 0.059477, 0.059128, 0.058779, 0.05843, 0.058081, 0.057732, 0.057383, 0.057034, 0.056685, 0.056336, 0.055987, 0.055638, 0.055289, 0.05494, 0.054591, 0.054242, 0.053893, 0.053544, 0.053195, 0.052846, 0.052508, 0.05216, 0.051819, 0.051475, 0.05113, 0.05079, 0.050441, 0.050105, 0.049756, 0.049416, 0.049071, 0.048727, 0.048385, 0.048038, 0.0477, 0.047351, 0.047013, 0.046666, 0.046324, 0.045981, 0.045635, 0.045296, 0.044947, 0.044609, 0.044261, 0.04392, 0.043576, 0.043231, 0.042891, 0.042542, 0.042206, 0.041857, 0.041517, 0.041172, 0.040828, 0.040486, 0.040139, 0.039801, 0.039452, 0.039114, 0.038767, 0.038425, 0.038082, 0.037736, 0.037397, 0.037048, 0.036711, 0.036362, 0.036022, 0.035677, 0.035333, 0.034992, 0.034644, 0.034307, 0.033958, 0.033618, 0.033273, 0.032929, 0.032587, 0.03224, 0.031902, 0.031553, 0.031215, 0.030868, 0.030526, 0.030183, 0.029837, 0.029498, 0.029149, 0.028812, 0.028463, 0.028123, 0.027778, 0.027434, 0.027093, 0.026745, 0.026408, 0.026059, 0.02572, 0.025374, 0.025031, 0.024688, 0.024342, 0.024003, 0.023654, 0.023317, 0.022969, 0.022627, 0.022284, 0.021938, 0.021599, 0.02125, 0.020913, 0.020564, 0.020224, 0.019879, 0.019535, 0.019194, 0.018846, 0.018509, 0.01816, 0.017821, 0.017475, 0.017132, 0.016789, 0.016443, 0.016104, 0.015755, 0.015418, 0.01507, 0.014729, 0.014385, 0.01404, 0.0137, 0.013351, 0.013014, 0.012665, 0.012326, 0.01198, 0.011637, 0.011295, 0.010948, 0.01061, 0.010261, 0.009922, 0.009576, 0.009233, 0.00889, 0.008544, 0.008205, 0.007856, 0.007519, 0.007171, 0.00683, 0.006486, 0.006141, 0.005801, 0.005452, 0.005115, 0.004766, 0.004427, 0.004081, 0.003738, 0.003396, 0.003049, 0.002712, 0.002398, 0.002137, 0.002105, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587, 0.006934, 0.004587], "epoch10_idx": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], "loss10": [0.08171, 0.068086, 0.062544, 0.058779, 0.055289, 0.051819, 0.048385, 0.044947, 0.041517, 0.038082], "w10": [0.3367, 0.3647, 0.3873, 0.4065, 0.4245, 0.4423, 0.4592, 0.4764, 0.4935, 0.5105], "b10": [0.3904, 0.4139, 0.4209, 0.4189, 0.4139, 0.4084, 0.4009, 0.3939, 0.3869, 0.3794], "final_test_preds_fresh100": [0.7946, 0.8051, 0.8157, 0.8262, 0.8368, 0.8473, 0.8579, 0.8684, 0.879, 0.8895], "final_wb_100": [0.5277, 0.3724], "final_wb_250": [0.6911, 0.2989], "traj_w": [0.3398, 0.3428, 0.3458, 0.3486, 0.3515, 0.3542, 0.3569, 0.3596, 0.3621, 0.3647, 0.3672, 0.3696, 0.372, 0.3743, 0.3765, 0.3787, 0.3809, 0.3831, 0.3851, 0.3871, 0.3891, 0.3911, 0.3931, 0.3951, 0.3971, 0.3991, 0.4009, 0.4027, 0.4045, 0.4063, 0.4081, 0.4099, 0.4117, 0.4135, 0.4153, 0.4171, 0.4189, 0.4207, 0.4225, 0.4243, 0.4261, 0.4279, 0.4297, 0.4315, 0.4333, 0.4351, 0.4369, 0.4387, 0.4405, 0.4423, 0.4439, 0.4457, 0.4473, 0.4491, 0.4507, 0.4525, 0.4543, 0.4558, 0.4576, 0.4592, 0.461, 0.4626, 0.4644, 0.466, 0.4678, 0.4696, 0.4712, 0.473, 0.4746, 0.4764, 0.478, 0.4798, 0.4816, 0.4832, 0.485, 0.4866, 0.4884, 0.49, 0.4918, 0.4936, 0.4951, 0.4969, 0.4985, 0.5003, 0.5019, 0.5037, 0.5053, 0.5071, 0.5089, 0.5105, 0.5123, 0.5139, 0.5157, 0.5173, 0.5191, 0.5209, 0.5225, 0.5243, 0.5259, 0.5277, 0.5293, 0.5311, 0.5329, 0.5344, 0.5362, 0.5378, 0.5396, 0.5412, 0.543, 0.5446, 0.5464, 0.5482, 0.5498, 0.5516, 0.5532, 0.555, 0.5566, 0.5584, 0.5602, 0.5618, 0.5636, 0.5652, 0.567, 0.5686, 0.5704, 0.5722, 0.5737, 0.5755, 0.5771, 0.5789, 0.5805, 0.5823, 0.5839, 0.5857, 0.5875, 0.5891, 0.5909, 0.5925, 0.5943, 0.5959, 0.5977, 0.5995, 0.6011, 0.6029, 0.6045, 0.6063, 0.6079, 0.6097, 0.6112, 0.613, 0.6148, 0.6164, 0.6182, 0.6198, 0.6216, 0.6232, 0.625, 0.6268, 0.6284, 0.6302, 0.6318, 0.6336, 0.6352, 0.637, 0.6388, 0.6404, 0.6422, 0.6438, 0.6456, 0.6472, 0.649, 0.6505, 0.6523, 0.6541, 0.6557, 0.6575, 0.6591, 0.6609, 0.6625, 0.6643, 0.6661, 0.6677, 0.6695, 0.6711, 0.6729, 0.6745, 0.6763, 0.6781, 0.6797, 0.6815, 0.6831, 0.6849, 0.6865, 0.6883, 0.6898, 0.6918, 0.6927, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962, 0.6923, 0.6962], "traj_b": [0.3939, 0.3969, 0.3999, 0.4024, 0.4049, 0.4069, 0.4089, 0.4109, 0.4124, 0.4139, 0.4154, 0.4164, 0.4174, 0.4184, 0.4189, 0.4194, 0.4199, 0.4204, 0.4204, 0.4204, 0.4204, 0.4204, 0.4204, 0.4204, 0.4204, 0.4204, 0.4199, 0.4194, 0.4189, 0.4184, 0.4179, 0.4174, 0.4169, 0.4164, 0.4159, 0.4154, 0.4149, 0.4144, 0.4139, 0.4134, 0.4129, 0.4124, 0.4119, 0.4114, 0.4109, 0.4104, 0.4099, 0.4094, 0.4089, 0.4084, 0.4074, 0.4069, 0.4059, 0.4054, 0.4044, 0.4039, 0.4034, 0.4024, 0.4019, 0.4009, 0.4004, 0.3994, 0.3989, 0.3979, 0.3974, 0.3969, 0.3959, 0.3954, 0.3944, 0.3939, 0.3929, 0.3924, 0.3919, 0.3909, 0.3904, 0.3894, 0.3889, 0.3879, 0.3874, 0.3869, 0.3859, 0.3854, 0.3844, 0.3839, 0.3829, 0.3824, 0.3814, 0.3809, 0.3804, 0.3794, 0.3789, 0.3779, 0.3774, 0.3764, 0.3759, 0.3754, 0.3744, 0.3739, 0.3729, 0.3724, 0.3714, 0.3709, 0.3704, 0.3694, 0.3689, 0.3679, 0.3674, 0.3664, 0.3659, 0.3649, 0.3644, 0.3639, 0.3629, 0.3624, 0.3614, 0.3609, 0.3599, 0.3594, 0.3589, 0.3579, 0.3574, 0.3564, 0.3559, 0.3549, 0.3544, 0.3539, 0.3529, 0.3524, 0.3514, 0.3509, 0.3499, 0.3494, 0.3484, 0.3479, 0.3474, 0.3464, 0.3459, 0.3449, 0.3444, 0.3434, 0.3429, 0.3424, 0.3414, 0.3409, 0.3399, 0.3394, 0.3384, 0.3379, 0.3369, 0.3364, 0.3359, 0.3349, 0.3344, 0.3334, 0.3329, 0.3319, 0.3314, 0.3309, 0.3299, 0.3294, 0.3284, 0.3279, 0.3269, 0.3264, 0.3259, 0.3249, 0.3244, 0.3234, 0.3229, 0.3219, 0.3214, 0.3204, 0.3199, 0.3194, 0.3184, 0.3179, 0.3169, 0.3164, 0.3154, 0.3149, 0.3144, 0.3134, 0.3129, 0.3119, 0.3114, 0.3104, 0.3099, 0.3094, 0.3084, 0.3079, 0.3069, 0.3064, 0.3054, 0.3049, 0.3039, 0.3039, 0.3014, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064, 0.2964, 0.3064], "traj_loss": [0.081696, 0.079512, 0.077718, 0.075963, 0.074525, 0.073108, 0.071979, 0.07085, 0.069822, 0.068952, 0.068081, 0.067326, 0.066665, 0.066003, 0.065401, 0.064897, 0.064392, 0.063888, 0.063384, 0.062984, 0.062584, 0.062184, 0.061784, 0.061384, 0.060984, 0.060584, 0.060188, 0.059839, 0.05949, 0.059141, 0.058792, 0.058443, 0.058094, 0.057745, 0.057396, 0.057047, 0.056698, 0.056349, 0.056, 0.055651, 0.055302, 0.054953, 0.054604, 0.054255, 0.053906, 0.053557, 0.053208, 0.052859, 0.05251, 0.052161, 0.051822, 0.051476, 0.051133, 0.050791, 0.050444, 0.050105, 0.049756, 0.049419, 0.049071, 0.04873, 0.048386, 0.048041, 0.047701, 0.047352, 0.047016, 0.046667, 0.046327, 0.045981, 0.045638, 0.045296, 0.044949, 0.044611, 0.044262, 0.043924, 0.043577, 0.043235, 0.042892, 0.042546, 0.042206, 0.041857, 0.04152, 0.041172, 0.040831, 0.040487, 0.040142, 0.039802, 0.039453, 0.039117, 0.038768, 0.038428, 0.038082, 0.037739, 0.037397, 0.03705, 0.036712, 0.036363, 0.036025, 0.035678, 0.035336, 0.034993, 0.034647, 0.034307, 0.033958, 0.033622, 0.033273, 0.032933, 0.032588, 0.032244, 0.031903, 0.031555, 0.031218, 0.030869, 0.030529, 0.030183, 0.02984, 0.029498, 0.029151, 0.028813, 0.028464, 0.028126, 0.027779, 0.027437, 0.027094, 0.026748, 0.026408, 0.026059, 0.025723, 0.025374, 0.025034, 0.024689, 0.024345, 0.024004, 0.023656, 0.023318, 0.02297, 0.022631, 0.022284, 0.021942, 0.021599, 0.021253, 0.020914, 0.020565, 0.020227, 0.01988, 0.019538, 0.019194, 0.018849, 0.018509, 0.01816, 0.017824, 0.017475, 0.017135, 0.01679, 0.016446, 0.016105, 0.015757, 0.015419, 0.01507, 0.014732, 0.014385, 0.014043, 0.0137, 0.013354, 0.013015, 0.012666, 0.012329, 0.011981, 0.01164, 0.011295, 0.010951, 0.01061, 0.010262, 0.009925, 0.009576, 0.009237, 0.008891, 0.008547, 0.008206, 0.007858, 0.00752, 0.007171, 0.006833, 0.006486, 0.006144, 0.005801, 0.005455, 0.005116, 0.004767, 0.00443, 0.004082, 0.003741, 0.003396, 0.003052, 0.002711, 0.002363, 0.002032, 0.001722, 0.001779, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557, 0.004964, 0.006557], "run1_end": 99, "run2_end": 199, "run3_end": 299, "match_epoch_start": 100, "match_epoch_end": 190, "final_test_preds_now": [0.8534, 0.867, 0.8807, 0.8944, 0.908, 0.9217, 0.9354, 0.949, 0.9627, 0.9763], "final_wb_now": [0.6831, 0.3069]};
+
+// ---------- tiny SVG helpers ----------
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function svgRoot(w, h) {
+  const s = el("svg", { viewBox: `0 0 ${w} ${h}`, width: "100%", style: `max-width:${w}px; display:block; margin:0 auto;` });
+  return s;
+}
+function scaleLin(domain, range) {
+  const [d0, d1] = domain, [r0, r1] = range;
+  return (v) => r0 + (v - d0) / (d1 - d0) * (r1 - r0);
+}
+function pathFrom(xs, ys, sx, sy) {
+  return xs.map((x, i) => `${i === 0 ? "M" : "L"} ${sx(x).toFixed(2)} ${sy(ys[i]).toFixed(2)}`).join(" ");
+}
+
+function axes(svg, sx, sy, xDomain, yDomain, opts) {
+  opts = opts || {};
+  const pad = opts.pad || 40;
+  const w = svg.viewBox.baseVal.width, h = svg.viewBox.baseVal.height;
+  // x axis
+  svg.appendChild(el("line", { class: "axis-line", x1: sx(xDomain[0]), x2: sx(xDomain[1]), y1: sy(yDomain[0]), y2: sy(yDomain[0]) }));
+  // y axis
+  svg.appendChild(el("line", { class: "axis-line", x1: sx(xDomain[0]), x2: sx(xDomain[0]), y1: sy(yDomain[0]), y2: sy(yDomain[1]) }));
+  (opts.xTicks || []).forEach(t => {
+    svg.appendChild(el("line", { class: "grid-line", x1: sx(t), x2: sx(t), y1: sy(yDomain[0]), y2: sy(yDomain[1]) }));
+    const lbl = el("text", { class: "val-label", x: sx(t), y: sy(yDomain[0]) + 16, "text-anchor": "middle" });
+    lbl.textContent = t; svg.appendChild(lbl);
+  });
+  (opts.yTicks || []).forEach(t => {
+    svg.appendChild(el("line", { class: "grid-line", x1: sx(xDomain[0]), x2: sx(xDomain[1]), y1: sy(t), y2: sy(t) }));
+    const lbl = el("text", { class: "val-label", x: sx(xDomain[0]) - 8, y: sy(t) + 4, "text-anchor": "end" });
+    lbl.textContent = t; svg.appendChild(lbl);
+  });
+  if (opts.xLabel) {
+    const l = el("text", { class: "val-label", x: (sx(xDomain[0]) + sx(xDomain[1])) / 2, y: h - 4, "text-anchor": "middle" });
+    l.textContent = opts.xLabel; svg.appendChild(l);
+  }
+  if (opts.yLabel) {
+    const l = el("text", { class: "val-label", x: 14, y: 16, "text-anchor": "start" });
+    l.textContent = opts.yLabel; svg.appendChild(l);
+  }
+}
+
+// ---------- 1. Big picture flow diagram ----------
+function renderBigPicture() {
+  const w = 700, h = 270;
+  const svg = svgRoot(w, h);
+  const boxW = 108, boxH = 56, y = 60, gap = 24;
+  const startX = 8;
+  const labels = [
+    { label: "Data", sub: "X, y_true" },
+    { label: "model.forward()", sub: "weights·x + bias" },
+    { label: "y_pred", sub: "the guess" },
+    { label: "Loss fn", sub: "compare to y_true" },
+    { label: "Loss", sub: "one number" },
+  ];
+  const boxes = labels.map((b, i) => ({ ...b, x: startX + i * (boxW + gap) }));
+  boxes.forEach((b, i) => {
+    const g = el("g", {});
+    g.appendChild(el("rect", { x: b.x, y, width: boxW, height: boxH, rx: 10, fill: "var(--surface-raised)", stroke: "var(--forward)", "stroke-width": 1.5 }));
+    const t1 = el("text", { x: b.x + boxW/2, y: y + 24, "text-anchor": "middle", "font-size": 12.5, "font-weight": 600, fill: "var(--ink)" });
+    t1.textContent = b.label;
+    const t2 = el("text", { x: b.x + boxW/2, y: y + 40, "text-anchor": "middle", "font-size": 10 });
+    t2.textContent = b.sub;
+    g.appendChild(t1); g.appendChild(t2);
+    svg.appendChild(g);
+    if (i < boxes.length - 1) {
+      svg.appendChild(el("line", { x1: b.x + boxW, x2: boxes[i+1].x, y1: y + boxH/2, y2: y + boxH/2, stroke: "var(--forward)", "stroke-width": 2, "marker-end": "url(#arrowF)" }));
+    }
+  });
+  // backward arc, dipping below the boxes, with its own label placed clear underneath
+  const firstCx = boxes[0].x + boxW/2, lastCx = boxes[boxes.length-1].x + boxW/2;
+  const dipY = y + boxH + 78;
+  svg.appendChild(el("path", {
+    d: `M ${lastCx} ${y+boxH} C ${lastCx} ${dipY}, ${firstCx} ${dipY}, ${firstCx} ${y+boxH}`,
+    fill: "none", stroke: "var(--backward)", "stroke-width": 2, "stroke-dasharray": "5 4", "marker-end": "url(#arrowB)"
+  }));
+  const bwLabel = el("text", { x: w/2, y: dipY + 22, "text-anchor": "middle", "font-size": 11.5, "font-weight": 700, fill: "var(--backward)" });
+  bwLabel.textContent = "backward: loss.backward() → optimizer.step() → updated weights & bias";
+  svg.appendChild(bwLabel);
+
+  const defs = el("defs", {});
+  const mF = el("marker", { id: "arrowF", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
+  mF.appendChild(el("path", { d: "M0,0 L10,5 L0,10 z", fill: "var(--forward)" }));
+  const mB = el("marker", { id: "arrowB", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
+  mB.appendChild(el("path", { d: "M0,0 L10,5 L0,10 z", fill: "var(--backward)" }));
+  defs.appendChild(mF); defs.appendChild(mB);
+  svg.appendChild(defs);
+  document.getElementById("bigpic-wrap").appendChild(svg);
+}
+
+// ---------- 2. 1D loss V-curve ----------
+function render1DLoss() {
+  const w = 680, h = 300;
+  const svg = svgRoot(w, h);
+  const sx = scaleLin([0.05, 0.95], [56, w - 20]);
+  const sy = scaleLin([0, 0.26], [h - 34, 20]);
+  axes(svg, sx, sy, [0.05,0.95], [0,0.26], { xTicks:[0.1,0.3,0.5,0.7,0.9], yTicks:[0,0.1,0.2], xLabel:"weights", yLabel:"loss" });
+  const p = pathFrom(DATA.ws_1d, DATA.loss_1d, sx, sy);
+  svg.appendChild(el("path", { d: p, fill: "none", stroke: "var(--forward)", "stroke-width": 2.5 }));
+  // markers: init (0.3367), true min (0.7)
+  const initLoss = DATA.loss_1d[DATA.ws_1d.findIndex(v => Math.abs(v-0.34) < 0.006)];
+  svg.appendChild(el("circle", { cx: sx(0.3367), cy: sy(0.2535), r: 5, fill: "var(--pred)" }));
+  const t1 = el("text", { x: sx(0.3367), y: sy(0.2535) - 10, "text-anchor":"middle", "font-size":11, "font-weight":600, fill:"var(--pred)" });
+  t1.textContent = "start (0.3367)"; svg.appendChild(t1);
+  svg.appendChild(el("circle", { cx: sx(0.7), cy: sy(0), r: 5, fill: "var(--test)" }));
+  const t2 = el("text", { x: sx(0.7), y: sy(0) - 10, "text-anchor":"middle", "font-size":11, "font-weight":600, fill:"var(--test)" });
+  t2.textContent = "true minimum (0.7)"; svg.appendChild(t2);
+  document.getElementById("loss1d-wrap").appendChild(svg);
+}
+
+// ---------- 3. Learning rate mini panels ----------
+function renderLRPanels() {
+  const panels = [
+    { data: DATA.lr_small, color: "var(--forward)", title: "lr = 0.002", sub: "too slow" },
+    { data: DATA.lr_mid,   color: "var(--forward)", title: "lr = 0.01", sub: "your notebook's value" },
+    { data: DATA.lr_big,   color: "var(--pred)",    title: "lr = 0.08", sub: "overshoots forever" },
+  ];
+  const grid = document.getElementById("lr-grid");
+  panels.forEach(p => {
+    const wrap = document.createElement("div");
+    wrap.className = "lr-card card";
+    wrap.style.margin = "0";
+    const h4 = document.createElement("h4"); h4.textContent = p.title;
+    const sub = document.createElement("div"); sub.className = "sub"; sub.textContent = p.sub;
+    wrap.appendChild(h4); wrap.appendChild(sub);
+
+    const w = 210, h = 150;
+    const svg = svgRoot(w, h);
+    const xs = p.data.map((_, i) => i);
+    const sx = scaleLin([0, xs.length - 1], [8, w - 8]);
+    const sy = scaleLin([0.3, 0.75], [h - 10, 14]);
+    // target line
+    svg.appendChild(el("line", { x1: 8, x2: w-8, y1: sy(0.7), y2: sy(0.7), stroke: "var(--test)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+    svg.appendChild(el("path", { d: pathFrom(xs, p.data, sx, sy), fill: "none", stroke: p.color, "stroke-width": 2 }));
+    xs.forEach((x, i) => {
+      svg.appendChild(el("circle", { cx: sx(x), cy: sy(p.data[i]), r: 2.2, fill: p.color }));
+    });
+    wrap.appendChild(svg);
+    grid.appendChild(wrap);
+  });
+}
+
+// ---------- 4. Contour + descent path ----------
+const BLUE_RAMP = ["#0d366b","#104281","#184f95","#1c5cab","#256abf","#2a78d6","#3987e5","#5598e7","#6da7ec","#86b6ef","#9ec5f4","#b7d3f6","#cde2fb"];
+function rampColor(t) {
+  // t in [0,1], 0 = low loss (dark), 1 = high loss (light)
+  const n = BLUE_RAMP.length;
+  const idx = Math.min(n - 1, Math.max(0, Math.round(t * (n - 1))));
+  return BLUE_RAMP[idx];
+}
+function renderContour() {
+  const wrap = document.getElementById("contour-wrap");
+  const cw = 640, ch = 460, pad = 46;
+  const canvas = document.createElement("canvas");
+  canvas.width = cw * 2; canvas.height = ch * 2;
+  canvas.style.width = "100%"; canvas.style.maxWidth = cw + "px"; canvas.style.display = "block"; canvas.style.margin = "0 auto"; canvas.style.borderRadius = "10px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(2, 2);
+
+  const W = DATA.W_grid, B = DATA.B_grid, S = DATA.surface;
+  const nW = W.length, nB = B.length;
+  const maxLoss = Math.max(...S.flat());
+  const sx = scaleLin([W[0], W[nW-1]], [pad, cw - 16]);
+  const syb = scaleLin([B[0], B[nB-1]], [ch - pad, 16]);
+  const cellW = (sx(W[1]) - sx(W[0]));
+  const cellH = (syb(B[0]) - syb(B[1]));
+
+  for (let bi = 0; bi < nB; bi++) {
+    for (let wi = 0; wi < nW; wi++) {
+      const loss = S[bi][wi];
+      ctx.fillStyle = rampColor(loss / maxLoss);
+      const px = sx(W[wi]), py = syb(B[bi]) - cellH;
+      ctx.fillRect(px, py, cellW + 1, cellH + 1);
+    }
+  }
+  // path
+  ctx.strokeStyle = "#f2c14e";
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  DATA.path_wb.forEach(([w, b], i) => {
+    const x = sx(w), y = syb(b);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // markers
+  function marker(w, b, color, label, dy) {
+    const x = sx(w), y = syb(b);
+    ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2);
+    ctx.fillStyle = color; ctx.fill();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.4; ctx.stroke();
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--ink").trim() || "#111";
+    ctx.font = "600 11px system-ui, sans-serif";
+    ctx.fillText(label, x + 8, y + (dy||4));
+  }
+  const start = DATA.path_wb[0];
+  const end = DATA.path_wb[DATA.path_wb.length - 1];
+  marker(start[0], start[1], "#e34948", "start", -8);
+  marker(0.7, 0.3, "#008300", "true (0.7, 0.3)", 16);
+  marker(end[0], end[1], "#f2c14e", "after 60 steps", -8);
+
+  // axis labels (plain DOM overlay, theme-aware text)
+  const svgOverlay = svgRoot(cw, ch);
+  svgOverlay.style.position = "absolute"; svgOverlay.style.inset = "0"; svgOverlay.style.pointerEvents = "none";
+  [0.2,0.4,0.6,0.8].forEach(w => {
+    const t = el("text", { class:"val-label", x: sx(w), y: ch - pad + 16, "text-anchor":"middle" }); t.textContent = w.toFixed(1);
+    svgOverlay.appendChild(t);
+  });
+  [0.0,0.2,0.4,0.6].forEach(b => {
+    const t = el("text", { class:"val-label", x: pad - 10, y: syb(b)+4, "text-anchor":"end" }); t.textContent = b.toFixed(1);
+    svgOverlay.appendChild(t);
+  });
+  const xl = el("text", { class:"val-label", x: cw/2, y: ch - 4, "text-anchor":"middle" }); xl.textContent = "weights";
+  svgOverlay.appendChild(xl);
+  const yl = el("text", { class:"val-label", x: 14, y: 16, "text-anchor":"start" }); yl.textContent = "bias";
+  svgOverlay.appendChild(yl);
+
+  const holder = document.createElement("div");
+  holder.style.position = "relative";
+  holder.appendChild(canvas);
+  holder.appendChild(svgOverlay);
+  wrap.appendChild(holder);
+}
+
+// ---------- 5. Computational graph ----------
+function renderCompGraph() {
+  const w = 720, h = 210;
+  const svg = svgRoot(w, h);
+  const nodes = [
+    { x: 20,  label: "x", sub: "input" },
+    { x: 150, label: "weights · x", sub: "multiply" },
+    { x: 300, label: "+ bias", sub: "add" },
+    { x: 430, label: "y_pred", sub: "" },
+    { x: 560, label: "Loss", sub: "vs y_true" },
+  ];
+  const bw = 100, bh = 52, y = 40;
+  nodes.forEach((n, i) => {
+    svg.appendChild(el("rect", { x: n.x, y, width: bw, height: bh, rx: 9, fill: "var(--surface-raised)", stroke: "var(--forward)", "stroke-width": 1.4 }));
+    const t = el("text", { x: n.x + bw/2, y: y + (n.sub? 22:30), "text-anchor":"middle", "font-size":12.5, "font-weight":600, fill:"var(--ink)" });
+    t.textContent = n.label; svg.appendChild(t);
+    if (n.sub) {
+      const s = el("text", { x: n.x+bw/2, y: y+38, "text-anchor":"middle", "font-size":10 }); s.textContent = n.sub; svg.appendChild(s);
+    }
+    if (i < nodes.length - 1) {
+      svg.appendChild(el("line", { x1: n.x+bw, x2: nodes[i+1].x, y1: y+bh/2, y2: y+bh/2, stroke:"var(--forward)", "stroke-width":2, "marker-end":"url(#arrowF2)" }));
+    }
+  });
+  // backward arrows + labels below
+  const by = y + bh + 46;
+  const labels = ["d(loss)/dx (unused)", "d(loss)/d(weights)\n= grad × x", "d(loss)/d(bias)\n= grad × 1", "d(loss)/d(y_pred)\n= sign(error)", "start here"];
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    const n = nodes[i];
+    if (i > 0) {
+      svg.appendChild(el("line", { x1: n.x, x2: nodes[i-1].x + bw, y1: by, y2: by, stroke:"var(--backward)", "stroke-width":2, "stroke-dasharray":"5 3", "marker-end":"url(#arrowB2)" }));
+    }
+  }
+  const capText = ["d(loss)/d(weights) travels back through '+' and '×'", "d(loss)/d(bias) travels straight back through '+'", "gradient starts here: d(loss)/d(y_pred) = sign(y_pred − y_true)"];
+  const cap = el("text", { x: 20, y: by + 22, "font-size":11.5, fill:"var(--backward)", "font-weight":600 });
+  cap.textContent = "backward: each box asks “how much of the loss is my fault, and how much is my input's fault?”";
+  svg.appendChild(cap);
+
+  const defs = el("defs", {});
+  const mF = el("marker", { id: "arrowF2", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
+  mF.appendChild(el("path", { d: "M0,0 L10,5 L0,10 z", fill: "var(--forward)" }));
+  const mB = el("marker", { id: "arrowB2", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
+  mB.appendChild(el("path", { d: "M0,0 L10,5 L0,10 z", fill: "var(--backward)" }));
+  defs.appendChild(mF); defs.appendChild(mB);
+  svg.appendChild(defs);
+  document.getElementById("compgraph-wrap").appendChild(svg);
+}
+
+// ---------- 6. Scatter charts ----------
+function scatterChart(containerId, series) {
+  const w = 680, h = 340;
+  const svg = svgRoot(w, h);
+  const sx = scaleLin([-0.02, 1.0], [50, w-16]);
+  const sy = scaleLin([0.2, 1.05], [h-34, 18]);
+  axes(svg, sx, sy, [-0.02,1.0], [0.2,1.05], { xTicks:[0,0.25,0.5,0.75,1.0], yTicks:[0.3,0.5,0.7,0.9], xLabel:"X", yLabel:"y" });
+  series.forEach(s => {
+    s.x.forEach((xv, i) => {
+      const cx = sx(xv), cy = sy(s.y[i]);
+      if (s.shape === "tri") {
+        svg.appendChild(el("path", { d:`M ${cx} ${cy-5} L ${cx+5} ${cy+4} L ${cx-5} ${cy+4} Z`, fill: s.color }));
+      } else if (s.shape === "diamond") {
+        svg.appendChild(el("path", { d:`M ${cx} ${cy-5} L ${cx+5} ${cy} L ${cx} ${cy+5} L ${cx-5} ${cy} Z`, fill: s.color }));
+      } else {
+        svg.appendChild(el("circle", { cx, cy, r: 4, fill: s.color }));
+      }
+    });
+  });
+  // legend
+  const lg = document.createElement("div");
+  lg.className = "legend-row";
+  series.forEach(s => {
+    const pill = document.createElement("span");
+    pill.className = "pill";
+    pill.style.color = s.color;
+    pill.style.background = `color-mix(in oklab, ${s.color} 14%, transparent)`;
+    pill.innerHTML = `<span class="dot"></span>${s.label}`;
+    lg.appendChild(pill);
+  });
+  const holder = document.getElementById(containerId);
+  holder.appendChild(svg);
+  holder.appendChild(lg);
+}
+
+function renderScatters() {
+  scatterChart("scatter-before-wrap", [
+    { x: DATA.X_train, y: DATA.y_train, color: getVar("--train"), shape:"circle", label:"Training data" },
+    { x: DATA.X_test, y: DATA.y_test, color: getVar("--test"), shape:"tri", label:"Testing data" },
+  ]);
+  scatterChart("scatter-untrained-wrap", [
+    { x: DATA.X_train, y: DATA.y_train, color: getVar("--train"), shape:"circle", label:"Training data" },
+    { x: DATA.X_test, y: DATA.y_test, color: getVar("--test"), shape:"tri", label:"Testing data" },
+    { x: DATA.X_test, y: DATA.init_test_preds, color: getVar("--pred"), shape:"diamond", label:"Predictions (untrained)" },
+  ]);
+  scatterChart("scatter-trained-wrap", [
+    { x: DATA.X_train, y: DATA.y_train, color: getVar("--train"), shape:"circle", label:"Training data" },
+    { x: DATA.X_test, y: DATA.y_test, color: getVar("--test"), shape:"tri", label:"Testing data" },
+    { x: DATA.X_test, y: DATA.final_test_preds_now, color: getVar("--pred"), shape:"diamond", label:"Predictions (current, real epoch 190)" },
+  ]);
+}
+function getVar(name) {
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
+// ---------- 7. Loss curve over epochs ----------
+function renderLossCurve() {
+  const w = 680, h = 280;
+  const svg = svgRoot(w, h);
+  const idx = DATA.epoch10_idx; // 0,10,...,90
+  const losses = DATA.loss10;
+  const sx = scaleLin([0, 90], [50, w-16]);
+  const sy = scaleLin([0, 0.09], [h-34, 20]);
+  axes(svg, sx, sy, [0,90], [0,0.09], { xTicks:[0,20,40,60,80], yTicks:[0,0.04,0.08], xLabel:"epoch", yLabel:"loss (fresh run)" });
+  svg.appendChild(el("path", { d: pathFrom(idx, losses, sx, sy), fill:"none", stroke:"var(--forward)", "stroke-width":2.5 }));
+  idx.forEach((e,i) => svg.appendChild(el("circle", { cx: sx(e), cy: sy(losses[i]), r:3.2, fill:"var(--forward)" })));
+  document.getElementById("losscurve-wrap").appendChild(svg);
+}
+
+// ---------- timeline of reruns ----------
+function renderTimeline() {
+  const w = 680, h = 300;
+  const svg = svgRoot(w, h);
+  const traj = DATA.traj_w;
+  const n = traj.length; // 300
+  const sx = scaleLin([0, n-1], [50, w-16]);
+  const sy = scaleLin([0.3, 0.72], [h-34, 20]);
+  axes(svg, sx, sy, [0,n-1], [0.3,0.72], { xTicks:[0,50,100,150,200,250,300], yTicks:[0.3,0.5,0.7], xLabel:"real cumulative epoch", yLabel:"weights" });
+
+  // target line
+  svg.appendChild(el("line", { x1: sx(0), x2: sx(n-1), y1: sy(0.7), y2: sy(0.7), stroke: "var(--test)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+  const targetLbl = el("text", { x: sx(n-1)-4, y: sy(0.7)-6, "text-anchor":"end", "font-size":10.5, fill:"var(--test)" });
+  targetLbl.textContent = "true weight = 0.7"; svg.appendChild(targetLbl);
+
+  // run-boundary dashed lines
+  const bounds = [DATA.run1_end, DATA.run2_end, DATA.run3_end];
+  const boundLabels = ["end of run 1\n(100 epochs)", "end of run 2\n(200 total)", "end of run 3\n(300 total)"];
+  bounds.forEach((b, i) => {
+    svg.appendChild(el("line", { x1: sx(b), x2: sx(b), y1: sy(0.3), y2: sy(0.72), stroke: "var(--ink-faint)", "stroke-width": 1, "stroke-dasharray": "2 3" }));
+  });
+
+  // highlighted band: exactly what your notebook's current printed output spans
+  const s0 = DATA.match_epoch_start, s1 = DATA.match_epoch_end;
+  svg.appendChild(el("rect", {
+    x: sx(s0), y: 18, width: sx(s1) - sx(s0), height: (h - 34) - 18,
+    fill: "var(--pred)", opacity: 0.08,
+  }));
+
+  // trajectory curve
+  const xs = traj.map((_, i) => i);
+  svg.appendChild(el("path", { d: pathFrom(xs, traj, sx, sy), fill:"none", stroke:"var(--forward)", "stroke-width":2.2 }));
+
+  // highlight the two exact-match epochs bounding your printed output
+  [s0, s1].forEach((me, i) => {
+    svg.appendChild(el("circle", { cx: sx(me), cy: sy(traj[me]), r: 6, fill: "none", stroke: "var(--pred)", "stroke-width": 2.5 }));
+    svg.appendChild(el("circle", { cx: sx(me), cy: sy(traj[me]), r: 2.5, fill: "var(--pred)" }));
+  });
+  const mlbl = el("text", { x: sx((s0+s1)/2), y: sy(traj[s0]) - 14, "text-anchor":"middle", "font-size":11, "font-weight":700, fill:"var(--pred)" });
+  mlbl.textContent = "← this whole band is your notebook's printed output";
+  svg.appendChild(mlbl);
+
+  document.getElementById("timeline-wrap").appendChild(svg);
+
+  // run-boundary text labels (placed low, avoiding the curve)
+  bounds.forEach((b, i) => {
+    const t = el("text", { x: sx(b), y: h - 6, "text-anchor": i === bounds.length-1 ? "end" : "middle", "font-size": 9.5, fill: "var(--ink-faint)" });
+    t.textContent = boundLabels[i].split("\n")[0];
+    svg.appendChild(t);
+  });
+}
+
+// ---------- run ----------
+renderBigPicture();
+render1DLoss();
+renderLRPanels();
+renderContour();
+renderCompGraph();
+renderScatters();
+renderLossCurve();
+renderTimeline();
+
+// ---------- scrollspy for TOC ----------
+(function() {
+  const links = Array.from(document.querySelectorAll('#toc a'));
+  const targets = links.map(a => document.querySelector(a.getAttribute('href')));
+  function onScroll() {
+    let activeIdx = 0;
+    const y = window.scrollY + 100;
+    targets.forEach((t, i) => { if (t && t.offsetTop <= y) activeIdx = i; });
+    links.forEach((a, i) => a.classList.toggle('active', i === activeIdx));
+  }
+  document.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+
+// ---------- reading progress bar + back-to-top ----------
+(function() {
+  const bar = document.getElementById('progressBar');
+  const toTop = document.getElementById('toTopBtn');
+  function onScroll() {
+    const doc = document.documentElement;
+    const scrollable = doc.scrollHeight - window.innerHeight;
+    const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+    bar.style.width = pct + '%';
+    toTop.classList.toggle('visible', window.scrollY > 600);
+  }
+  document.addEventListener('scroll', onScroll, { passive: true });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  onScroll();
+})();
+
+// ---------- theme toggle (for standalone/local viewing, no host chrome) ----------
+(function() {
+  const btn = document.getElementById('themeToggleBtn');
+  const KEY = 'pytorch-explainer-theme';
+  function apply(theme) {
+    if (theme === 'light' || theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', theme);
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+  function current() {
+    const stored = localStorage.getItem(KEY);
+    if (stored) return stored;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  apply(localStorage.getItem(KEY));
+  btn.addEventListener('click', () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(KEY, next);
+    apply(next);
+  });
+})();
+
+// ---------- TOC filter/search ----------
+(function() {
+  const input = document.getElementById('tocSearch');
+  const links = Array.from(document.querySelectorAll('#toc a'));
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    links.forEach((a) => {
+      const match = !q || a.textContent.toLowerCase().includes(q);
+      a.classList.toggle('hidden', !match);
+    });
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { input.value = ''; input.dispatchEvent(new Event('input')); input.blur(); }
+  });
+  // quick focus shortcut
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== input && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      input.focus();
+    }
+  });
+})();
+
+</script>
