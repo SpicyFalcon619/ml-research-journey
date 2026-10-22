@@ -411,6 +411,17 @@ input:focus-visible,
   }
 }
 
+/* A floating control that must stay solid. Its hover tint (surface-hover) is a translucent colour,
+   so using it as the hover background made the control see-through over whatever is behind it.
+   Here the solid colour stays and the tint is laid on top of it. */
+.float-solid {
+  background-color: var(--color-bg-elevated);
+  background-image: linear-gradient(transparent, transparent);
+}
+.float-solid:hover {
+  background-image: linear-gradient(var(--color-surface-hover), var(--color-surface-hover));
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;

@@ -13,6 +13,7 @@ import { Dropdown } from '@/components/ui/Dropdown'
 import { RichText } from '@/components/ai/RichText'
 import { cn } from '@/lib/cn'
 import type { Msg } from '@/lib/chats'
+import type { Snippet } from '@/types'
 
 const iconButton =
   'flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-[var(--color-ink-faint)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]'
@@ -243,11 +244,11 @@ export function AssistantPanel() {
       setView('chat')
       const controller = new AbortController()
       abortRef.current = controller
-      const recentTitles = recent
+      const recentLessons = recent
         .slice(0, 3)
-        .map((entry) => getSnippetById(entry.id)?.title)
-        .filter((title): title is string => !!title)
-      const request = buildMessages([...prior, { role: 'user', content: options.asked ?? content }], activeLesson, done, recentTitles)
+        .map((entry) => getSnippetById(entry.id))
+        .filter((snippet): snippet is Snippet => !!snippet)
+      const request = buildMessages([...prior, { role: 'user', content: options.asked ?? content }], activeLesson, done, recentLessons)
       let received = false
       try {
         // Each model has its own free limit, so if the chosen one is used up or unavailable the next one answers.
