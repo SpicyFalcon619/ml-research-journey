@@ -111,6 +111,35 @@ function LessonRow({ snippet }: { snippet: Snippet }) {
   )
 }
 
+// Every lesson you can finish in a section and all of its sub-sections (data files don't count).
+function lessonsIn(item: NavItem): Snippet[] {
+  return [...item.snippets.filter((s) => !s.filename.endsWith('.csv')), ...item.children.flatMap(lessonsIn)]
+}
+
+// Marks a whole track or section done in one click, or clears it once everything is done.
+function MarkSectionButton({ item, className }: { item: NavItem; className?: string }) {
+  const { isDone, setManyDone } = useLibrary()
+  const lessons = lessonsIn(item)
+  if (lessons.length === 0) return null
+  const remaining = lessons.filter((s) => !isDone(s.id))
+  const allDone = remaining.length === 0
+  const ids = lessons.map((s) => s.id)
+  return (
+    <button
+      type="button"
+      onClick={() => setManyDone(ids, !allDone)}
+      title={allDone ? `Clear done on all ${lessons.length} lessons in ${item.label}` : `Mark the ${remaining.length} unfinished lessons in ${item.label} as done`}
+      aria-label={allDone ? `Clear done on all lessons in ${item.label}` : `Mark all lessons in ${item.label} as done`}
+      className={cn(
+        'shrink-0 cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 transition-colors hover:text-[var(--color-ink)]',
+        className,
+      )}
+    >
+      {allDone ? 'Clear all' : `Mark all done${remaining.length < lessons.length ? ` (${remaining.length} left)` : ''}`}
+    </button>
+  )
+}
+
 function Section({ item, depth, show }: { item: NavItem; depth: number; show: (s: Snippet) => boolean }) {
   const lessons = item.snippets.filter(show)
   const children = item.children
@@ -120,7 +149,12 @@ function Section({ item, depth, show }: { item: NavItem; depth: number; show: (s
   const SubHeading = depth === 1 ? 'h3' : 'h4'
   return (
     <div className={cn(depth > 0 && 'mt-4')}>
-      {depth > 0 && <SubHeading className="mb-1 px-2 text-xs font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">{item.label}</SubHeading>}
+      {depth > 0 && (
+        <div className="mb-1 flex items-baseline justify-between gap-3 px-2">
+          <SubHeading className="text-xs font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">{item.label}</SubHeading>
+          <MarkSectionButton item={item} />
+        </div>
+      )}
       {children.map((child) => (
         <Section key={child.slug} item={child} depth={depth + 1} show={show} />
       ))}
@@ -219,9 +253,12 @@ export function ExplorePage() {
                     <span className="mr-2 font-mono text-xs font-normal text-[var(--color-ink-faint)]">{String(index + 1).padStart(2, '0')}</span>
                     {category.label}
                   </h2>
-                  <Link to={`/c/${category.slug}`} className="shrink-0 text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
-                    Open track
-                  </Link>
+                  <span className="flex shrink-0 items-baseline gap-4">
+                    <MarkSectionButton item={category} />
+                    <Link to={`/c/${category.slug}`} className="shrink-0 text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+                      Open track
+                    </Link>
+                  </span>
                 </div>
                 {CATEGORY_INFO[category.slug] && <p className="mb-3 max-w-2xl text-sm leading-relaxed text-[var(--color-ink-faint)]">{CATEGORY_INFO[category.slug]}</p>}
                 <Section item={category} depth={0} show={show} />

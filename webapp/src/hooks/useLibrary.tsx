@@ -29,6 +29,8 @@ interface LibraryValue {
   isDone: (id: string) => boolean
   toggleFavorite: (id: string) => void
   toggleDone: (id: string) => void
+  /** Mark every one of these lessons done (or not done) in one go. */
+  setManyDone: (ids: string[], value: boolean) => void
   recordVisit: (id: string) => void
   addSearch: (query: string) => void
   dismissResume: (id: string) => void
@@ -132,6 +134,21 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     [logToday],
   )
 
+  const setManyDone = useCallback(
+    (ids: string[], value: boolean) => {
+      setDone((prev) => {
+        const set = new Set(prev)
+        for (const id of ids) {
+          if (value) set.add(id)
+          else set.delete(id)
+        }
+        return [...set]
+      })
+      if (value) logToday()
+    },
+    [logToday],
+  )
+
   const recordVisit = useCallback(
     (id: string) => {
       if (!prefs.keepHistory) return
@@ -167,6 +184,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       isDone: (id) => done.includes(id),
       toggleFavorite,
       toggleDone,
+      setManyDone,
       recordVisit,
       addSearch,
       dismissResume: setDismissedResume,
@@ -180,7 +198,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       clearSearches: () => setRecentSearches([]),
       clearActivity: () => setActivityDays([]),
     }),
-    [favorites, done, recent, recentSearches, activityDays, prefs, dismissedResume, toggleFavorite, toggleDone, recordVisit, addSearch, setPrefs],
+    [favorites, done, recent, recentSearches, activityDays, prefs, dismissedResume, toggleFavorite, toggleDone, setManyDone, recordVisit, addSearch, setPrefs],
   )
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>
