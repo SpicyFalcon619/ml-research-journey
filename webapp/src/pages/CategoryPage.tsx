@@ -1,12 +1,15 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { FileSpreadsheet } from 'lucide-react'
 import { navGroups, flattenNavItems, countSnippets } from '@/lib/roadmap'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { GlassPanel } from '@/components/ui/GlassPanel'
 import { Badge } from '@/components/ui/Badge'
 
 export function CategoryPage() {
   const { categorySlug } = useParams()
   const category = navGroups.flatMap((g) => g.categories).find((c) => c.slug === categorySlug)
+
+  useDocumentTitle(category?.label)
 
   if (!category) return <Navigate to="/" replace />
 

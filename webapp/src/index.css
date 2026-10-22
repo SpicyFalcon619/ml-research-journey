@@ -151,6 +151,138 @@
   --shadow-code: 0 1px 0 0 rgba(255, 255, 255, 0.7) inset, 0 8px 24px -12px rgba(0, 0, 0, 0.18);
 }
 
+/* "Midnight" — deep navy with a cool cyan accent and a warm orange counterpoint.
+   Code surface matches the Tokyo Night editor palette. */
+:root[data-theme="midnight"] {
+  --color-bg: #0a0f1e;
+  --color-bg-elevated: #101729;
+  --color-surface: rgba(150, 175, 255, 0.05);
+  --color-surface-hover: rgba(150, 175, 255, 0.09);
+  --color-border: rgba(150, 175, 255, 0.13);
+  --color-border-strong: rgba(150, 175, 255, 0.24);
+
+  --color-ink: #e6ebf7;
+  --color-ink-dim: #a1acc9;
+  --color-ink-faint: #8895b5;
+
+  --color-accent: #5ccfe6;
+  --color-accent-soft: #8fe3f2;
+  --color-accent-glow: rgba(92, 207, 230, 0.32);
+  --color-accent-ink: #04141a;
+
+  --color-ember: #ff9e64;
+  --color-ember-soft: #ffc196;
+
+  --color-scrollbar-thumb: rgba(150, 175, 255, 0.16);
+  --color-scrollbar-thumb-hover: rgba(150, 175, 255, 0.28);
+  --color-mesh-grid: rgba(150, 175, 255, 0.6);
+
+  --shadow-glass: 0 1px 0 0 rgba(180, 200, 255, 0.07) inset, 0 8px 30px -12px rgba(0, 4, 20, 0.7);
+
+  --color-code-bg: #1a1b26;
+  --color-code-terminal-bg: #16161e;
+  --color-code-surface: rgba(150, 175, 255, 0.04);
+  --color-code-surface-hover: rgba(150, 175, 255, 0.09);
+  --color-code-border: rgba(150, 175, 255, 0.13);
+  --color-code-border-strong: rgba(150, 175, 255, 0.24);
+  --color-code-ink: #c0caf5;
+  --color-code-ink-dim: #a1acc9;
+  --color-code-ink-faint: #8895b5;
+  --color-code-accent-soft: #8fe3f2;
+  --color-code-accent-glow: rgba(92, 207, 230, 0.32);
+  --color-code-ember: #ff9e64;
+  --color-code-ember-soft: #ffc196;
+  --shadow-code: 0 1px 0 0 rgba(180, 200, 255, 0.06) inset, 0 8px 30px -12px rgba(0, 4, 20, 0.7);
+}
+
+/* "Terminal" — near-black with a single phosphor-green accent and an amber counterpoint. */
+:root[data-theme="terminal"] {
+  --color-bg: #070a07;
+  --color-bg-elevated: #0d130d;
+  --color-surface: rgba(120, 255, 140, 0.04);
+  --color-surface-hover: rgba(120, 255, 140, 0.08);
+  --color-border: rgba(120, 255, 140, 0.13);
+  --color-border-strong: rgba(120, 255, 140, 0.25);
+
+  --color-ink: #d7f5da;
+  --color-ink-dim: #96c49d;
+  --color-ink-faint: #7fa987;
+
+  --color-accent: #4ade80;
+  --color-accent-soft: #86efac;
+  --color-accent-glow: rgba(74, 222, 128, 0.3);
+  --color-accent-ink: #03140a;
+
+  --color-ember: #facc15;
+  --color-ember-soft: #fde68a;
+
+  --color-scrollbar-thumb: rgba(120, 255, 140, 0.16);
+  --color-scrollbar-thumb-hover: rgba(120, 255, 140, 0.28);
+  --color-mesh-grid: rgba(120, 255, 140, 0.7);
+
+  --shadow-glass: 0 1px 0 0 rgba(120, 255, 140, 0.06) inset, 0 8px 30px -12px rgba(0, 10, 0, 0.8);
+
+  --color-code-bg: #0a0f0a;
+  --color-code-terminal-bg: #050805;
+  --color-code-surface: rgba(120, 255, 140, 0.03);
+  --color-code-surface-hover: rgba(120, 255, 140, 0.08);
+  --color-code-border: rgba(120, 255, 140, 0.13);
+  --color-code-border-strong: rgba(120, 255, 140, 0.25);
+  --color-code-ink: #d7f5da;
+  --color-code-ink-dim: #96c49d;
+  --color-code-ink-faint: #7fa987;
+  --color-code-accent-soft: #86efac;
+  --color-code-accent-glow: rgba(74, 222, 128, 0.3);
+  --color-code-ember: #facc15;
+  --color-code-ember-soft: #fde68a;
+  --shadow-code: 0 1px 0 0 rgba(120, 255, 140, 0.05) inset, 0 8px 30px -12px rgba(0, 10, 0, 0.8);
+}
+
+/* "Paper" — warm uncoated stock with dark-brown ink and a terracotta accent;
+   code sits on a cream card (Solarized Light's own background). */
+:root[data-theme="paper"] {
+  --color-bg: #f4efe6;
+  --color-bg-elevated: #fbf8f2;
+  --color-surface: rgba(70, 45, 20, 0.045);
+  --color-surface-hover: rgba(70, 45, 20, 0.08);
+  --color-border: rgba(70, 45, 20, 0.15);
+  --color-border-strong: rgba(70, 45, 20, 0.26);
+
+  --color-ink: #2b2420;
+  --color-ink-dim: #5a4f45;
+  --color-ink-faint: #6b5f53;
+
+  --color-accent: #b4532a;
+  --color-accent-soft: #94401d;
+  --color-accent-glow: rgba(180, 83, 42, 0.18);
+  --color-accent-ink: #fffaf3;
+
+  --color-ember: #2e6f68;
+  --color-ember-soft: #235650;
+
+  --color-scrollbar-thumb: rgba(70, 45, 20, 0.2);
+  --color-scrollbar-thumb-hover: rgba(70, 45, 20, 0.34);
+  --color-mesh-grid: rgba(70, 45, 20, 0.4);
+
+  --shadow-glass: 0 1px 0 0 rgba(255, 255, 255, 0.7) inset, 0 8px 24px -12px rgba(70, 45, 20, 0.22);
+  color-scheme: light;
+
+  --color-code-bg: #fdf6e3;
+  --color-code-terminal-bg: #f3ead2;
+  --color-code-surface: rgba(70, 45, 20, 0.045);
+  --color-code-surface-hover: rgba(70, 45, 20, 0.085);
+  --color-code-border: rgba(70, 45, 20, 0.15);
+  --color-code-border-strong: rgba(70, 45, 20, 0.26);
+  --color-code-ink: #433b34;
+  --color-code-ink-dim: #5a4f45;
+  --color-code-ink-faint: #6b5f53;
+  --color-code-accent-soft: #94401d;
+  --color-code-accent-glow: rgba(180, 83, 42, 0.18);
+  --color-code-ember: #2e6f68;
+  --color-code-ember-soft: #235650;
+  --shadow-code: 0 1px 0 0 rgba(255, 255, 255, 0.7) inset, 0 8px 24px -12px rgba(70, 45, 20, 0.22);
+}
+
 html {
   color-scheme: dark;
 }
@@ -167,6 +299,18 @@ body {
 ::selection {
   background: var(--color-accent-glow);
   color: var(--color-ink);
+}
+
+/* Keyboard focus: a visible ring in the theme's accent. Only :focus-visible, so
+   mouse clicks never show it. Text inputs already show focus themselves. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+input:focus-visible,
+[cmdk-input]:focus-visible {
+  outline: none;
 }
 
 /* Thin, unobtrusive scrollbars that fit the glass aesthetic */
@@ -256,10 +400,17 @@ samp,
   counter-reset: line;
   display: block;
   min-width: max-content;
+  /* Shiki separates lines with a literal "\n" text node. Our lines are
+     display:block, so under the <pre>'s `white-space: pre` each of those
+     newlines rendered as an extra empty line (the whole file looked
+     double-spaced). Collapse whitespace between the line boxes and keep it
+     preserved *inside* each line instead. */
+  white-space: normal;
 }
 .code-line {
   counter-increment: line;
   display: block;
+  white-space: pre;
   min-height: 1.625em;
   padding-left: 5.25rem; /* Massive padding to guarantee no overlap */
   position: relative;

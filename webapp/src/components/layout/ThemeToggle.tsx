@@ -5,7 +5,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { cn } from '@/lib/cn'
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useTheme()
+  const [, setTheme, preference] = useTheme()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -27,7 +27,7 @@ export function ThemeToggle() {
     }
   }, [open])
 
-  const activeOption = THEME_OPTIONS.find((o) => o.id === theme) ?? THEME_OPTIONS[0]
+  const activeOption = THEME_OPTIONS.find((o) => o.id === preference) ?? THEME_OPTIONS[0]
 
   return (
     <div className="relative" ref={containerRef}>
@@ -48,7 +48,7 @@ export function ThemeToggle() {
             className="absolute right-0 top-[calc(100%+8px)] z-40 w-48 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-elevated)] p-1 shadow-[var(--shadow-glass)]"
           >
             {THEME_OPTIONS.map((option) => {
-              const active = option.id === theme
+              const active = option.id === preference
               return (
                 <button
                   key={option.id}

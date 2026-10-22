@@ -10,11 +10,13 @@ function NavNode({
   depth,
   expanded,
   toggle,
+  onNavigate,
 }: {
   item: NavItem
   depth: number
   expanded: Record<string, boolean>
   toggle: (slug: string) => void
+  onNavigate?: () => void
 }) {
   const isOpen = expanded[item.slug] ?? false
   const hasContent = item.children.length > 0 || item.snippets.length > 0
@@ -36,7 +38,14 @@ function NavNode({
       {isOpen && hasContent && (
         <div className="animate-fade-up">
           {item.children.map((child) => (
-            <NavNode key={child.slug} item={child} depth={depth + 1} expanded={expanded} toggle={toggle} />
+            <NavNode
+              key={child.slug}
+              item={child}
+              depth={depth + 1}
+              expanded={expanded}
+              toggle={toggle}
+              onNavigate={onNavigate}
+            />
           ))}
           {item.snippets.map((snippet) => {
             const isData = snippet.filename.endsWith('.csv')
@@ -44,6 +53,7 @@ function NavNode({
               <NavLink
                 key={snippet.id}
                 to={`/s/${snippet.id}`}
+                onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-1.5 truncate rounded-lg py-1.5 pr-2 text-[13px] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]',
@@ -64,7 +74,8 @@ function NavNode({
   )
 }
 
-export function Sidebar() {
+// `onNavigate` lets the mobile drawer close itself when a lesson is chosen.
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
     navGroups.forEach((group) => group.categories.forEach((c) => (initial[c.slug] = true)))
@@ -85,7 +96,14 @@ export function Sidebar() {
             </div>
             <div className="flex flex-col gap-0.5">
               {group.categories.map((category) => (
-                <NavNode key={category.slug} item={category} depth={0} expanded={expanded} toggle={toggle} />
+                <NavNode
+                  key={category.slug}
+                  item={category}
+                  depth={0}
+                  expanded={expanded}
+                  toggle={toggle}
+                  onNavigate={onNavigate}
+                />
               ))}
             </div>
           </div>

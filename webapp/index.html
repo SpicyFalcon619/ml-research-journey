@@ -12,9 +12,16 @@
     <title>Field Guide · ML Research</title>
     <script>
       (function () {
+        // Keep the ids in sync with src/lib/theme.ts.
         try {
           var stored = window.localStorage.getItem('mlfg-theme')
-          var theme = stored === 'vesper' || stored === 'light' ? stored : 'dark'
+          var known = ['dark', 'vesper', 'light', 'midnight', 'paper', 'terminal']
+          var theme = 'dark'
+          if (stored === 'system') {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+          } else if (known.indexOf(stored) !== -1) {
+            theme = stored
+          }
           document.documentElement.setAttribute('data-theme', theme)
         } catch (e) {}
       })()
