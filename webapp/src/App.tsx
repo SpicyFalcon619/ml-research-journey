@@ -14,6 +14,7 @@ import { ExplorePage } from '@/pages/ExplorePage'
 import { ProgressPage } from '@/pages/ProgressPage'
 import { SiteNav } from '@/components/layout/SiteNav'
 import { AskButton } from '@/components/ai/AskButton'
+import { SelectionAsk } from '@/components/ai/SelectionAsk'
 import { useAssistant } from '@/hooks/useAssistant'
 import { cn } from '@/lib/cn'
 
@@ -101,6 +102,7 @@ function App() {
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <AskButton />
+      <SelectionAsk />
       {everOpened && (
         <Suspense fallback={null}>
           <AssistantPanel />

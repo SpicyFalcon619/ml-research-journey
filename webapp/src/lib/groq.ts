@@ -15,8 +15,8 @@ export interface GroqModel {
 // The chat models on Groq's free plan. The free plan allows about 8K tokens a minute, so
 // prompts are kept short (see assistantPrompts.ts) whichever model is chosen.
 export const MODELS: GroqModel[] = [
-  { id: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B', note: 'Fast, good for most questions' },
-  { id: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B', note: 'Slower, more careful' },
+  { id: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B', note: 'The strongest here: best answers' },
+  { id: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B', note: 'Faster, a little less careful' },
   { id: 'qwen/qwen3.8-27b', label: 'Qwen 3.8 27B', note: 'An alternative to compare with' },
 ]
 export const DEFAULT_MODEL = MODELS[0].id
@@ -27,6 +27,9 @@ export const DEFAULT_MODEL = MODELS[0].id
  * committed: the deploy workflow reads it from a repository secret.
  */
 export const BUILT_IN_KEY = ((import.meta.env.VITE_GROQ_KEY as string | undefined) ?? '').trim()
+
+/** The chosen model first, then the others. Each model has its own free limit, so when one is used up the next can still answer. */
+export const modelOrder = (chosen: string): GroqModel[] => [...MODELS.filter((m) => m.id === chosen), ...MODELS.filter((m) => m.id !== chosen)]
 
 export const looksLikeKey = (value: string) => /^gsk_[A-Za-z0-9_-]{20,}$/.test(value.trim())
 
@@ -117,7 +120,8 @@ interface StreamOptions {
 }
 
 // Streams the reply token by token (server-sent events) so the answer appears as it is written.
-export async function streamChat({ apiKey, model, messages, signal, onToken }: StreamOptions): Promise<void> {
+/** Resolves with the reason the model stopped: 'length' means the answer was cut off. */
+export async function streamChat({ apiKey, model, messages, signal, onToken }: StreamOptions): Promise<string | undefined> {
   let response: Response
   try {
     response = await fetch(ENDPOINT, {
@@ -129,7 +133,7 @@ export async function streamChat({ apiKey, model, messages, signal, onToken }: S
         messages,
         stream: true,
         temperature: 0.4,
-        max_completion_tokens: 1200,
+        max_completion_tokens: 1600,
         // The gpt-oss models "think" before answering; a low setting keeps replies quick and cheap.
         ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {}),
       }),
@@ -144,6 +148,7 @@ export async function streamChat({ apiKey, model, messages, signal, onToken }: S
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
+  let finish: string | undefined
   for (;;) {
     const { done, value } = await reader.read()
     if (done) break
@@ -154,16 +159,18 @@ export async function streamChat({ apiKey, model, messages, signal, onToken }: S
       const trimmed = line.trim()
       if (!trimmed.startsWith('data:')) continue
       const payload = trimmed.slice(5).trim()
-      if (payload === '[DONE]') return
+      if (payload === '[DONE]') return finish
       try {
-        const chunk = JSON.parse(payload) as { choices?: { delta?: { content?: string } }[]; error?: { message?: string } }
+        const chunk = JSON.parse(payload) as { choices?: { delta?: { content?: string }; finish_reason?: string | null }[]; error?: { message?: string } }
         if (chunk.error?.message) throw new GroqError(chunk.error.message, 'other')
         const text = chunk.choices?.[0]?.delta?.content
         if (text) onToken(text)
+        finish = chunk.choices?.[0]?.finish_reason ?? finish
       } catch (error) {
         if (error instanceof GroqError) throw error
         // A partial or non-JSON line: skip it.
       }
     }
   }
+  return finish
 }
