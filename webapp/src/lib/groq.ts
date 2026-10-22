@@ -120,6 +120,55 @@ interface StreamOptions {
 }
 
 // Streams the reply token by token (server-sent events) so the answer appears as it is written.
+/**
+ * Some models (Qwen, DeepSeek) write their reasoning into the answer between <think> tags. This drops
+ * those blocks as the text streams in. A tag can arrive split across two chunks, so the end of the
+ * buffer is held back while it could still turn out to be the start of a tag.
+ */
+export function createThinkFilter(emit: (text: string) => void) {
+  const OPEN = '<think>'
+  const CLOSE = '</think>'
+  let buffer = ''
+  let inside = false
+  // How many characters at the end of `text` could be the beginning of `tag`.
+  const partial = (text: string, tag: string) => {
+    for (let n = Math.min(tag.length - 1, text.length); n > 0; n--) if (tag.startsWith(text.slice(-n))) return n
+    return 0
+  }
+  return {
+    push(text: string) {
+      buffer += text
+      for (;;) {
+        if (inside) {
+          const end = buffer.indexOf(CLOSE)
+          if (end === -1) {
+            buffer = buffer.slice(buffer.length - partial(buffer, CLOSE))
+            return
+          }
+          buffer = buffer.slice(end + CLOSE.length).replace(/^\s+/, '')
+          inside = false
+        } else {
+          const start = buffer.indexOf(OPEN)
+          if (start === -1) {
+            const hold = partial(buffer, OPEN)
+            if (buffer.length > hold) emit(buffer.slice(0, buffer.length - hold))
+            buffer = buffer.slice(buffer.length - hold)
+            return
+          }
+          if (start > 0) emit(buffer.slice(0, start))
+          buffer = buffer.slice(start + OPEN.length)
+          inside = true
+        }
+      }
+    },
+    /** Call when the stream ends: anything held back was not a tag after all. */
+    flush() {
+      if (!inside && buffer) emit(buffer)
+      buffer = ''
+    },
+  }
+}
+
 /** Resolves with the reason the model stopped: 'length' means the answer was cut off. */
 export async function streamChat({ apiKey, model, messages, signal, onToken }: StreamOptions): Promise<string | undefined> {
   let response: Response
@@ -149,6 +198,7 @@ export async function streamChat({ apiKey, model, messages, signal, onToken }: S
   const decoder = new TextDecoder()
   let buffer = ''
   let finish: string | undefined
+  const filter = createThinkFilter(onToken)
   for (;;) {
     const { done, value } = await reader.read()
     if (done) break
@@ -159,12 +209,15 @@ export async function streamChat({ apiKey, model, messages, signal, onToken }: S
       const trimmed = line.trim()
       if (!trimmed.startsWith('data:')) continue
       const payload = trimmed.slice(5).trim()
-      if (payload === '[DONE]') return finish
+      if (payload === '[DONE]') {
+        filter.flush()
+        return finish
+      }
       try {
         const chunk = JSON.parse(payload) as { choices?: { delta?: { content?: string }; finish_reason?: string | null }[]; error?: { message?: string } }
         if (chunk.error?.message) throw new GroqError(chunk.error.message, 'other')
         const text = chunk.choices?.[0]?.delta?.content
-        if (text) onToken(text)
+        if (text) filter.push(text)
         finish = chunk.choices?.[0]?.finish_reason ?? finish
       } catch (error) {
         if (error instanceof GroqError) throw error
@@ -172,5 +225,6 @@ export async function streamChat({ apiKey, model, messages, signal, onToken }: S
       }
     }
   }
+  filter.flush()
   return finish
 }
