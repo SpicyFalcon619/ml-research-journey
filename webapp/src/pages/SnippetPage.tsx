@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronRight, ExternalLink } from 'lucide-react'
+import { ChevronRight, ExternalLink, MessageSquareText } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
 import { getOutput } from '@/lib/outputs'
 import { getAdjacent } from '@/lib/roadmap'
@@ -8,6 +8,7 @@ import { jumpToLine } from '@/lib/scroll'
 import { tagPath } from '@/lib/tags'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useLibrary } from '@/hooks/useLibrary'
+import { useAssistant } from '@/hooks/useAssistant'
 import { CodeBlock } from '@/components/code/CodeBlock'
 import { DoneButton } from '@/components/snippet/DoneButton'
 import { FavoriteButton } from '@/components/snippet/FavoriteButton'
@@ -19,6 +20,7 @@ export function SnippetPage() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const { recordVisit } = useLibrary()
+  const { openAssistant } = useAssistant()
   const snippet = id ? getSnippetById(id) : undefined
 
   useDocumentTitle(snippet?.title)
@@ -66,6 +68,13 @@ export function SnippetPage() {
           {/* Data files are shown in the guide but aren't something you finish. */}
           {!snippet.filename.endsWith('.csv') && <DoneButton id={snippet.id} />}
           <FavoriteButton id={snippet.id} />
+          <button
+            type="button"
+            onClick={() => openAssistant()}
+            className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]"
+          >
+            <MessageSquareText className="h-3.5 w-3.5" /> Ask AI
+          </button>
           <a
             href={githubUrl}
             target="_blank"

@@ -8,6 +8,7 @@ import { MAX_CODE_FONT_SIZE, MIN_CODE_FONT_SIZE } from '@/lib/codeFontSize'
 import { ROADMAP_PREFIX, KEYS, computeStreak, eraseAll, exportData, localDay, parseImport, storageSnapshot, timeAgo, writeEntries } from '@/lib/userData'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useLibrary } from '@/hooks/useLibrary'
+import { useAssistant } from '@/hooks/useAssistant'
 import { useTheme } from '@/hooks/useTheme'
 import { useCodeFontSize } from '@/hooks/useCodeFontSize'
 import { GlassPanel } from '@/components/ui/GlassPanel'
@@ -40,6 +41,7 @@ const buttonClass =
 export function ProgressPage() {
   useDocumentTitle('Your progress')
   const lib = useLibrary()
+  const assistant = useAssistant()
   const [theme, setTheme, themePreference] = useTheme()
   const [codeSize, setCodeSize] = useCodeFontSize()
   const importRef = useRef<HTMLInputElement>(null)
@@ -109,6 +111,7 @@ export function ProgressPage() {
       clearLabel: 'Reset',
       onClear: captureSaved ? () => { window.localStorage.removeItem(KEYS.capture); window.location.reload() } : undefined,
     },
+    { label: 'AI assistant key (never exported)', detail: assistant.apiKey ? 'saved' : 'none', clearLabel: 'Remove', onClear: assistant.apiKey ? assistant.clearApiKey : undefined },
     { label: 'Roadmap steps ticked', detail: `${roadmapTicks}` },
   ]
 
