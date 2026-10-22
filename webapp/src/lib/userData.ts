@@ -1,3 +1,5 @@
+import { GROQ_KEY_STORAGE, MODEL_STORAGE } from '@/lib/groq'
+
 // Everything a visitor can personalize lives in their own browser (localStorage). This
 // module is the single list of those keys, plus the helpers that show, export, import
 // and erase them. Nothing here is ever sent to a server.
@@ -17,6 +19,9 @@ export const KEYS = {
 
 /** The roadmap page (same site, so same storage) saves one `roadmap-<id>` key per ticked step. */
 export const ROADMAP_PREFIX = 'roadmap-'
+
+/** Kept in this browser but deliberately left out of exports and imports: the Groq key is a secret. */
+const SECRET_KEYS = [GROQ_KEY_STORAGE, MODEL_STORAGE]
 
 const OWN_KEYS: string[] = Object.values(KEYS)
 const MAX_VALUE_LENGTH = 200_000
@@ -78,7 +83,7 @@ export function writeEntries(entries: Record<string, string>) {
 }
 
 export function eraseAll() {
-  for (const key of Object.keys(storageSnapshot())) window.localStorage.removeItem(key)
+  for (const key of [...Object.keys(storageSnapshot()), ...SECRET_KEYS]) window.localStorage.removeItem(key)
 }
 
 // ---- Dates, streaks and "x ago" -------------------------------------------------

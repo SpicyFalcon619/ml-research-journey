@@ -13,10 +13,14 @@ import { TagPage } from '@/pages/TagPage'
 import { ExplorePage } from '@/pages/ExplorePage'
 import { ProgressPage } from '@/pages/ProgressPage'
 import { SiteNav } from '@/components/layout/SiteNav'
+import { AskButton } from '@/components/ai/AskButton'
+import { useAssistant } from '@/hooks/useAssistant'
 import { cn } from '@/lib/cn'
 
 // Shiki (syntax highlighting) is only needed once a snippet is opened, so keep
 // it out of the initial bundle that Home/CategoryPage load.
+// The assistant panel is also loaded on demand: most visits never open it.
+const AssistantPanel = lazy(() => import('@/components/ai/AssistantPanel').then((m) => ({ default: m.AssistantPanel })))
 const SnippetPage = lazy(() => import('@/pages/SnippetPage').then((m) => ({ default: m.SnippetPage })))
 
 // A new route should start at the top, like a real page load. Jumps to a
@@ -39,6 +43,7 @@ function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const { everOpened } = useAssistant()
 
   useEffect(() => {
     function handleKeydown(event: KeyboardEvent) {
@@ -95,6 +100,12 @@ function App() {
       </div>
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <AskButton />
+      {everOpened && (
+        <Suspense fallback={null}>
+          <AssistantPanel />
+        </Suspense>
+      )}
     </>
   )
 }
