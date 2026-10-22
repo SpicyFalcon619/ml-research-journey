@@ -20,7 +20,7 @@ export function SnippetPage() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const { recordVisit } = useLibrary()
-  const { openAssistant } = useAssistant()
+  const { available, openAssistant } = useAssistant()
   const snippet = id ? getSnippetById(id) : undefined
 
   useDocumentTitle(snippet?.title)
@@ -68,6 +68,7 @@ export function SnippetPage() {
           {/* Data files are shown in the guide but aren't something you finish. */}
           {!snippet.filename.endsWith('.csv') && <DoneButton id={snippet.id} />}
           <FavoriteButton id={snippet.id} />
+          {available && (
           <button
             type="button"
             onClick={() => openAssistant()}
@@ -75,6 +76,7 @@ export function SnippetPage() {
           >
             <MessageSquareText className="h-3.5 w-3.5" /> Ask AI
           </button>
+          )}
           <a
             href={githubUrl}
             target="_blank"

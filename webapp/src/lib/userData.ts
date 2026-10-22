@@ -17,6 +17,7 @@ export const KEYS = {
   codeSize: 'mlfg-code-font-size',
   capture: 'mlfg-capture-style-v1',
   aiChats: CHATS_KEY,
+  exploreOpen: 'mlfg-explore-open',
 } as const
 
 /** The roadmap page (same site, so same storage) saves one `roadmap-<id>` key per ticked step. */

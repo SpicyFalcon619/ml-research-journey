@@ -34,8 +34,8 @@ jobs:
         working-directory: webapp
         run: npm run build
         env:
-          # The assistant's built-in Groq key, from the repository's Actions secrets (never committed).
-          # Without it the assistant simply asks each visitor for their own key.
+          # The assistant's Groq key, from the repository's Actions secrets (never committed). Visitors are
+          # never asked for a key; without this secret the assistant is simply switched off.
           VITE_GROQ_KEY: ${{ secrets.GROQ_API_KEY }}
 
       - name: Keep the existing roadmap page at its current URL

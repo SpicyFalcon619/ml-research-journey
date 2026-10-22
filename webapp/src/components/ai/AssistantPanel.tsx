@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Link, useLocation } from 'react-router-dom'
-import { ArrowUp, Check, Copy, Eye, EyeOff, History, Link2, Plus, RotateCcw, Settings, Square, Trash2, X } from 'lucide-react'
+import { ArrowUp, Check, Copy, History, Plus, RotateCcw, Settings as SettingsIcon, Square, Trash2, X } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
 import { buildMessages, CONTINUE_PROMPT, FOLLOW_UPS, GENERAL_ACTIONS, LESSON_ACTIONS, MAX_QUESTION_CHARS } from '@/lib/assistantPrompts'
-import { BUILT_IN_KEY, GroqError, looksLikeKey, MODELS, modelOrder, setupLink, streamChat } from '@/lib/groq'
+import { GroqError, MODELS, modelOrder, streamChat } from '@/lib/groq'
 import { timeAgo } from '@/lib/userData'
 import { useAssistant } from '@/hooks/useAssistant'
 import { useLibrary } from '@/hooks/useLibrary'
@@ -20,172 +20,40 @@ const iconButton =
 const textButton =
   'flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-50'
 
-function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }) {
-  const { apiKey, personalKey, usingBuiltIn, setApiKey, clearApiKey, model, setModel } = useAssistant()
-  const [value, setValue] = useState('')
-  const [visible, setVisible] = useState(false)
-  const [copied, setCopied] = useState(false)
-  // With a key built into the site nobody needs to set anything up, so using your own is tucked away.
-  const [ownOpen, setOwnOpen] = useState(false)
-  const valid = looksLikeKey(value)
-  const showWarning = value.trim() !== '' && !valid
-  const builtInAvailable = BUILT_IN_KEY !== ''
-
-  const keyField = (
-    <div>
-      <label htmlFor="groq-key" className="mb-1.5 block text-xs font-medium text-[var(--color-ink-dim)]">
-        {personalKey ? 'Replace your key' : builtInAvailable ? 'Your Groq API key' : 'Groq API key'}
-      </label>
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <input
-            id="groq-key"
-            type={visible ? 'text' : 'password'}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="gsk_..."
-            autoComplete="off"
-            spellCheck={false}
-            className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pr-9 pl-3 font-mono text-xs text-[var(--color-ink)] outline-none transition-colors placeholder:text-[var(--color-ink-faint)] focus:border-[var(--color-accent)]"
-          />
-          <button type="button" onClick={() => setVisible((v) => !v)} aria-label={visible ? 'Hide key' : 'Show key'} className="absolute top-1/2 right-1.5 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center text-[var(--color-ink-faint)] hover:text-[var(--color-ink)]">
-            {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-          </button>
-        </div>
-        <button
-          type="button"
-          disabled={!valid}
-          onClick={() => {
-            setApiKey(value)
-            setValue('')
-            onDone()
-          }}
-          className="h-9 cursor-pointer rounded-lg bg-[var(--color-accent)] px-4 text-sm font-medium text-[var(--color-accent-ink)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Save
-        </button>
-      </div>
-      {showWarning && <p className="mt-1.5 text-xs text-[var(--color-ember)]">Groq keys start with gsk_ and are about 56 characters long.</p>}
-      <p className="mt-2 text-xs leading-relaxed text-[var(--color-ink-faint)]">
-        Kept in this browser only and sent only to Groq. It is never put in the site's code, in an export, or on GitHub.
-      </p>
-    </div>
-  )
-
-  // Nothing to connect to yet: the site has no key built in and the visitor hasn't added one.
-  if (!existing) {
-    return (
-      <div className="flex flex-col gap-5 p-5">
-        <div>
-          <h3 className="text-base font-semibold text-[var(--color-ink)]">Connect Groq</h3>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-dim)]">
-            The assistant runs on Groq's free plan. Make a key at{' '}
-            <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" className="text-[var(--color-ink)] underline decoration-[var(--color-border-strong)] underline-offset-4">
-              console.groq.com/keys
-            </a>
-            , paste it below, and ask away.
-          </p>
-        </div>
-        {keyField}
-      </div>
-    )
-  }
-
+// Settings has one thing to choose: the model. There is nothing to enter, because the site uses its own key.
+function Settings({ onDone }: { onDone: () => void }) {
+  const { model, setModel } = useAssistant()
   return (
     <div className="flex flex-col gap-5 p-5">
       <div>
         <div className="mb-1.5 text-xs font-medium text-[var(--color-ink-dim)]">Model</div>
         <Dropdown ariaLabel="Model" value={model} onChange={setModel} options={MODELS.map((m) => ({ value: m.id, label: m.label, description: m.note }))} />
         <p className="mt-2 text-xs leading-relaxed text-[var(--color-ink-faint)]">
-          If the chosen model reaches its free limit, another one answers instead, so you can keep going.
+          If the chosen model reaches its free limit, another one answers instead, so you can keep going. Everyone using the site shares one free
+          daily limit.
         </p>
       </div>
-
-      {usingBuiltIn && (
-        <p className="text-xs leading-relaxed text-[var(--color-ink-faint)]">
-          This site has an AI key built in, so there is nothing to set up. Everyone using the site shares its free daily limit.
-        </p>
-      )}
-
-      {personalKey && builtInAvailable && (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs text-[var(--color-ink-dim)]">
-          <span>You are using your own key.</span>
-          <button
-            type="button"
-            onClick={() => {
-              clearApiKey()
-              onDone()
-            }}
-            className="shrink-0 cursor-pointer text-[var(--color-ink)] underline decoration-[var(--color-border-strong)] underline-offset-4"
-          >
-            Switch back to the site's key
-          </button>
-        </div>
-      )}
-
-      {builtInAvailable && !personalKey && (
-        <div>
-          <button
-            type="button"
-            onClick={() => setOwnOpen((v) => !v)}
-            aria-expanded={ownOpen}
-            className="flex cursor-pointer items-center gap-1 text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
-          >
-            Use my own Groq key instead (optional)
-          </button>
-          {ownOpen && <div className="mt-3">{keyField}</div>}
-        </div>
-      )}
-
-      {/* Without a built-in key the visitor's own key is the only way in: replace or remove it, and share it. */}
-      {!builtInAvailable && (
-        <>
-          {keyField}
-          {personalKey && (
-            <div>
-              <div className="mb-1.5 text-xs font-medium text-[var(--color-ink-dim)]">Set up another device</div>
-              <p className="mb-2 text-xs leading-relaxed text-[var(--color-ink-faint)]">
-                This copies a link that saves your key in whoever opens it, so a friend or your phone is ready in one click. Anyone with the link
-                can use your free quota, so send it only to people you trust.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  void navigator.clipboard?.writeText(setupLink(apiKey)).then(() => {
-                    setCopied(true)
-                    window.setTimeout(() => setCopied(false), 1800)
-                  })
-                }}
-                className={textButton}
-              >
-                {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />} {copied ? 'Link copied' : 'Copy setup link'}
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-4">
-        {personalKey && !builtInAvailable ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm('Remove your saved Groq key from this browser?')) {
-                clearApiKey()
-                onDone()
-              }
-            }}
-            className="cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
-          >
-            Remove my key
-          </button>
-        ) : (
-          <span />
-        )}
+      <div className="flex justify-end border-t border-[var(--color-border)] pt-4">
         <button type="button" onClick={onDone} className={textButton}>
           Back to chat
         </button>
       </div>
+    </div>
+  )
+}
+
+// Shown when the site was built without a key (for instance a local copy with no .env.local), so there is nothing to ask.
+function Unavailable() {
+  return (
+    <div className="flex flex-col gap-3 p-5">
+      <h3 className="text-base font-semibold text-[var(--color-ink)]">The assistant is switched off</h3>
+      <p className="text-sm leading-relaxed text-[var(--color-ink-dim)]">It isn't set up on this copy of the site, so there's nothing to ask right now.</p>
+      {import.meta.env.DEV && (
+        <p className="text-xs leading-relaxed text-[var(--color-ink-faint)]">
+          For the site's owner: put the key in <span className="font-mono">webapp/.env.local</span> as <span className="font-mono">VITE_GROQ_KEY=...</span> and restart
+          the dev server. On GitHub it comes from the <span className="font-mono">GROQ_API_KEY</span> secret.
+        </p>
+      )}
     </div>
   )
 }
@@ -203,7 +71,7 @@ function TypingDots() {
 }
 
 export function AssistantPanel() {
-  const { open, pending, apiKey, usingBuiltIn, model, closeAssistant, consumePending } = useAssistant()
+  const { open, pending, apiKey, available, model, closeAssistant, consumePending } = useAssistant()
   const { done, recent } = useLibrary()
   const { chats, active, messages, startChat, updateMessages, patchMessage, newChat, openChat, deleteChat, clearAll, makeId } = useChats()
   const { pathname } = useLocation()
@@ -221,7 +89,7 @@ export function AssistantPanel() {
   const returnFocusRef = useRef<HTMLElement | null>(null)
 
   const activeLesson = useLesson ? lesson : undefined
-  const hasKey = apiKey !== ''
+  const hasKey = available
 
   // A new lesson gets its own context back, even if it was switched off for the last one.
   useEffect(() => setUseLesson(true), [lessonId])
@@ -278,7 +146,7 @@ export function AssistantPanel() {
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           const kind = error instanceof GroqError ? error.kind : 'other'
-          const message = kind === 'auth' && usingBuiltIn ? "The site's built-in key was not accepted. You can use your own key in Settings." : (error as Error).message
+          const message = kind === 'auth' ? "The assistant's key isn't working right now. Please try again later." : (error as Error).message
           patchMessage(chatId, replyId, { error: message, errorKind: kind })
         }
       } finally {
@@ -286,7 +154,7 @@ export function AssistantPanel() {
         abortRef.current = null
       }
     },
-    [apiKey, usingBuiltIn, model, messages, busy, active, activeLesson, done, recent, startChat, updateMessages, patchMessage, makeId],
+    [apiKey, model, messages, busy, active, activeLesson, done, recent, startChat, updateMessages, patchMessage, makeId],
   )
 
   // A question handed over by an "Ask about this" button is sent once the panel is ready.
@@ -303,7 +171,7 @@ export function AssistantPanel() {
   useEffect(() => {
     if (!open) return
     returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    const timer = window.setTimeout(() => (inputRef.current ?? document.getElementById('groq-key'))?.focus(), 120)
+    const timer = window.setTimeout(() => inputRef.current?.focus(), 120)
     return () => {
       window.clearTimeout(timer)
       returnFocusRef.current?.focus?.()
@@ -390,8 +258,8 @@ export function AssistantPanel() {
                 </button>
               )}
               {hasKey && (
-                <button type="button" onClick={() => setView((v) => (v === 'settings' ? 'chat' : 'settings'))} aria-label="Settings" aria-pressed={view === 'settings'} title="Model and key" className={cn(iconButton, view === 'settings' && 'bg-[var(--color-surface-hover)] text-[var(--color-ink)]')}>
-                  <Settings className="h-4 w-4" />
+                <button type="button" onClick={() => setView((v) => (v === 'settings' ? 'chat' : 'settings'))} aria-label="Settings" aria-pressed={view === 'settings'} title="Model" className={cn(iconButton, view === 'settings' && 'bg-[var(--color-surface-hover)] text-[var(--color-ink)]')}>
+                  <SettingsIcon className="h-4 w-4" />
                 </button>
               )}
               <button type="button" onClick={closeAssistant} aria-label="Close" className={iconButton}>
@@ -402,7 +270,7 @@ export function AssistantPanel() {
 
           {showSetup ? (
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <KeyForm existing={hasKey} onDone={() => setView('chat')} />
+              {hasKey ? <Settings onDone={() => setView('chat')} /> : <Unavailable />}
             </div>
           ) : view === 'history' ? (
             <div className="min-h-0 flex-1 overflow-y-auto p-4">
@@ -471,7 +339,7 @@ export function AssistantPanel() {
                     </div>
                     <p className="mt-6 text-xs leading-relaxed text-[var(--color-ink-faint)]">
                       Answers come from an AI model and can be wrong. Check anything important against the lesson's real output. Your questions go to Groq.
-                      The free plan has a daily limit{usingBuiltIn ? ' that everyone using the site shares' : ''}, so this is for light use. Conversations are saved in this browser.
+                      The free plan has a daily limit that everyone using the site shares, so this is for light use. Conversations are saved in this browser.
                     </p>
                   </div>
                 ) : (
@@ -491,15 +359,9 @@ export function AssistantPanel() {
                               <div className="mt-2 rounded-lg border border-[var(--color-ember)]/40 px-3 py-2 text-sm text-[var(--color-ember)]" role="alert">
                                 {message.error}
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                  {message.errorKind === 'auth' ? (
-                                    <button type="button" onClick={() => setView('settings')} className={textButton}>
-                                      Open settings
-                                    </button>
-                                  ) : (
-                                    <button type="button" onClick={() => retry(index)} disabled={busy} className={textButton}>
-                                      <RotateCcw className="h-3.5 w-3.5" /> Try again
-                                    </button>
-                                  )}
+                                  <button type="button" onClick={() => retry(index)} disabled={busy} className={textButton}>
+                                    <RotateCcw className="h-3.5 w-3.5" /> Try again
+                                  </button>
                                 </div>
                               </div>
                             )}
