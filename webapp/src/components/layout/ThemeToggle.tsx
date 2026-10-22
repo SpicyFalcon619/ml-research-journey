@@ -72,9 +72,9 @@ export function ThemeToggle() {
         title="Change the colour theme"
         aria-expanded={open}
       >
-        {/* A palette icon and the word "Theme" say what this is; the dot shows which one is on. */}
+        {/* The palette icon, plus the word and an arrow on wider screens; the list shows which
+            theme is on. Phones have no room for the word, so they get the icon alone. */}
         <Palette className="h-4 w-4 shrink-0" aria-hidden />
-        <ThemeDot option={activeOption} size={14} />
         <span className="hidden sm:inline">Theme</span>
         <ChevronDown className={cn('hidden h-3.5 w-3.5 shrink-0 transition-transform sm:block', open && 'rotate-180')} aria-hidden />
       </button>

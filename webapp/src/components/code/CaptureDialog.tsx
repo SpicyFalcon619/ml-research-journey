@@ -392,8 +392,8 @@ function CaptureDialog({ code, filename, topics = [], output, onClose }: Capture
           </button>
         </header>
 
-        <div className="grid min-h-0 flex-1 overflow-y-auto md:h-[min(38rem,calc(100vh-11rem))] md:grid-cols-2 md:overflow-hidden">
-          <section className="flex min-h-0 min-w-0 flex-col gap-3 p-5 md:border-r md:border-[var(--color-border)]">
+        <div className="grid min-h-0 flex-1 overflow-y-auto wide:h-[min(38rem,calc(100vh-11rem))] wide:grid-cols-2 wide:overflow-hidden">
+          <section className="flex min-w-0 flex-col gap-3 p-5 wide:min-h-0 wide:border-r wide:border-[var(--color-border)]">
             <Step number={1} title="Choose lines">
               <div className="flex items-center gap-1.5">
                 <button type="button" className={smallButton} onClick={() => setSelected(new Set(Array.from({ length: total }, (_, i) => i + 1)))}>
@@ -417,7 +417,8 @@ function CaptureDialog({ code, filename, topics = [], output, onClose }: Capture
                 onChange={selectSection}
               />
             )}
-            <div className="flex min-h-[14rem] min-w-0 flex-1 flex-col overflow-hidden md:min-h-0">
+            {/* A fixed height on phones: there the sections stack and the panel scrolls, so the list must not depend on a parent height. */}
+            <div className="flex h-72 min-w-0 shrink-0 flex-col overflow-hidden wide:h-auto wide:min-h-0 wide:flex-1">
               {pickHtml ? (
                 <LinePicker lines={pickLines} selected={selected} onChange={setSelected} />
               ) : (
@@ -429,11 +430,11 @@ function CaptureDialog({ code, filename, topics = [], output, onClose }: Capture
             </p>
           </section>
 
-          <section className="flex min-h-0 min-w-0 flex-col gap-3 overflow-y-auto border-t border-[var(--color-border)] p-5 md:border-t-0">
+          <section className="flex min-w-0 flex-col gap-3 border-t border-[var(--color-border)] p-5 wide:min-h-0 wide:overflow-y-auto wide:border-t-0">
             <Step number={2} title="Preview">
               <span className="font-mono text-xs text-[var(--color-ink-faint)]">{size.w ? `${pixels.w} x ${pixels.h} px` : ''}</span>
             </Step>
-            <div ref={frameRef} className="min-h-[13rem] flex-1 overflow-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+            <div ref={frameRef} className="min-h-[13rem] shrink-0 overflow-auto wide:shrink wide:flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
               {filtered === null ? (
                 <p className="text-sm text-[var(--color-ink-faint)]">Preparing preview...</p>
               ) : (
