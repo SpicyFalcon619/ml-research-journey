@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Field Guide: Charting a Course into ML &amp; AI Research</title>
+<!-- Compass from the hero, as a favicon (the Field Guide app has its own chevron-and-cursor icon). -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c1118'/%3E%3Ccircle cx='16' cy='16' r='11.5' fill='none' stroke='%23d2a14e' stroke-width='1.6' stroke-opacity='.7'/%3E%3Cpath d='M16 4.5 L18.6 16 L16 27.5 L13.4 16 Z' fill='%23d2a14e'/%3E%3Cpath d='M4.5 16 L16 13.4 L27.5 16 L16 18.6 Z' fill='%23f3ecdb' fill-opacity='.5'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%230c1118'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0c1118">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1269,10 +1272,13 @@
     }
   }
 
-  // Load state from local storage
+  // Load state from local storage. A saved choice wins in both directions, so
+  // un-ticking a box that ships ticked in the HTML is remembered too (the ticks
+  // written into the HTML are only the starting point for a first visit).
   checkboxes.forEach(chk => {
     const saved = localStorage.getItem(`roadmap-${chk.id}`);
     if (saved === 'true') chk.checked = true;
+    else if (saved === 'false') chk.checked = false;
 
     chk.addEventListener('change', (e) => {
       localStorage.setItem(`roadmap-${chk.id}`, e.target.checked);
@@ -1284,9 +1290,11 @@
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
       if (!confirm('Reset all checked progress on this guide?')) return;
+      // Store an explicit "unticked" rather than deleting the key: a deleted key would
+      // let the boxes that ship ticked in the HTML tick themselves again on refresh.
       checkboxes.forEach(chk => {
         chk.checked = false;
-        localStorage.removeItem(`roadmap-${chk.id}`);
+        localStorage.setItem(`roadmap-${chk.id}`, 'false');
       });
       updateProgress();
     });
