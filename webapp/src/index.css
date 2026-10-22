@@ -9,6 +9,9 @@
 @import "@fontsource/geist-mono/400-italic.css";
 @import "@fontsource/geist-mono/500-italic.css";
 
+/* Side-by-side layouts need room in both directions: a phone held sideways is wide but short. */
+@custom-variant wide (@media (min-width: 48rem) and (min-height: 34rem));
+
 @theme {
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
