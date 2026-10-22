@@ -66,6 +66,13 @@ export function TopBar({
       </div>
 
       <div className="ml-auto flex shrink-0 items-center gap-2">
+        {/* The roadmap is a separate static page on the same site (copied in by the deploy workflow). */}
+        <a
+          href={`${import.meta.env.BASE_URL}ml-research-roadmap.html`}
+          className="hidden items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-medium text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] sm:flex"
+        >
+          Roadmap
+        </a>
         <ThemeToggle />
         <a
           href="https://github.com/SpicyFalcon619/ml-research-journey"

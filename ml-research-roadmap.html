@@ -59,6 +59,20 @@
     border-bottom:1px solid var(--line);
   }
   .hero__inner{position:relative; z-index:1;}
+  .hero__back{
+    display:inline-block;
+    margin-bottom:22px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+    text-decoration:none;
+    border-bottom:1px solid var(--line-strong);
+    padding-bottom:3px;
+    transition:color .15s, border-color .15s;
+  }
+  .hero__back:hover{color:var(--gold); border-color:var(--gold-dim);}
   .eyebrow{
     font-family:'JetBrains Mono',monospace;
     font-size:12.5px;
@@ -713,6 +727,7 @@
         <text x="75" y="146" text-anchor="middle" fill="#b8c0c8" font-family="JetBrains Mono, monospace" font-size="9">S</text>
       </svg>
 
+      <a class="hero__back" href="./">&larr; Field Guide</a>
       <div class="eyebrow">A field guide, compiled for one traveler</div>
       <h1>Charting a course into <em>ML &amp; AI research</em></h1>
       <p class="hero__lede">You already think in code &mdash; <strong>JS, PHP</strong> &mdash; which means the on-ramp here is shorter than it looks. This guide assumes nothing about where the trail ends. It's built to get you fluent enough, fast enough, that the destination becomes obvious on its own.</p>
