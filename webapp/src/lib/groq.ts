@@ -22,7 +22,7 @@ export const MODELS: GroqModel[] = [
 export const DEFAULT_MODEL = MODELS[0].id
 
 /**
- * A key baked in at build time (VITE_GROQ_KEY) so the site works for visitors without setup. It is
+ * The key the site uses, baked in at build time (VITE_GROQ_KEY) so it works for visitors without any setup. It is
  * visible to anyone who reads the page's JavaScript, so it should be a free-plan key. It is never
  * committed: the deploy workflow reads it from a repository secret.
  */
@@ -30,8 +30,6 @@ export const BUILT_IN_KEY = ((import.meta.env.VITE_GROQ_KEY as string | undefine
 
 /** The chosen model first, then the others. Each model has its own free limit, so when one is used up the next can still answer. */
 export const modelOrder = (chosen: string): GroqModel[] => [...MODELS.filter((m) => m.id === chosen), ...MODELS.filter((m) => m.id !== chosen)]
-
-export const looksLikeKey = (value: string) => /^gsk_[A-Za-z0-9_-]{20,}$/.test(value.trim())
 
 function read(key: string): string | null {
   try {
@@ -41,17 +39,11 @@ function read(key: string): string | null {
   }
 }
 
-export const getStoredKey = () => read(GROQ_KEY_STORAGE) ?? ''
-
-export function saveKey(key: string) {
-  try {
-    window.localStorage.setItem(GROQ_KEY_STORAGE, key.trim())
-  } catch {
-    // Storage unavailable: the key lasts until the tab closes.
-  }
-}
-
-export function removeKey() {
+/**
+ * Visitors are never asked for a key: the site uses only the one built into it. Earlier versions let
+ * people paste their own, so any key left in a browser from then is deleted.
+ */
+export function purgeStoredKey() {
   try {
     window.localStorage.removeItem(GROQ_KEY_STORAGE)
   } catch {
@@ -70,11 +62,6 @@ export function saveModel(id: string) {
   } catch {
     // Not remembered; the default applies next time.
   }
-}
-
-/** A link that stores the key in whoever opens it. The key sits after the # so it is never sent to a server. */
-export function setupLink(key: string): string {
-  return `${window.location.origin}${window.location.pathname}#/?k=${encodeURIComponent(key)}`
 }
 
 export type ChatRole = 'system' | 'user' | 'assistant'

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { BUILT_IN_KEY, getStoredKey, getStoredModel, looksLikeKey, removeKey, saveKey, saveModel } from '@/lib/groq'
+import { BUILT_IN_KEY, getStoredModel, purgeStoredKey, saveModel } from '@/lib/groq'
 
 interface AssistantValue {
   open: boolean
@@ -7,43 +7,27 @@ interface AssistantValue {
   everOpened: boolean
   /** A question waiting to be sent as soon as the panel is ready. */
   pending: string | null
-  /** The key in use: the visitor's own if they saved one, otherwise the site's built-in key. */
+  /** The site's own key. Nobody is ever asked for one; if the site was built without it, the assistant is switched off. */
   apiKey: string
-  /** Only a key the visitor saved themselves. */
-  personalKey: string
-  usingBuiltIn: boolean
+  available: boolean
   model: string
   openAssistant: (prompt?: string) => void
   closeAssistant: () => void
   consumePending: () => void
-  setApiKey: (key: string) => void
-  clearApiKey: () => void
   setModel: (id: string) => void
 }
 
 const AssistantContext = createContext<AssistantValue | null>(null)
 
-// Holds the assistant's open state and the saved Groq key. The key is kept in this browser's
-// storage only. A setup link (#/?k=...) stores a key for whoever opens it, then removes it
-// from the address bar so it isn't left in the history or in screenshots.
+// Holds the assistant's open state and the chosen model. The key comes from the build (see
+// lib/groq.ts); visitors can't supply one, and a key saved by an older version is deleted.
 export function AssistantProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [everOpened, setEverOpened] = useState(false)
   const [pending, setPending] = useState<string | null>(null)
-  const [personalKey, setKeyState] = useState(getStoredKey)
   const [model, setModelState] = useState(getStoredModel)
 
-  useEffect(() => {
-    const match = window.location.hash.match(/[?&]k=([^&]+)/)
-    if (!match) return
-    const key = decodeURIComponent(match[1])
-    if (looksLikeKey(key)) {
-      saveKey(key)
-      setKeyState(key)
-    }
-    const cleaned = window.location.hash.replace(/([?&])k=[^&]*&?/, '$1').replace(/[?&]$/, '')
-    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${cleaned}`)
-  }, [])
+  useEffect(() => purgeStoredKey(), [])
 
   const openAssistant = useCallback((prompt?: string) => {
     setEverOpened(true)
@@ -56,27 +40,18 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       open,
       everOpened,
       pending,
-      apiKey: personalKey || BUILT_IN_KEY,
-      personalKey,
-      usingBuiltIn: personalKey === '' && BUILT_IN_KEY !== '',
+      apiKey: BUILT_IN_KEY,
+      available: BUILT_IN_KEY !== '',
       model,
       openAssistant,
       closeAssistant: () => setOpen(false),
       consumePending: () => setPending(null),
-      setApiKey: (key) => {
-        saveKey(key)
-        setKeyState(key.trim())
-      },
-      clearApiKey: () => {
-        removeKey()
-        setKeyState('')
-      },
       setModel: (id) => {
         saveModel(id)
         setModelState(id)
       },
     }),
-    [open, everOpened, pending, personalKey, model, openAssistant],
+    [open, everOpened, pending, model, openAssistant],
   )
 
   return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>

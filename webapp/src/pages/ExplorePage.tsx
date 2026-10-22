@@ -1,8 +1,10 @@
-import { useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Check, Search, Star } from 'lucide-react'
+import { Check, ChevronRight, Search, Star } from 'lucide-react'
 import { snippets } from '@/lib/content'
-import { navGroups } from '@/lib/roadmap'
+import { ancestorSlugs, navGroups } from '@/lib/roadmap'
+import { nextUpLesson } from '@/lib/progress'
+import { KEYS } from '@/lib/userData'
 import { CATEGORY_INFO } from '@/lib/categoryInfo'
 import { allTagCounts, tagPath } from '@/lib/tags'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -111,6 +113,57 @@ function LessonRow({ snippet }: { snippet: Snippet }) {
   )
 }
 
+// Which tracks and sections are open, as for the sidebar. A section nobody has touched starts closed,
+// except the ones that lead to the lesson you'd do next. The choice is remembered in this browser.
+interface OpenState {
+  isOpen: (slug: string) => boolean
+  toggle: (slug: string) => void
+  /** A search or filter is on, so everything that matches is shown whatever is closed. */
+  forced: boolean
+}
+const OpenContext = createContext<OpenState>({ isOpen: () => true, toggle: () => {}, forced: false })
+
+function loadOpen(): Record<string, boolean> {
+  try {
+    const parsed: unknown = JSON.parse(window.localStorage.getItem(KEYS.exploreOpen) ?? '{}')
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {}
+    return Object.fromEntries(Object.entries(parsed).filter(([, v]) => typeof v === 'boolean')) as Record<string, boolean>
+  } catch {
+    return {}
+  }
+}
+
+const slugsOf = (item: NavItem): string[] => [item.slug, ...item.children.flatMap(slugsOf)]
+
+// The clickable heading of a track or section: a chevron, the name, and how much of it is done.
+function FoldHeading({ item, as: Tag, className, children }: { item: NavItem; as: 'h2' | 'h3' | 'h4'; className?: string; children: React.ReactNode }) {
+  const { isOpen, toggle, forced } = useContext(OpenContext)
+  const open = isOpen(item.slug)
+  const { isDone } = useLibrary()
+  const lessons = lessonsIn(item)
+  const finished = lessons.filter((s) => isDone(s.id)).length
+  return (
+    <Tag className={className}>
+      <button
+        type="button"
+        onClick={() => !forced && toggle(item.slug)}
+        aria-expanded={open}
+        aria-controls={`explore-${item.slug}`}
+        title={forced ? 'A search or filter is on, so everything that matches is shown' : open ? 'Collapse' : 'Expand'}
+        className={cn('group/fold flex min-w-0 cursor-pointer items-center gap-1.5 text-left', forced && 'cursor-default')}
+      >
+        <ChevronRight className={cn('h-4 w-4 shrink-0 transition-transform', open && 'rotate-90', forced ? 'opacity-30' : 'text-[var(--color-ink-faint)] group-hover/fold:text-[var(--color-ink)]')} aria-hidden />
+        <span className="min-w-0">{children}</span>
+        {lessons.length > 0 && (
+          <span className="ml-1 shrink-0 font-mono text-[11px] font-normal tracking-normal text-[var(--color-ink-faint)] normal-case">
+            {finished}/{lessons.length}
+          </span>
+        )}
+      </button>
+    </Tag>
+  )
+}
+
 // Every lesson you can finish in a section and all of its sub-sections (data files don't count).
 function lessonsIn(item: NavItem): Snippet[] {
   return [...item.snippets.filter((s) => !s.filename.endsWith('.csv')), ...item.children.flatMap(lessonsIn)]
@@ -141,24 +194,33 @@ function MarkSectionButton({ item, className }: { item: NavItem; className?: str
 }
 
 function Section({ item, depth, show }: { item: NavItem; depth: number; show: (s: Snippet) => boolean }) {
+  const { isOpen } = useContext(OpenContext)
   const lessons = item.snippets.filter(show)
   const children = item.children
   const nonEmpty = (node: NavItem): boolean => node.snippets.some(show) || node.children.some(nonEmpty)
   if (!nonEmpty(item)) return null
   // Track titles are h2, so sub-sections start at h3 and nest from there (no skipped levels).
   const SubHeading = depth === 1 ? 'h3' : 'h4'
+  // The track itself (depth 0) is folded by its own heading in the page; here only sections fold.
+  const open = depth === 0 || isOpen(item.slug)
   return (
-    <div className={cn(depth > 0 && 'mt-4')}>
+    <div className={cn(depth > 0 && 'mt-3')}>
       {depth > 0 && (
         <div className="mb-1 flex items-baseline justify-between gap-3 px-2">
-          <SubHeading className="text-xs font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">{item.label}</SubHeading>
+          <FoldHeading item={item} as={SubHeading} className="min-w-0 text-xs font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">
+            {item.label}
+          </FoldHeading>
           <MarkSectionButton item={item} />
         </div>
       )}
-      {children.map((child) => (
-        <Section key={child.slug} item={child} depth={depth + 1} show={show} />
-      ))}
-      {lessons.length > 0 && <ul className="flex flex-col">{lessons.map((s) => <LessonRow key={s.id} snippet={s} />)}</ul>}
+      {open && (
+        <div id={`explore-${item.slug}`} className={cn(depth > 0 && 'pl-3')}>
+          {children.map((child) => (
+            <Section key={child.slug} item={child} depth={depth + 1} show={show} />
+          ))}
+          {lessons.length > 0 && <ul className="flex flex-col">{lessons.map((s) => <LessonRow key={s.id} snippet={s} />)}</ul>}
+        </div>
+      )}
     </div>
   )
 }
@@ -167,7 +229,7 @@ function Section({ item, depth, show }: { item: NavItem; depth: number; show: (s
 // browse by track, by tag, or A to Z, filter by text, and narrow by your own progress.
 export function ExplorePage() {
   useDocumentTitle('Explore')
-  const { isDone, isFavorite } = useLibrary()
+  const { done, isDone, isFavorite } = useLibrary()
   const [params, setParams] = useSearchParams()
   const view = (VIEWS.some((v) => v.id === params.get('view')) ? params.get('view') : 'track') as View
   const status = (STATUSES.some((s) => s.id === params.get('show')) ? params.get('show') : 'all') as Status
@@ -199,6 +261,28 @@ export function ExplorePage() {
   }
 
   const categories = navGroups.flatMap((g) => g.categories)
+
+  // Open and closed tracks and sections (see OpenContext). Untouched ones follow the defaults below.
+  const [openMap, setOpenMap] = useState<Record<string, boolean>>(loadOpen)
+  const defaultOpen = useMemo(() => {
+    const next = nextUpLesson(done)
+    return new Set(next ? ancestorSlugs(next.id) : categories.slice(0, 1).map((c) => c.slug))
+    // Decided once, when the page opens: ticking lessons while browsing shouldn't fold things away.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const forced = needle !== '' || status !== 'all'
+  const isOpen = useCallback((slug: string) => forced || (openMap[slug] ?? defaultOpen.has(slug)), [forced, openMap, defaultOpen])
+  const remember = (next: Record<string, boolean>) => {
+    setOpenMap(next)
+    try {
+      window.localStorage.setItem(KEYS.exploreOpen, JSON.stringify(next))
+    } catch {
+      // Not remembered; it still works for this visit.
+    }
+  }
+  const toggle = (slug: string) => remember({ ...openMap, [slug]: !(openMap[slug] ?? defaultOpen.has(slug)) })
+  const setAll = (open: boolean) => remember(Object.fromEntries(categories.flatMap(slugsOf).map((slug) => [slug, open])))
+  const openState: OpenState = { isOpen, toggle, forced }
   const matching = useMemo(() => snippets.filter(show), [needle, status, isDone, isFavorite]) // eslint-disable-line react-hooks/exhaustive-deps
   const tags = useMemo(() => allTagCounts().filter((t) => !needle || t.tag.includes(needle)), [needle])
   const alphabetical = useMemo(() => [...matching].sort((a, b) => a.title.localeCompare(b.title)), [matching])
@@ -214,6 +298,7 @@ export function ExplorePage() {
   const countLabel = view === 'tag' ? `${tags.length} tags` : `${matching.length} of ${snippets.length} lessons`
 
   return (
+    <OpenContext.Provider value={openState}>
     <div className="mx-auto max-w-4xl animate-fade-up pb-16">
       <header className="mb-6">
         <h1 className="text-3xl font-semibold text-[var(--color-ink)]">Explore</h1>
@@ -238,7 +323,19 @@ export function ExplorePage() {
           <Segmented label="View" value={view} options={VIEWS} onChange={(id) => update({ view: id })} />
           {view !== 'tag' && <Segmented label="Show" value={status} options={STATUSES} onChange={(id) => update({ show: id })} />}
         </div>
-        <p className="font-mono text-xs text-[var(--color-ink-faint)]" role="status">{countLabel}</p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="font-mono text-xs text-[var(--color-ink-faint)]" role="status">{countLabel}</p>
+          {view === 'track' && !forced && (
+            <span className="flex shrink-0 items-center gap-3 text-xs">
+              <button type="button" onClick={() => setAll(true)} className="cursor-pointer text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+                Expand all
+              </button>
+              <button type="button" onClick={() => setAll(false)} className="cursor-pointer text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+                Collapse all
+              </button>
+            </span>
+          )}
+        </div>
       </div>
 
       {view === 'track' && (
@@ -249,10 +346,10 @@ export function ExplorePage() {
             return (
               <section key={category.slug}>
                 <div className="mb-2 flex items-baseline justify-between gap-4">
-                  <h2 className="text-lg font-semibold text-[var(--color-ink)]">
+                  <FoldHeading item={category} as="h2" className="min-w-0 text-lg font-semibold text-[var(--color-ink)]">
                     <span className="mr-2 font-mono text-xs font-normal text-[var(--color-ink-faint)]">{String(index + 1).padStart(2, '0')}</span>
                     {category.label}
-                  </h2>
+                  </FoldHeading>
                   <span className="flex shrink-0 items-baseline gap-4">
                     <MarkSectionButton item={category} />
                     <Link to={`/c/${category.slug}`} className="shrink-0 text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
@@ -261,7 +358,11 @@ export function ExplorePage() {
                   </span>
                 </div>
                 {CATEGORY_INFO[category.slug] && <p className="mb-3 max-w-2xl text-sm leading-relaxed text-[var(--color-ink-faint)]">{CATEGORY_INFO[category.slug]}</p>}
-                <Section item={category} depth={0} show={show} />
+                {isOpen(category.slug) && (
+                  <div id={`explore-${category.slug}`}>
+                    <Section item={category} depth={0} show={show} />
+                  </div>
+                )}
               </section>
             )
           })}
@@ -304,5 +405,6 @@ export function ExplorePage() {
         </div>
       )}
     </div>
+    </OpenContext.Provider>
   )
 }

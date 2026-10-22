@@ -10,12 +10,13 @@ const preload = () => void import('@/components/ai/AssistantPanel')
 // A small pill pinned to the corner of every page. It slips away while the panel is open
 // and comes back when it closes.
 export function AskButton() {
-  const { open, openAssistant } = useAssistant()
+  const { open, available, openAssistant } = useAssistant()
   const reduceMotion = useReducedMotion()
   useEffect(() => {
     const timer = window.setTimeout(preload, 2500)
     return () => window.clearTimeout(timer)
   }, [])
+  if (!available) return null
   return (
     <AnimatePresence>
       {!open && (

@@ -17,12 +17,12 @@ const GAP = 14
 // the cursor and asks about exactly that part. It only appears for code (not for any text on the
 // page), and never on touch screens, where selecting text already brings up the phone's own menu.
 export function SelectionAsk() {
-  const { openAssistant } = useAssistant()
+  const { available, openAssistant } = useAssistant()
   const [spot, setSpot] = useState<Spot | null>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) return
+    if (!available || !window.matchMedia('(pointer: fine)').matches) return
 
     function update(pointer?: { x: number; y: number }) {
       const selection = window.getSelection()
@@ -74,7 +74,7 @@ export function SelectionAsk() {
       document.removeEventListener('scroll', hide, true)
       window.removeEventListener('resize', hide)
     }
-  }, [])
+  }, [available])
 
   if (!spot) return null
   // Just to the right of the cursor; to its left when there isn't room, and kept on screen.
