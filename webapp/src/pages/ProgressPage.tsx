@@ -155,7 +155,7 @@ export function ProgressPage() {
           {tracks.map((track) => {
             const pct = track.total ? (track.done / track.total) * 100 : 0
             return (
-              <li key={track.slug} className="grid items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(0,1fr)_14rem_9rem]">
+              <li key={track.slug} className="grid grid-cols-1 items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(0,1fr)_14rem_9rem]">
                 <Link to={`/c/${track.slug}`} className="min-w-0 text-sm font-medium text-[var(--color-ink)] hover:underline">
                   {track.label}
                 </Link>
@@ -178,7 +178,7 @@ export function ProgressPage() {
         </ul>
       </section>
 
-      <div className="mb-12 grid gap-8 md:grid-cols-2">
+      <div className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-2">
         <section>
           <Heading title="Saved lessons">{savedLessons.length}</Heading>
           {savedLessons.length === 0 ? (

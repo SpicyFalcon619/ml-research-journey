@@ -119,7 +119,7 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
       </section>
 
       {(resume || favoriteLessons.length > 0) && (
-        <section className="mb-12 grid gap-4 sm:grid-cols-2">
+        <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {resume && (
             <div className={cn('relative', favoriteLessons.length === 0 && 'sm:col-span-2')}>
               <button
@@ -171,7 +171,7 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
 
       <section>
         <SectionHeading title="How to use this guide" />
-        <div className="grid gap-6 border-t border-[var(--color-border)] pt-6 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 border-t border-[var(--color-border)] pt-6 sm:grid-cols-3">
           {howTo.map((item) => (
             <div key={item.title}>
               <h3 className="font-medium text-[var(--color-ink)]">{item.title}</h3>
@@ -183,7 +183,7 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
 
       <section className="mt-14">
         <SectionHeading title="Tracks">Read top to bottom: each one builds on the last.</SectionHeading>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {categories.map((category, i) => {
             const inCategory = snippets.filter((s) => s.categorySlug === category.slug)
             const lines = inCategory.reduce((sum, s) => sum + s.lineCount, 0)
@@ -245,7 +245,7 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
             return (
               <li
                 key={b.slug}
-                className="grid items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(0,1fr)_12rem_7.5rem]"
+                className="grid grid-cols-1 items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(0,1fr)_12rem_7.5rem]"
               >
                 <div className="min-w-0">
                   <p className="text-xs text-[var(--color-ink-faint)]">

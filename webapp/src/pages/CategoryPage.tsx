@@ -41,12 +41,12 @@ export function CategoryPage() {
               // Keeps the heading outline valid (h1 > h2 > h3) when a track has no sub-sections.
               <h2 className="sr-only">Lessons</h2>
             )}
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {section.snippets.map((snippet) => {
                 const isData = snippet.filename.endsWith('.csv')
                 const rowCount = snippet.code.split('\n').filter((l) => l.trim().length > 0).length - 1
                 return (
-                  <Link key={snippet.id} to={`/s/${snippet.id}`}>
+                  <Link key={snippet.id} to={`/s/${snippet.id}`} className="min-w-0">
                     <GlassPanel className="group h-full p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--color-border-strong)]">
                       <div className="flex items-center justify-between gap-2">
                         <h3 className="flex items-center gap-1.5 font-medium text-[var(--color-ink)]">

@@ -56,13 +56,15 @@ export function SnippetPage() {
         ))}
       </nav>
 
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
+      {/* Stacked on phones: the title and three buttons side by side are wider than the screen. */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-[var(--color-ink)] sm:text-3xl">{snippet.title}</h1>
-          <p className="mt-1 font-mono text-xs text-[var(--color-ink-faint)]">{snippet.path}</p>
+          <p className="mt-1 font-mono text-xs break-all text-[var(--color-ink-faint)]">{snippet.path}</p>
         </div>
-        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-          <DoneButton id={snippet.id} />
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">
+          {/* Data files are shown in the guide but aren't something you finish. */}
+          {!snippet.filename.endsWith('.csv') && <DoneButton id={snippet.id} />}
           <FavoriteButton id={snippet.id} />
           <a
             href={githubUrl}
