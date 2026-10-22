@@ -24,7 +24,7 @@ const textButton =
   'flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-50'
 
 function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }) {
-  const { apiKey, setApiKey, clearApiKey, model, setModel } = useAssistant()
+  const { personalKey, usingBuiltIn, setApiKey, clearApiKey, model, setModel } = useAssistant()
   const [value, setValue] = useState('')
   const [visible, setVisible] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -33,6 +33,12 @@ function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }
 
   return (
     <div className="flex flex-col gap-5 p-5">
+      {usingBuiltIn && (
+        <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs leading-relaxed text-[var(--color-ink-dim)]">
+          This site comes with a built-in key, so you can just ask. Everyone using the site shares its free daily limit. If that runs out,
+          or you'd rather use your own, add your own key below.
+        </p>
+      )}
       {!existing && (
         <div>
           <h3 className="text-base font-semibold text-[var(--color-ink)]">Connect Groq</h3>
@@ -48,7 +54,7 @@ function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }
 
       <div>
         <label htmlFor="groq-key" className="mb-1.5 block text-xs font-medium text-[var(--color-ink-dim)]">
-          {existing ? 'Replace the key' : 'Groq API key'}
+          {personalKey ? 'Replace your key' : usingBuiltIn ? 'Use your own key instead' : 'Groq API key'}
         </label>
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -96,6 +102,7 @@ function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }
               options={MODELS.map((m) => ({ value: m.id, label: m.label, description: m.note }))}
             />
           </div>
+          {personalKey && (
           <div>
             <div className="mb-1.5 text-xs font-medium text-[var(--color-ink-dim)]">Set up another device</div>
             <p className="mb-2 text-xs leading-relaxed text-[var(--color-ink-faint)]">
@@ -105,7 +112,7 @@ function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }
             <button
               type="button"
               onClick={() => {
-                void navigator.clipboard?.writeText(setupLink(apiKey)).then(() => {
+                void navigator.clipboard?.writeText(setupLink(personalKey)).then(() => {
                   setCopied(true)
                   window.setTimeout(() => setCopied(false), 1800)
                 })
@@ -115,19 +122,24 @@ function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }
               {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />} {copied ? 'Link copied' : 'Copy setup link'}
             </button>
           </div>
+          )}
           <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-4">
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm('Remove the saved Groq key from this browser?')) {
-                  clearApiKey()
-                  onDone()
-                }
-              }}
-              className="cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
-            >
-              Remove my key
-            </button>
+            {personalKey ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm('Remove your saved Groq key from this browser?')) {
+                    clearApiKey()
+                    onDone()
+                  }
+                }}
+                className="cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
+              >
+                Remove my key
+              </button>
+            ) : (
+              <span />
+            )}
             <button type="button" onClick={onDone} className={textButton}>
               Back to chat
             </button>
@@ -139,7 +151,7 @@ function KeyForm({ onDone, existing }: { onDone: () => void; existing: boolean }
 }
 
 export function AssistantPanel() {
-  const { open, pending, apiKey, model, closeAssistant, consumePending } = useAssistant()
+  const { open, pending, apiKey, usingBuiltIn, model, closeAssistant, consumePending } = useAssistant()
   const { done } = useLibrary()
   const { pathname } = useLocation()
   const lessonId = pathname.startsWith('/s/') ? decodeURIComponent(pathname.slice(3)) : undefined
@@ -186,14 +198,15 @@ export function AssistantPanel() {
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           const kind = error instanceof GroqError ? error.kind : 'other'
-          setMessages((prev) => prev.map((m) => (m.id === replyId ? { ...m, error: (error as Error).message, errorKind: kind } : m)))
+          const text = kind === 'auth' && usingBuiltIn ? "The site's built-in key was not accepted. You can use your own key in Settings." : (error as Error).message
+          setMessages((prev) => prev.map((m) => (m.id === replyId ? { ...m, error: text, errorKind: kind } : m)))
         }
       } finally {
         setBusy(false)
         abortRef.current = null
       }
     },
-    [apiKey, model, messages, busy, activeLesson, done],
+    [apiKey, usingBuiltIn, model, messages, busy, activeLesson, done],
   )
 
   // A question handed over by an "Ask about this" button is sent once the panel is ready.
@@ -272,7 +285,7 @@ export function AssistantPanel() {
             </button>
           )}
           {hasKey && (
-            <button type="button" onClick={() => setSettings((v) => !v)} aria-label="Settings" aria-pressed={settings} title="Key, model and setup link" className={cn(iconButton, settings && 'bg-[var(--color-surface-hover)] text-[var(--color-ink)]')}>
+            <button type="button" onClick={() => setSettings((v) => !v)} aria-label="Settings" aria-pressed={settings} title="Model and key" className={cn(iconButton, settings && 'bg-[var(--color-surface-hover)] text-[var(--color-ink)]')}>
               <Settings className="h-4 w-4" />
             </button>
           )}
@@ -309,7 +322,7 @@ export function AssistantPanel() {
                 </div>
                 <p className="mt-6 text-xs leading-relaxed text-[var(--color-ink-faint)]">
                   Answers come from an AI model and can be wrong. Check anything important against the lesson's real output. Your questions go to Groq.
-                  The free plan has a daily limit, so this is for light use.
+                  The free plan has a daily limit{usingBuiltIn ? ' that everyone using the site shares' : ''}, so this is for light use.
                 </p>
               </div>
             ) : (

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { getStoredKey, getStoredModel, looksLikeKey, removeKey, saveKey, saveModel } from '@/lib/groq'
+import { BUILT_IN_KEY, getStoredKey, getStoredModel, looksLikeKey, removeKey, saveKey, saveModel } from '@/lib/groq'
 
 interface AssistantValue {
   open: boolean
@@ -7,7 +7,11 @@ interface AssistantValue {
   everOpened: boolean
   /** A question waiting to be sent as soon as the panel is ready. */
   pending: string | null
+  /** The key in use: the visitor's own if they saved one, otherwise the site's built-in key. */
   apiKey: string
+  /** Only a key the visitor saved themselves. */
+  personalKey: string
+  usingBuiltIn: boolean
   model: string
   openAssistant: (prompt?: string) => void
   closeAssistant: () => void
@@ -26,7 +30,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [everOpened, setEverOpened] = useState(false)
   const [pending, setPending] = useState<string | null>(null)
-  const [apiKey, setKeyState] = useState(getStoredKey)
+  const [personalKey, setKeyState] = useState(getStoredKey)
   const [model, setModelState] = useState(getStoredModel)
 
   useEffect(() => {
@@ -52,7 +56,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       open,
       everOpened,
       pending,
-      apiKey,
+      apiKey: personalKey || BUILT_IN_KEY,
+      personalKey,
+      usingBuiltIn: personalKey === '' && BUILT_IN_KEY !== '',
       model,
       openAssistant,
       closeAssistant: () => setOpen(false),
@@ -70,7 +76,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         setModelState(id)
       },
     }),
-    [open, everOpened, pending, apiKey, model, openAssistant],
+    [open, everOpened, pending, personalKey, model, openAssistant],
   )
 
   return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>
