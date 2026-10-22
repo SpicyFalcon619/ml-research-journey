@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, CircleCheck, Flame, Grid3x3, LineChart, Search, Table2, Terminal } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { snippets } from '@/lib/content'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { navGroups, basecamps, countSnippets } from '@/lib/roadmap'
 import { GlassPanel } from '@/components/ui/GlassPanel'
 import { StatTile } from '@/components/ui/StatTile'
@@ -16,6 +17,7 @@ const CATEGORY_ICON: Record<string, LucideIcon> = {
 }
 
 export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
+  useDocumentTitle()
   const categories = navGroups.flatMap((g) => g.categories)
   const totalLines = snippets.reduce((sum, s) => sum + s.lineCount, 0)
 

@@ -171,3 +171,19 @@ export function flattenNavItems(items: NavItem[]): NavItem[] {
 export function countSnippets(item: NavItem): number {
   return flattenNavItems([item]).reduce((sum, node) => sum + node.snippets.length, 0)
 }
+
+// The sidebar lists sub-folders first and then the files directly in a folder,
+// so "the next lesson" has to follow that same order or prev/next would
+// disagree with what the sidebar shows.
+function orderedSnippetsOf(item: NavItem): Snippet[] {
+  return [...item.children.flatMap(orderedSnippetsOf), ...item.snippets]
+}
+
+const trailOrder: Snippet[] = navGroups.flatMap((group) => group.categories.flatMap(orderedSnippetsOf))
+const trailIndex = new Map(trailOrder.map((snippet, index) => [snippet.id, index]))
+
+export function getAdjacent(id: string): { prev?: Snippet; next?: Snippet } {
+  const index = trailIndex.get(id)
+  if (index === undefined) return {}
+  return { prev: trailOrder[index - 1], next: trailOrder[index + 1] }
+}

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import { GradientMesh } from '@/components/layout/GradientMesh'
+import { MobileDrawer } from '@/components/layout/MobileDrawer'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { SidebarToggle } from '@/components/layout/SidebarToggle'
 import { TopBar } from '@/components/layout/TopBar'
@@ -14,9 +15,21 @@ import { cn } from '@/lib/cn'
 // it out of the initial bundle that Home/CategoryPage load.
 const SnippetPage = lazy(() => import('@/pages/SnippetPage').then((m) => ({ default: m.SnippetPage })))
 
+// A new route should start at the top, like a real page load. Jumps to a
+// specific line (?line=) are left alone: the code block scrolls there itself.
+function ScrollToTopOnNavigate() {
+  const { pathname, search } = useLocation()
+  useEffect(() => {
+    if (new URLSearchParams(search).has('line')) return
+    window.scrollTo(0, 0)
+  }, [pathname, search])
+  return null
+}
+
 function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     function handleKeydown(event: KeyboardEvent) {
@@ -32,6 +45,7 @@ function App() {
   return (
     <>
       <GradientMesh />
+      <ScrollToTopOnNavigate />
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
         <aside
           className={cn(
@@ -45,7 +59,11 @@ function App() {
         </aside>
         <div className="flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out">
           <SidebarToggle open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
-          <TopBar onOpenSearch={() => setPaletteOpen(true)} sidebarOpen={sidebarOpen} />
+          <TopBar
+            onOpenSearch={() => setPaletteOpen(true)}
+            onOpenDrawer={() => setDrawerOpen(true)}
+            sidebarOpen={sidebarOpen}
+          />
           <main className="flex-1 px-4 py-8 sm:px-8">
             <Suspense fallback={null}>
               <Routes>
@@ -58,6 +76,7 @@ function App() {
           </main>
         </div>
       </div>
+      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </>
   )

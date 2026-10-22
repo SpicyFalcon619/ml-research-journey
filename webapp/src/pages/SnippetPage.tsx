@@ -2,7 +2,10 @@ import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ChevronRight, ExternalLink } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
 import { getOutput } from '@/lib/outputs'
+import { getAdjacent } from '@/lib/roadmap'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { CodeBlock } from '@/components/code/CodeBlock'
+import { PrevNext } from '@/components/snippet/PrevNext'
 import { Badge } from '@/components/ui/Badge'
 
 function jumpToLine(line: number) {
@@ -18,12 +21,15 @@ export function SnippetPage() {
   const [searchParams] = useSearchParams()
   const snippet = id ? getSnippetById(id) : undefined
 
+  useDocumentTitle(snippet?.title)
+
   if (!snippet) return <Navigate to="/" replace />
 
   const lineParam = searchParams.get('line')
   const focusLine = lineParam ? Number(lineParam) : undefined
   const githubUrl = `https://github.com/SpicyFalcon619/ml-research-journey/blob/master/${encodeURI(snippet.path)}`
   const output = getOutput(snippet.path)
+  const { prev, next } = getAdjacent(snippet.id)
 
   return (
     // Keyed by snippet id so navigating between snippets (same route pattern, `/s/:id`)
@@ -78,6 +84,8 @@ export function SnippetPage() {
           <Badge key={tag}>{tag}</Badge>
         ))}
       </div>
+
+      <PrevNext prev={prev} next={next} />
     </div>
   )
 }

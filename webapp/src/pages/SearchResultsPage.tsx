@@ -1,12 +1,15 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { CornerDownLeft, FileText } from 'lucide-react'
 import { search } from '@/lib/search'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { GlassPanel } from '@/components/ui/GlassPanel'
 
 export function SearchResultsPage() {
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') ?? ''
   const hits = search(query, 100)
+
+  useDocumentTitle(query ? `Search: ${query}` : 'Search')
 
   return (
     <div className="mx-auto max-w-3xl animate-fade-up pb-16">

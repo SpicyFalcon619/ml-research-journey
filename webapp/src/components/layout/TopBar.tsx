@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { Menu, Search } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { Logo } from './Logo'
 import { cn } from '@/lib/cn'
@@ -14,7 +14,15 @@ function GithubMark(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function TopBar({ onOpenSearch, sidebarOpen = true }: { onOpenSearch: () => void; sidebarOpen?: boolean }) {
+export function TopBar({
+  onOpenSearch,
+  onOpenDrawer,
+  sidebarOpen = true,
+}: {
+  onOpenSearch: () => void
+  onOpenDrawer: () => void
+  sidebarOpen?: boolean
+}) {
   const location = useLocation()
   // On snippet pages the code block's own header takes over as the persistent,
   // reachable control (Run/Copy), so the site nav scrolls away instead of
@@ -28,6 +36,14 @@ export function TopBar({ onOpenSearch, sidebarOpen = true }: { onOpenSearch: () 
         !isSnippetPage && 'sticky top-4',
       )}
     >
+      {/* The sidebar is hidden below the laptop breakpoint, so phones get a menu button for it. */}
+      <button
+        onClick={onOpenDrawer}
+        aria-label="Open navigation"
+        className="flex shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-[var(--color-ink-faint)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] lg:hidden"
+      >
+        <Menu className="h-4 w-4" />
+      </button>
       <Link to="/" className="flex shrink-0 items-center gap-2 font-semibold tracking-tight text-[var(--color-ink)]">
         <Logo className="h-7 w-7 shrink-0" />
         <span className="hidden sm:inline">Field Guide</span>
