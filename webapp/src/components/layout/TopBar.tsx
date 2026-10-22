@@ -32,7 +32,7 @@ export function TopBar({
   return (
     <header
       className={cn(
-        'glass-panel z-30 mx-4 mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 sm:mx-6',
+        'glass-panel solid z-30 mx-4 mt-4 flex items-center gap-2 rounded-2xl px-3 py-3 sm:mx-6 sm:gap-3 sm:px-4',
         // Both are positioned, so the search box below can be centered against this bar.
         isSnippetPage ? 'relative' : 'sticky top-4',
       )}
@@ -62,7 +62,9 @@ export function TopBar({
           )}
         >
           <Search className="h-4 w-4 shrink-0" />
-          <span className="flex-1 truncate text-left">Search snippets…</span>
+          <span className="flex-1 truncate text-left">
+            Search<span className="hidden sm:inline"> snippets…</span>
+          </span>
           <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-[10px] sm:inline">
             {isMac ? '⌘K' : 'Ctrl+K'}
           </kbd>
