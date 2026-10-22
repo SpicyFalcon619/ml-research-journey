@@ -1,6 +1,7 @@
 import type { Snippet } from '@/types'
 import { getOutput } from '@/lib/outputs'
 import { siteMap } from '@/lib/siteIndex'
+import { getAdjacent } from '@/lib/roadmap'
 import { nextUpLesson, overallProgress, trackProgress } from '@/lib/progress'
 import type { ChatMessage } from '@/lib/groq'
 
@@ -14,7 +15,7 @@ const MAX_HISTORY_CHARS = 9000
 const SYSTEM = `You are the study assistant inside "Field Guide", a personal reference of working code from someone's machine learning journey: Python basics, NumPy, Pandas, scikit-learn and PyTorch. Each lesson is a real, runnable file.
 Answer accurately and in plain language, the way a patient tutor would. If you are not sure, say so instead of guessing. Only refer to the lesson below when the question is about it. Do not make up facts about the learner.
 
-How to answer: lead with the direct answer in a sentence or two, then explain why it works, then show a small runnable example when code helps, and finish with one practical tip or a common pitfall when there is a useful one. Be thorough where the question needs it and brief where it doesn't; use a short heading only for long answers. When you point someone to a lesson in this guide, write its exact title from the list below in **bold** (it becomes a link), and only name lessons that are in that list.
+How to answer: lead with the direct answer in a sentence or two, then explain why it works, then show a small runnable example when code helps, and finish with one practical tip or a common pitfall when there is a useful one. Be thorough where the question needs it and brief where it doesn't; use a short heading only for long answers. When someone asks what to do or learn next, start from their real progress below: say briefly what they have already finished, then recommend the next step, preferring to carry on from the lesson they opened last. When you point someone to a lesson in this guide, write its exact title from the list below in **bold** (it becomes a link), and only name lessons that are in that list.
 
 About the site, which is everything you know about it:
 - It is a personal project: its owner keeps their own working code from learning machine learning here, in the order they learned it, and has made it public. It is not a course, a book or a company product, and it has no instructor, exercises or certificates.
@@ -49,23 +50,33 @@ function lessonContext(snippet: Snippet): string {
     .join('\n')
 }
 
-function progressContext(done: string[], recentTitles: string[]): string {
+function progressContext(done: string[], recent: Snippet[]): string {
   const overall = overallProgress(done)
   const next = nextUpLesson(done)
-  const tracks = trackProgress(done)
-    .map((t) => `${t.label} ${t.done}/${t.total}`)
-    .join(', ')
+  const progress = trackProgress(done)
+  const tracks = progress.map((t) => `${t.label} ${t.done}/${t.total}`).join(', ')
+  const finished = progress.filter((t) => t.total > 0 && t.done === t.total).map((t) => t.label)
+  const underway = progress.filter((t) => t.done > 0 && t.done < t.total).map((t) => t.label)
+  const untouched = progress.filter((t) => t.done === 0).map((t) => t.label)
+  // The lesson after the one they opened last, if they haven't done it: "carry on from where you were".
+  const latest = recent[0]
+  const carryOn = latest ? getAdjacent(latest.id).next : undefined
   return [
-    `The learner has finished ${overall.done} of ${overall.total} lessons (${tracks}).`,
-    next ? `The next lesson on the trail is "${next.title}" (${next.categoryLabel}).` : 'They have finished every lesson.',
-    recentTitles.length ? `Lessons they opened most recently: ${recentTitles.map((t) => `"${t}"`).join(', ')}.` : '',
+    `The learner's real progress, which you must use exactly as given: ${overall.done} of ${overall.total} lessons finished (${tracks}).`,
+    overall.done > 0
+      ? `Finished tracks: ${finished.join(', ') || 'none'}. Tracks in progress: ${underway.join(', ') || 'none'}. Tracks not started: ${untouched.join(', ') || 'none'}.`
+      : 'They have not finished any lesson yet.',
+    next ? `The first unfinished lesson on the trail is "${next.title}" (${next.categoryLabel}).` : 'They have finished every lesson.',
+    recent.length ? `Lessons they opened most recently, newest first: ${recent.map((s) => `"${s.title}"`).join(', ')}.` : '',
+    carryOn && !done.includes(carryOn.id) ? `The lesson that follows their latest one is "${carryOn.title}".` : '',
+    'Never say they have not started or finished lessons when the numbers above say otherwise.',
   ]
     .filter(Boolean)
     .join(' ')
 }
 
-export function buildMessages(history: ChatMessage[], lesson: Snippet | undefined, done: string[], recentTitles: string[] = []): ChatMessage[] {
-  const system = [SYSTEM, siteMap(), progressContext(done, recentTitles), lesson ? lessonContext(lesson) : ''].filter(Boolean).join('\n\n')
+export function buildMessages(history: ChatMessage[], lesson: Snippet | undefined, done: string[], recent: Snippet[] = []): ChatMessage[] {
+  const system = [SYSTEM, siteMap(), progressContext(done, recent), lesson ? lessonContext(lesson) : ''].filter(Boolean).join('\n\n')
   // Newest messages first until the budget is used, then restore the order.
   const kept: ChatMessage[] = []
   let used = 0

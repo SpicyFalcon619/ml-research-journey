@@ -11,9 +11,15 @@ const NavigateContext = createContext<() => void>(() => {})
 // headings, tables, `code`, **bold** and fenced code blocks) and draws everything as React
 // text nodes, never as HTML, so nothing a model writes can inject markup into the page.
 
+// `code`, **bold** and *italic*. An italic's stars must hug the words and sit at word edges, so a
+// sum like 2*3*4 or a bullet "* item" is left alone. (The leading space or bracket is kept in the
+// match and put back when drawing.)
+const INLINE_SPLIT = /(`[^`\n]+`|\*\*[^*\n]+\*\*|(?:^|[\s(])\*[^\s*](?:[^*\n]*[^\s*])?\*(?=$|[\s).,;:!?]))/g
+const ITALIC_PART = /^([\s(]?)\*([^\s*](?:[^*\n]*[^\s*])?)\*$/
+
 function Inline({ text }: { text: string }) {
   const onNavigate = useContext(NavigateContext)
-  const parts = text.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/g)
+  const parts = text.split(INLINE_SPLIT)
   return (
     <>
       {parts.map((part, i) => {
@@ -44,6 +50,15 @@ function Inline({ text }: { text: string }) {
             <strong key={i} className="font-semibold text-[var(--color-ink)]">
               {part.slice(2, -2)}
             </strong>
+          )
+        }
+        const italic = part.match(ITALIC_PART)
+        if (italic) {
+          return (
+            <Fragment key={i}>
+              {italic[1]}
+              <em className="italic">{italic[2]}</em>
+            </Fragment>
           )
         }
         return <Fragment key={i}>{part}</Fragment>

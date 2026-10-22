@@ -31,7 +31,7 @@ export function AskButton() {
           exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.94 }}
           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-          className="fixed right-4 bottom-4 z-40 flex cursor-pointer items-center gap-2 rounded-full border border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] py-2.5 pr-4 pl-3.5 text-sm font-medium text-[var(--color-ink)] shadow-[var(--shadow-glass)] transition-colors hover:bg-[var(--color-surface-hover)]"
+          className="fixed right-4 bottom-4 z-40 flex cursor-pointer items-center gap-2 rounded-full float-solid border border-[var(--color-border-strong)] py-2.5 pr-4 pl-3.5 text-sm font-medium text-[var(--color-ink)] shadow-[var(--shadow-glass)]"
         >
           <MessageSquareText className="h-4 w-4 text-[var(--color-accent-soft)]" aria-hidden /> Ask AI
         </motion.button>

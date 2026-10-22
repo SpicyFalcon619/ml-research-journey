@@ -5,13 +5,17 @@ import { useAssistant } from '@/hooks/useAssistant'
 
 interface Spot {
   text: string
-  left: number
-  top: number
+  /** Where the mouse was released, in viewport coordinates. */
+  x: number
+  y: number
 }
 
-// When code or text on a page is highlighted with a mouse, a small "Ask AI" button appears
-// beside it that asks about exactly that part. Left out on touch screens, where selecting text
-// already brings up the phone's own menu.
+const BUTTON_WIDTH = 150
+const GAP = 14
+
+// When lesson code is highlighted with a mouse, a small "Ask AI" button appears right beside
+// the cursor and asks about exactly that part. It only appears for code (not for any text on the
+// page), and never on touch screens, where selecting text already brings up the phone's own menu.
 export function SelectionAsk() {
   const { openAssistant } = useAssistant()
   const [spot, setSpot] = useState<Spot | null>(null)
@@ -20,7 +24,7 @@ export function SelectionAsk() {
   useEffect(() => {
     if (!window.matchMedia('(pointer: fine)').matches) return
 
-    function update() {
+    function update(pointer?: { x: number; y: number }) {
       const selection = window.getSelection()
       const text = selection?.toString().trim() ?? ''
       if (!selection || selection.rangeCount === 0 || text.length < 4 || text.length > 3000) {
@@ -29,34 +33,55 @@ export function SelectionAsk() {
       }
       const range = selection.getRangeAt(0)
       const anchor = range.commonAncestorContainer instanceof Element ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement
-      // Not inside the assistant itself, a text field, or the search palette.
-      if (!anchor || anchor.closest('[role=dialog], input, textarea, [cmdk-root]')) {
+      // Only code in a lesson, so ordinary text on the page doesn't pop a button up.
+      if (!anchor?.closest('.code-scroll')) {
         setSpot(null)
         return
       }
-      const rect = range.getBoundingClientRect()
-      if (rect.width === 0 && rect.height === 0) {
+      // From the keyboard there is no pointer: use the end of the selection instead.
+      const rects = range.getClientRects()
+      const end = rects[rects.length - 1]
+      if (!pointer && !end) {
         setSpot(null)
         return
       }
-      const above = rect.top > 56
-      setSpot({ text, left: Math.min(Math.max(rect.left + rect.width / 2, 60), window.innerWidth - 60), top: above ? rect.top - 40 : rect.bottom + 8 })
+      setSpot({ text, x: pointer ? pointer.x : end.right, y: pointer ? pointer.y : end.top + end.height / 2 })
     }
-    const afterPointer = () => window.setTimeout(update, 0)
+    const afterMouse = (event: MouseEvent) => {
+      if (buttonRef.current?.contains(event.target as Node)) return
+      const pointer = { x: event.clientX, y: event.clientY }
+      window.setTimeout(() => update(pointer), 0)
+    }
+    const afterKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSpot(null)
+      else window.setTimeout(() => update(), 0)
+    }
+    // Starting a new selection (or clicking elsewhere) clears the old button straight away, so it
+    // never lingers beside text that is no longer selected.
+    const beforeMouse = (event: MouseEvent) => {
+      if (!buttonRef.current?.contains(event.target as Node)) setSpot(null)
+    }
     const hide = () => setSpot(null)
-    document.addEventListener('mouseup', afterPointer)
-    document.addEventListener('keyup', afterPointer)
+    document.addEventListener('mousedown', beforeMouse)
+    document.addEventListener('mouseup', afterMouse)
+    document.addEventListener('keyup', afterKey)
     document.addEventListener('scroll', hide, true)
     window.addEventListener('resize', hide)
     return () => {
-      document.removeEventListener('mouseup', afterPointer)
-      document.removeEventListener('keyup', afterPointer)
+      document.removeEventListener('mousedown', beforeMouse)
+      document.removeEventListener('mouseup', afterMouse)
+      document.removeEventListener('keyup', afterKey)
       document.removeEventListener('scroll', hide, true)
       window.removeEventListener('resize', hide)
     }
   }, [])
 
   if (!spot) return null
+  // Just to the right of the cursor; to its left when there isn't room, and kept on screen.
+  const fitsRight = spot.x + GAP + BUTTON_WIDTH <= window.innerWidth - 8
+  const left = fitsRight ? spot.x + GAP : Math.max(8, spot.x - GAP - BUTTON_WIDTH)
+  const top = Math.min(Math.max(spot.y - 16, 8), window.innerHeight - 44)
+
   return (
     <button
       ref={buttonRef}
@@ -68,8 +93,8 @@ export function SelectionAsk() {
         window.getSelection()?.removeAllRanges()
         setSpot(null)
       }}
-      style={{ left: spot.left, top: spot.top }}
-      className="fixed z-[65] flex -translate-x-1/2 animate-fade-up cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] px-2.5 py-1.5 text-xs font-medium text-[var(--color-ink)] shadow-[var(--shadow-glass)] hover:bg-[var(--color-surface-hover)]"
+      style={{ left, top, width: BUTTON_WIDTH }}
+      className="float-solid fixed z-[65] flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border-strong)] py-1.5 text-xs font-medium whitespace-nowrap text-[var(--color-ink)] shadow-[var(--shadow-glass)]"
     >
       <MessageSquareText className="h-3.5 w-3.5 text-[var(--color-accent-soft)]" aria-hidden /> Ask AI about this
     </button>
