@@ -111,7 +111,7 @@ export function ProgressPage() {
       clearLabel: 'Reset',
       onClear: captureSaved ? () => { window.localStorage.removeItem(KEYS.capture); window.location.reload() } : undefined,
     },
-    { label: 'AI assistant key (never exported)', detail: assistant.apiKey ? 'saved' : 'none', clearLabel: 'Remove', onClear: assistant.apiKey ? assistant.clearApiKey : undefined },
+    { label: 'Your own AI key (never exported)', detail: assistant.personalKey ? 'saved' : 'none', clearLabel: 'Remove', onClear: assistant.personalKey ? assistant.clearApiKey : undefined },
     { label: 'Roadmap steps ticked', detail: `${roadmapTicks}` },
   ]
 

@@ -21,6 +21,13 @@ export const MODELS: GroqModel[] = [
 ]
 export const DEFAULT_MODEL = MODELS[0].id
 
+/**
+ * A key baked in at build time (VITE_GROQ_KEY) so the site works for visitors without setup. It is
+ * visible to anyone who reads the page's JavaScript, so it should be a free-plan key. It is never
+ * committed: the deploy workflow reads it from a repository secret.
+ */
+export const BUILT_IN_KEY = ((import.meta.env.VITE_GROQ_KEY as string | undefined) ?? '').trim()
+
 export const looksLikeKey = (value: string) => /^gsk_[A-Za-z0-9_-]{20,}$/.test(value.trim())
 
 function read(key: string): string | null {
