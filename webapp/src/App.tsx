@@ -9,6 +9,10 @@ import { CommandPalette } from '@/components/search/CommandPalette'
 import { Home } from '@/pages/Home'
 import { CategoryPage } from '@/pages/CategoryPage'
 import { SearchResultsPage } from '@/pages/SearchResultsPage'
+import { TagPage } from '@/pages/TagPage'
+import { ExplorePage } from '@/pages/ExplorePage'
+import { ProgressPage } from '@/pages/ProgressPage'
+import { SiteNav } from '@/components/layout/SiteNav'
 import { cn } from '@/lib/cn'
 
 // Shiki (syntax highlighting) is only needed once a snippet is opened, so keep
@@ -26,6 +30,11 @@ function ScrollToTopOnNavigate() {
   return null
 }
 
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+}
+
 function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -36,6 +45,10 @@ function App() {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
         setPaletteOpen((v) => !v)
+      } else if (event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey && !isTypingTarget(event.target)) {
+        // "/" opens search too, as on most documentation sites.
+        event.preventDefault()
+        setPaletteOpen(true)
       }
     }
     window.addEventListener('keydown', handleKeydown)
@@ -64,12 +77,16 @@ function App() {
             onOpenDrawer={() => setDrawerOpen(true)}
             sidebarOpen={sidebarOpen}
           />
+          <SiteNav />
           <main className="flex-1 px-4 py-8 sm:px-8">
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<Home onOpenSearch={() => setPaletteOpen(true)} />} />
                 <Route path="/c/:categorySlug" element={<CategoryPage />} />
                 <Route path="/search" element={<SearchResultsPage />} />
+                <Route path="/tag/:tag" element={<TagPage />} />
+                <Route path="/explore" element={<ExplorePage />} />
+                <Route path="/me" element={<ProgressPage />} />
                 <Route path="/s/:id" element={<SnippetPage />} />
               </Routes>
             </Suspense>

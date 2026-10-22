@@ -61,8 +61,46 @@
   --shadow-code: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 8px 30px -12px rgba(0, 0, 0, 0.6);
 }
 
+/* "Aurora" again, as an attribute selector. The @theme block above already makes it the
+   page default, but a capture preview scoped to Aurora (data-theme="dark" on an element
+   inside a page that is currently Vesper, say) must be able to restore these values. */
+[data-theme="dark"] {
+  --color-bg: #08080d;
+  --color-bg-elevated: #0e0e17;
+  --color-surface: rgba(255, 255, 255, 0.045);
+  --color-surface-hover: rgba(255, 255, 255, 0.075);
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-ink: #edeef2;
+  --color-ink-dim: #9a9aa8;
+  --color-ink-faint: #8a8a94;
+  --color-accent: #8b8ff7;
+  --color-accent-soft: #b7b9fb;
+  --color-accent-glow: rgba(139, 143, 247, 0.35);
+  --color-accent-ink: #0a0a10;
+  --color-ember: #f2a65a;
+  --color-ember-soft: #f7c78e;
+  --color-scrollbar-thumb: rgba(255, 255, 255, 0.12);
+  --color-scrollbar-thumb-hover: rgba(255, 255, 255, 0.22);
+  --color-mesh-grid: rgba(255, 255, 255, 0.6);
+  --shadow-glass: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 8px 30px -12px rgba(0, 0, 0, 0.6);
+  --color-code-bg: #1b1e28;
+  --color-code-terminal-bg: #131620;
+  --color-code-surface: rgba(255, 255, 255, 0.025);
+  --color-code-surface-hover: rgba(255, 255, 255, 0.07);
+  --color-code-border: rgba(255, 255, 255, 0.09);
+  --color-code-border-strong: rgba(255, 255, 255, 0.16);
+  --color-code-ink: #e4e6f3;
+  --color-code-ink-dim: #9a9aa8;
+  --color-code-ink-faint: #8a8a94;
+  --color-code-accent-soft: #b7b9fb;
+  --color-code-accent-glow: rgba(139, 143, 247, 0.35);
+  --color-code-ember: #f2a65a;
+  --color-code-ember-soft: #f7c78e;
+  --shadow-code: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 8px 30px -12px rgba(0, 0, 0, 0.6);
+}
 /* "Vesper" — matches the Vesper VS Code theme: near-black, pure white text, warm peach accent. */
-:root[data-theme="vesper"] {
+[data-theme="vesper"] {
   --color-bg: #101010;
   --color-bg-elevated: #161616;
   --color-surface: rgba(255, 255, 255, 0.04);
@@ -107,7 +145,7 @@
 
 /* "Daylight" — ported from the real "Quiet Light" VS Code theme (the user's
    actual installed light theme), the same way Vesper mirrors their dark one. */
-:root[data-theme="light"] {
+[data-theme="light"] {
   --color-bg: #f5f5f5;
   --color-bg-elevated: #ffffff;
   --color-surface: rgba(0, 0, 0, 0.04);
@@ -153,7 +191,7 @@
 
 /* "Midnight" — deep navy with a cool cyan accent and a warm orange counterpoint.
    Code surface matches the Tokyo Night editor palette. */
-:root[data-theme="midnight"] {
+[data-theme="midnight"] {
   --color-bg: #0a0f1e;
   --color-bg-elevated: #101729;
   --color-surface: rgba(150, 175, 255, 0.05);
@@ -196,7 +234,7 @@
 }
 
 /* "Terminal" — near-black with a single phosphor-green accent and an amber counterpoint. */
-:root[data-theme="terminal"] {
+[data-theme="terminal"] {
   --color-bg: #070a07;
   --color-bg-elevated: #0d130d;
   --color-surface: rgba(120, 255, 140, 0.04);
@@ -240,7 +278,7 @@
 
 /* "Paper" — warm uncoated stock with dark-brown ink and a terracotta accent;
    code sits on a cream card (Solarized Light's own background). */
-:root[data-theme="paper"] {
+[data-theme="paper"] {
   --color-bg: #f4efe6;
   --color-bg-elevated: #fbf8f2;
   --color-surface: rgba(70, 45, 20, 0.045);
@@ -518,4 +556,51 @@ samp,
   font-size: 11px;
   position: sticky;
   left: 0;
+}
+
+/* "Capture as image": the card that is previewed in the dialog and exported as a PNG.
+   It lives outside .code-scroll, so it carries its own line-number and layout rules.
+   Line numbers come from data-line (set during highlighting) rather than a CSS
+   counter, so a capture of lines 40-60 is numbered 40-60, not 1-21. */
+.capture-code pre.shiki {
+  background: transparent !important;
+  margin: 0;
+  padding: 0;
+}
+.capture-code code {
+  display: block;
+  min-width: max-content;
+  white-space: normal;
+}
+.capture-code .code-line {
+  display: block;
+  position: relative;
+  white-space: pre;
+  min-height: 1.625em;
+  padding-left: 3.5rem;
+}
+.capture-code .code-line::before {
+  content: attr(data-line);
+  position: absolute;
+  left: 0;
+  width: 2.5rem;
+  text-align: right;
+  color: var(--color-code-ink-faint);
+  user-select: none;
+}
+.capture-code.capture-no-numbers .code-line {
+  padding-left: 0;
+}
+.capture-code.capture-no-numbers .code-line::before {
+  display: none;
+}
+.capture-code .capture-gap {
+  display: block;
+  min-height: 1.625em;
+  padding-left: 3.5rem;
+  color: var(--color-code-ink-faint);
+  user-select: none;
+}
+.capture-code.capture-no-numbers .capture-gap {
+  padding-left: 0;
 }
