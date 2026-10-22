@@ -399,10 +399,16 @@ input:focus-visible,
   position: absolute;
   z-index: -1;
   top: calc(-1rem - 1px); /* the 1px is the bar's border, which the offset is measured inside of */
-  left: -1.5rem;
-  right: -1.5rem;
+  left: -1rem; /* the bar's side margin: mx-4 on phones, mx-6 from sm up (below). Wider than that makes the page scroll sideways. */
+  right: -1rem;
   height: 1rem;
   background: var(--color-bg);
+}
+@media (min-width: 40rem) {
+  .glass-panel.solid::before {
+    left: -1.5rem;
+    right: -1.5rem;
+  }
 }
 
 @keyframes fade-up {

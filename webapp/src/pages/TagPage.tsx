@@ -55,7 +55,7 @@ export function TagPage() {
               </Link>
               <span className="font-mono text-xs font-normal normal-case">{group.lessons.length}</span>
             </h2>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {group.lessons.map((snippet) => {
                 const isData = snippet.filename.endsWith('.csv')
                 return (

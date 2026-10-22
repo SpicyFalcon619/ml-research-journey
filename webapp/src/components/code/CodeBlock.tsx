@@ -142,7 +142,7 @@ export function CodeBlock({ code, filename, focusLine, className, output, topics
             </span>
           )}
         </div>
-        <div data-code-actions className="flex items-center gap-2">
+        <div data-code-actions className="flex flex-wrap items-center gap-2">
           {output && !isCsv && (
             <button
               onClick={() => setShowOutput((v) => !v)}
