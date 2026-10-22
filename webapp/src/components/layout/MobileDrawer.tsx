@@ -75,6 +75,12 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
             >
               <X className="h-4 w-4" />
             </button>
+            <a
+              href={`${import.meta.env.BASE_URL}ml-research-roadmap.html`}
+              className="absolute top-3.5 left-5 z-10 text-xs font-medium text-[var(--color-ink-dim)] transition-colors hover:text-[var(--color-ink)]"
+            >
+              Roadmap
+            </a>
             <div className="h-full pt-8">
               <Sidebar onNavigate={onClose} />
             </div>
