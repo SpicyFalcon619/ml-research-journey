@@ -334,7 +334,7 @@ export function AssistantPanel() {
                     ) : (
                       <div>
                         {message.content ? (
-                          <RichText text={message.content} />
+                          <RichText text={message.content} onNavigate={() => { if (window.matchMedia('(max-width: 1023px)').matches) closeAssistant() }} />
                         ) : !message.error ? (
                           <p className="text-sm text-[var(--color-ink-faint)]" role="status">
                             Thinking...
