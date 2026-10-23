@@ -8,6 +8,12 @@
 @import "@fontsource/geist-mono/500.css";
 @import "@fontsource/geist-mono/400-italic.css";
 @import "@fontsource/geist-mono/500-italic.css";
+/* The Expedition theme's own faces: the roadmap's serif headings and mono labels. They only download when that theme is used. */
+@import "@fontsource-variable/fraunces/wght.css";
+@import "@fontsource-variable/fraunces/wght-italic.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/400-italic.css";
 
 /* Side-by-side layouts need room in both directions: a phone held sideways is wide but short. */
 @custom-variant wide (@media (min-width: 48rem) and (min-height: 34rem));
@@ -322,6 +328,69 @@
   --color-code-ember: #2e6f68;
   --color-code-ember-soft: #235650;
   --shadow-code: 0 1px 0 0 rgba(255, 255, 255, 0.7) inset, 0 8px 24px -12px rgba(70, 45, 20, 0.22);
+}
+
+/* "Expedition" — the roadmap page's own look: deep navy, antique gold, a sea-green second voice and
+   rust for warnings, with serif headings, mono labels and faint contour lines behind everything. */
+[data-theme="expedition"] {
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
+
+  --color-bg: #0c1118;
+  --color-bg-elevated: #131c27;
+  --color-surface: rgba(243, 236, 219, 0.04);
+  --color-surface-hover: rgba(243, 236, 219, 0.075);
+  --color-border: rgba(243, 236, 219, 0.11);
+  --color-border-strong: rgba(243, 236, 219, 0.2);
+
+  --color-ink: #f3ecdb;
+  --color-ink-dim: #b8c0c8;
+  --color-ink-faint: #8f99a4;
+
+  --color-accent: #d2a14e;
+  --color-accent-soft: #e6c07f;
+  --color-accent-glow: rgba(210, 161, 78, 0.3);
+  --color-accent-ink: #0c1118;
+
+  --color-ember: #d2784a;
+  --color-ember-soft: #e39a6e;
+
+  --color-scrollbar-thumb: rgba(243, 236, 219, 0.16);
+  --color-scrollbar-thumb-hover: rgba(243, 236, 219, 0.28);
+  --color-mesh-grid: rgba(243, 236, 219, 0.5);
+
+  --shadow-glass: 0 1px 0 0 rgba(243, 236, 219, 0.05) inset, 0 8px 30px -12px rgba(0, 0, 0, 0.7);
+  color-scheme: dark;
+
+  --color-code-bg: #0f1620;
+  --color-code-terminal-bg: #0a0f16;
+  --color-code-surface: rgba(243, 236, 219, 0.04);
+  --color-code-surface-hover: rgba(243, 236, 219, 0.08);
+  --color-code-border: rgba(243, 236, 219, 0.1);
+  --color-code-border-strong: rgba(243, 236, 219, 0.2);
+  --color-code-ink: #e9e1cf;
+  --color-code-ink-dim: #b8c0c8;
+  --color-code-ink-faint: #8f99a4;
+  --color-code-accent-soft: #e6c07f;
+  --color-code-accent-glow: rgba(210, 161, 78, 0.3);
+  --color-code-ember: #e39a6e;
+  --color-code-ember-soft: #ecb593;
+  --shadow-code: 0 1px 0 0 rgba(243, 236, 219, 0.05) inset, 0 8px 30px -12px rgba(0, 0, 0, 0.7);
+}
+
+/* Serif headings, as on the roadmap. Small uppercase labels that happen to be headings stay as they are. */
+[data-theme="expedition"] :is(h1, h2, h3):not(.uppercase) {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+/* The roadmap's contour lines instead of the grid. */
+[data-theme="expedition"] .mesh-grid {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 900' preserveAspectRatio='xMidYMid slice'%3E%3Cg fill='none' stroke='%23f3ecdb' stroke-width='1.2'%3E%3Cpath d='M -100 110 Q 300 30 700 130 T 1500 90'/%3E%3Cpath d='M -100 170 Q 300 90 700 190 T 1500 150'/%3E%3Cpath d='M -100 230 Q 300 150 700 250 T 1500 210'/%3E%3Cpath d='M -100 400 Q 300 320 700 420 T 1500 380'/%3E%3Cpath d='M -100 460 Q 300 380 700 480 T 1500 440'/%3E%3Cpath d='M -100 520 Q 300 440 700 540 T 1500 500'/%3E%3Cpath d='M -100 590 Q 300 510 700 610 T 1500 570'/%3E%3Cpath d='M -100 700 Q 300 620 700 720 T 1500 680'/%3E%3Cpath d='M -100 760 Q 300 680 700 780 T 1500 740'/%3E%3Cpath d='M -100 820 Q 300 740 700 840 T 1500 800'/%3E%3C/g%3E%3C/svg%3E") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  opacity: 0.07 !important;
 }
 
 html {

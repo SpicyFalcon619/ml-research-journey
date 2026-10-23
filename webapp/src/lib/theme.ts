@@ -1,4 +1,4 @@
-export type ThemeId = 'dark' | 'vesper' | 'light' | 'midnight' | 'paper' | 'terminal'
+export type ThemeId = 'dark' | 'vesper' | 'light' | 'midnight' | 'paper' | 'terminal' | 'expedition'
 // What the user picked: a concrete theme, or "system" to follow the device.
 export type ThemePreference = ThemeId | 'system'
 
@@ -26,6 +26,7 @@ export const THEME_OPTIONS: ThemeOption[] = [
   { id: 'midnight', label: 'Midnight', description: 'Deep sea, cyan accent', swatch: { bg: '#0a0f1e', accent: '#5ccfe6', ember: '#ff9e64' } },
   { id: 'paper', label: 'Paper', description: 'Warm stock, terracotta ink', swatch: { bg: '#f4efe6', accent: '#b4532a', ember: '#2e6f68' } },
   { id: 'terminal', label: 'Terminal', description: 'Phosphor green on black', swatch: { bg: '#070a07', accent: '#4ade80', ember: '#facc15' } },
+  { id: 'expedition', label: 'Expedition', description: 'Navy and gold, like the roadmap', swatch: { bg: '#0c1118', accent: '#d2a14e', ember: '#c06a3f' } },
   {
     id: 'system',
     label: 'System',

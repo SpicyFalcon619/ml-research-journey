@@ -7,6 +7,7 @@ import githubLight from 'shiki/themes/github-light.mjs'
 import vitesseBlack from 'shiki/themes/vitesse-black.mjs'
 import vesper from './themes/vesper-shiki-theme.json'
 import quietlight from './themes/quietlight-shiki-theme.json'
+import expedition from './themes/expedition-shiki-theme.json'
 import type { ThemeId } from './theme'
 
 // Shiki theme name to use for each site theme, so code blocks look native to
@@ -18,6 +19,7 @@ export const SHIKI_THEME_BY_SITE_THEME: Record<ThemeId, string> = {
   midnight: 'tokyo-night',
   paper: 'github-light',
   terminal: 'vitesse-black',
+  expedition: 'expedition',
 }
 
 // Tokyo Night, GitHub Light and Vitesse Black set comments at 2.6-4.3:1 contrast,
@@ -45,6 +47,7 @@ export function getHighlighter(): Promise<HighlighterCore> {
         poimandres,
         vesper as unknown as ThemeRegistrationRaw,
         quietlight as unknown as ThemeRegistrationRaw,
+        expedition as unknown as ThemeRegistrationRaw,
         withReadableComments(tokyoNight as unknown as ThemeRegistrationRaw, '#7983b0'),
         withReadableComments(githubLight as unknown as ThemeRegistrationRaw, '#5c636b'),
         withReadableComments(vitesseBlack as unknown as ThemeRegistrationRaw, '#7f917f'),

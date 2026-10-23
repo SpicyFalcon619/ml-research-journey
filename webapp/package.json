@@ -11,8 +11,10 @@
     "capture-outputs": "node scripts/capture-outputs.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource/geist": "^5.2.9",
     "@fontsource/geist-mono": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "@tailwindcss/vite": "^4.3.2",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
