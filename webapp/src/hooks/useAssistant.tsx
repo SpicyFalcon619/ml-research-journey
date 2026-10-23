@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { BUILT_IN_KEY, getStoredModel, purgeStoredKey, saveModel } from '@/lib/groq'
+import { getStoredModel, MODELS, purgeStoredKey, saveModel } from '@/lib/llm'
 
 interface AssistantValue {
   open: boolean
@@ -7,8 +7,7 @@ interface AssistantValue {
   everOpened: boolean
   /** A question waiting to be sent as soon as the panel is ready. */
   pending: string | null
-  /** The site's own key. Nobody is ever asked for one; if the site was built without it, the assistant is switched off. */
-  apiKey: string
+  /** True when the site was built with at least one provider's key. Nobody is ever asked for a key; with none, the assistant is switched off. */
   available: boolean
   model: string
   openAssistant: (prompt?: string) => void
@@ -40,8 +39,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       open,
       everOpened,
       pending,
-      apiKey: BUILT_IN_KEY,
-      available: BUILT_IN_KEY !== '',
+      available: MODELS.length > 0,
       model,
       openAssistant,
       closeAssistant: () => setOpen(false),

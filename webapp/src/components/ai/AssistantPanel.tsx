@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { ArrowUp, Check, Copy, History, Plus, RotateCcw, Settings as SettingsIcon, Square, Trash2, X } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
 import { buildMessages, CONTINUE_PROMPT, FOLLOW_UPS, GENERAL_ACTIONS, LESSON_ACTIONS, MAX_QUESTION_CHARS } from '@/lib/assistantPrompts'
-import { GroqError, MODELS, modelOrder, streamChat } from '@/lib/groq'
+import { ACTIVE_PROVIDERS, LlmError, MODELS, modelOrder, PROVIDERS, streamChat } from '@/lib/llm'
 import { timeAgo } from '@/lib/userData'
 import { useAssistant } from '@/hooks/useAssistant'
 import { useLibrary } from '@/hooks/useLibrary'
@@ -51,8 +51,8 @@ function Unavailable() {
       <p className="text-sm leading-relaxed text-[var(--color-ink-dim)]">It isn't set up on this copy of the site, so there's nothing to ask right now.</p>
       {import.meta.env.DEV && (
         <p className="text-xs leading-relaxed text-[var(--color-ink-faint)]">
-          For the site's owner: put the key in <span className="font-mono">webapp/.env.local</span> as <span className="font-mono">VITE_GROQ_KEY=...</span> and restart
-          the dev server. On GitHub it comes from the <span className="font-mono">GROQ_API_KEY</span> secret.
+          For the site's owner: put a key in <span className="font-mono">webapp/.env.local</span> as <span className="font-mono">VITE_GROQ_KEY=...</span> or <span className="font-mono">VITE_GEMINI_KEY=...</span> and restart
+          the dev server. On GitHub they come from the <span className="font-mono">GROQ_API_KEY</span> and <span className="font-mono">GEMINI_API_KEY</span> secrets.
         </p>
       )}
     </div>
@@ -72,7 +72,7 @@ function TypingDots() {
 }
 
 export function AssistantPanel() {
-  const { open, pending, apiKey, available, model, closeAssistant, consumePending } = useAssistant()
+  const { open, pending, available, model, closeAssistant, consumePending } = useAssistant()
   const { done, recent } = useLibrary()
   const { chats, active, messages, startChat, updateMessages, patchMessage, newChat, openChat, deleteChat, clearAll, makeId } = useChats()
   const { pathname } = useLocation()
@@ -101,7 +101,7 @@ export function AssistantPanel() {
   const send = useCallback(
     async (text: string, options: { history?: Msg[]; asked?: string } = {}) => {
       const content = text.trim().slice(0, MAX_QUESTION_CHARS)
-      if (!content || busy || !apiKey) return
+      if (!content || busy || !available) return
       const base = options.history ?? messages
       const chatId = active?.id ?? startChat(content)
       const prior = base.filter((m) => !m.error && m.content).map(({ role, content: c }) => ({ role, content: c }))
@@ -127,8 +127,7 @@ export function AssistantPanel() {
         for (let i = 0; i < order.length; i++) {
           try {
             finish = await streamChat({
-              apiKey,
-              model: order[i].id,
+              model: order[i],
               signal: controller.signal,
               messages: request,
               onToken: (token) => {
@@ -139,7 +138,8 @@ export function AssistantPanel() {
             if (i > 0) patchMessage(chatId, replyId, { note: `Answered by ${order[i].label}, because ${order[0].label} was at its free limit or unavailable.` })
             break
           } catch (error) {
-            const retryable = error instanceof GroqError && (error.kind === 'rate' || error.kind === 'other')
+            // A rejected key counts too: if one provider's key is wrong, the other provider can still answer.
+            const retryable = error instanceof LlmError && (error.kind === 'rate' || error.kind === 'other' || error.kind === 'auth')
             if (retryable && !received && i < order.length - 1) continue
             throw error
           }
@@ -147,7 +147,7 @@ export function AssistantPanel() {
         if (finish === 'length') patchMessage(chatId, replyId, { truncated: true })
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
-          const kind = error instanceof GroqError ? error.kind : 'other'
+          const kind = error instanceof LlmError ? error.kind : 'other'
           const message = kind === 'auth' ? "The assistant's key isn't working right now. Please try again later." : (error as Error).message
           patchMessage(chatId, replyId, { error: message, errorKind: kind })
         }
@@ -156,7 +156,7 @@ export function AssistantPanel() {
         abortRef.current = null
       }
     },
-    [apiKey, model, messages, busy, active, activeLesson, done, recent, startChat, updateMessages, patchMessage, makeId],
+    [available, model, messages, busy, active, activeLesson, done, recent, startChat, updateMessages, patchMessage, makeId],
   )
 
   // A question handed over by an "Ask about this" button is sent once the panel is ready.
@@ -346,7 +346,7 @@ export function AssistantPanel() {
                       ))}
                     </div>
                     <p className="mt-6 text-xs leading-relaxed text-[var(--color-ink-faint)]">
-                      Answers come from an AI model and can be wrong. Check anything important against the lesson's real output. Your questions go to Groq.
+                      Answers come from an AI model and can be wrong. Check anything important against the lesson's real output. Your questions go to {ACTIVE_PROVIDERS.map((id) => PROVIDERS[id].label).join(' or ')}.{ACTIVE_PROVIDERS.includes('gemini') ? " Google may use free-tier questions to improve its products, so keep anything private out of them." : ''}
                       The free plan has a daily limit that everyone using the site shares, so this is for light use. Conversations are saved in this browser.
                     </p>
                   </div>

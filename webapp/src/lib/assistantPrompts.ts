@@ -3,7 +3,7 @@ import { getOutput } from '@/lib/outputs'
 import { siteMap } from '@/lib/siteIndex'
 import { getAdjacent } from '@/lib/roadmap'
 import { nextUpLesson, overallProgress, trackProgress } from '@/lib/progress'
-import type { ChatMessage } from '@/lib/groq'
+import type { ChatMessage } from '@/lib/llm'
 
 // The free plan allows roughly 8K tokens a minute, so what is sent is capped: about 1.5K
 // tokens of code, a little output, and only the most recent turns of the conversation.
