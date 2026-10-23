@@ -1,4 +1,4 @@
-import { GROQ_KEY_STORAGE, MODEL_STORAGE } from '@/lib/groq'
+import { GROQ_KEY_STORAGE, MODEL_STORAGE } from '@/lib/llm'
 import { CHATS_KEY } from '@/lib/chats'
 
 // Everything a visitor can personalize lives in their own browser (localStorage). This

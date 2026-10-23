@@ -1,7 +1,7 @@
-import type { GroqErrorKind } from '@/lib/groq'
+import type { LlmErrorKind } from '@/lib/llm'
 
 // Conversations with the assistant, kept in this browser's local storage so they survive a
-// refresh. They hold only what was typed and answered: never the Groq key. Old chats are
+// refresh. They hold only what was typed and answered: never any key. Old chats are
 // dropped to stay well inside the browser's storage limit.
 
 export const CHATS_KEY = 'mlfg-ai-chats'
@@ -11,7 +11,7 @@ export interface Msg {
   role: 'user' | 'assistant'
   content: string
   error?: string
-  errorKind?: GroqErrorKind
+  errorKind?: LlmErrorKind
   /** Set when a different model than the chosen one answered because of a rate limit. */
   note?: string
   /** True when the model hit its length limit and the answer stops short. */
