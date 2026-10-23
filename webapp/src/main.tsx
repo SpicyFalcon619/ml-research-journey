@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/hooks/useTheme'
 import { CodeFontSizeProvider } from '@/hooks/useCodeFontSize'
 import { LibraryProvider } from '@/hooks/useLibrary'
 import { AssistantProvider } from '@/hooks/useAssistant'
+import { ConfirmProvider } from '@/hooks/useConfirm'
 import './index.css'
 import App from './App.tsx'
 
@@ -14,9 +15,11 @@ createRoot(document.getElementById('root')!).render(
       <CodeFontSizeProvider>
         <LibraryProvider>
           <AssistantProvider>
-            <HashRouter>
-              <App />
-            </HashRouter>
+            <ConfirmProvider>
+              <HashRouter>
+                <App />
+              </HashRouter>
+            </ConfirmProvider>
           </AssistantProvider>
         </LibraryProvider>
       </CodeFontSizeProvider>

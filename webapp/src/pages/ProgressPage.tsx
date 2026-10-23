@@ -8,6 +8,8 @@ import { MAX_CODE_FONT_SIZE, MIN_CODE_FONT_SIZE } from '@/lib/codeFontSize'
 import { ROADMAP_PREFIX, KEYS, computeStreak, eraseAll, exportData, localDay, parseImport, storageSnapshot, timeAgo, writeEntries } from '@/lib/userData'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useLibrary } from '@/hooks/useLibrary'
+import { useConfirm } from '@/hooks/useConfirm'
+import type { ConfirmOptions } from '@/components/ui/ConfirmDialog'
 import { loadChats } from '@/lib/chats'
 import { useTheme } from '@/hooks/useTheme'
 import { useCodeFontSize } from '@/hooks/useCodeFontSize'
@@ -71,8 +73,10 @@ export function ProgressPage() {
   const roadmapTicks = Object.entries(snapshot).filter(([key, value]) => key.startsWith(ROADMAP_PREFIX) && value === 'true').length
   const captureSaved = KEYS.capture in snapshot
 
-  function confirmThen(message: string, action: () => void) {
-    if (window.confirm(message)) action()
+  // Asks with the site's own dialog (not the browser's pop-up) and runs the action only on a yes.
+  const confirm = useConfirm()
+  async function confirmThen(options: ConfirmOptions, action: () => void) {
+    if (await confirm(options)) action()
   }
 
   function handleExport() {
@@ -93,7 +97,7 @@ export function ProgressPage() {
       return
     }
     const count = Object.keys(result.entries).length
-    confirmThen(`Import ${count} saved items from "${file.name}"? This replaces the matching progress and preferences stored in this browser.`, () => {
+    confirmThen({ title: `Import ${count} saved items?`, message: `"${file.name}" replaces the matching progress and preferences stored in this browser.`, confirmLabel: 'Import' }, () => {
       writeEntries(result.entries)
       window.location.reload()
     })
@@ -307,7 +311,18 @@ export function ProgressPage() {
                   <button
                     type="button"
                     disabled={!row.onClear || row.detail === '0'}
-                    onClick={() => row.onClear && confirmThen(`${row.clearLabel ?? 'Clear'}: ${row.label.toLowerCase()}?`, row.onClear)}
+                    onClick={() =>
+                      row.onClear &&
+                      confirmThen(
+                        {
+                          title: `${row.clearLabel ?? 'Clear'} "${row.label}"?`,
+                          message: row.clearLabel === 'Reset' ? 'This puts it back to how it started.' : 'This removes it from this browser and cannot be undone.',
+                          confirmLabel: row.clearLabel ?? 'Clear',
+                          danger: row.clearLabel !== 'Reset',
+                        },
+                        row.onClear,
+                      )
+                    }
                     className="cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)] disabled:cursor-not-allowed disabled:no-underline disabled:opacity-40"
                   >
                     {row.clearLabel ?? 'Clear'}
@@ -327,7 +342,20 @@ export function ProgressPage() {
           <input ref={importRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => { handleImport(e.target.files?.[0]); e.target.value = '' }} />
           <button
             type="button"
-            onClick={() => confirmThen('Erase all saved progress, saved lessons, history and preferences from this browser? This cannot be undone.', () => { eraseAll(); window.location.reload() })}
+            onClick={() =>
+              confirmThen(
+                {
+                  title: 'Erase everything?',
+                  message: 'This removes your finished and saved lessons, history, preferences and AI conversations from this browser. It cannot be undone.',
+                  confirmLabel: 'Erase everything',
+                  danger: true,
+                },
+                () => {
+                  eraseAll()
+                  window.location.reload()
+                },
+              )
+            }
             className={cn(buttonClass, 'ml-auto')}
           >
             Erase everything

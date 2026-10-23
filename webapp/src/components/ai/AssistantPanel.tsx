@@ -9,6 +9,7 @@ import { timeAgo } from '@/lib/userData'
 import { useAssistant } from '@/hooks/useAssistant'
 import { useLibrary } from '@/hooks/useLibrary'
 import { useChats } from '@/hooks/useChats'
+import { useConfirm } from '@/hooks/useConfirm'
 import { Dropdown } from '@/components/ui/Dropdown'
 import { RichText } from '@/components/ai/RichText'
 import { cn } from '@/lib/cn'
@@ -75,6 +76,7 @@ export function AssistantPanel() {
   const { done, recent } = useLibrary()
   const { chats, active, messages, startChat, updateMessages, patchMessage, newChat, openChat, deleteChat, clearAll, makeId } = useChats()
   const { pathname } = useLocation()
+  const confirm = useConfirm()
   const reduceMotion = useReducedMotion()
   const lessonId = pathname.startsWith('/s/') ? decodeURIComponent(pathname.slice(3)) : undefined
   const lesson = lessonId ? getSnippetById(lessonId) : undefined
@@ -307,8 +309,14 @@ export function AssistantPanel() {
               {sortedChats.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (window.confirm('Delete all saved conversations from this browser?')) guard(() => { clearAll(); setView('chat') })
+                  onClick={async () => {
+                    const yes = await confirm({
+                      title: 'Delete all conversations?',
+                      message: 'They are saved only in this browser, so they cannot be brought back.',
+                      confirmLabel: 'Delete all',
+                      danger: true,
+                    })
+                    if (yes) guard(() => { clearAll(); setView('chat') })
                   }}
                   className="mt-2 cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]"
                 >
