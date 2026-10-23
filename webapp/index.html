@@ -15,7 +15,7 @@
         // Keep the ids in sync with src/lib/theme.ts.
         try {
           var stored = window.localStorage.getItem('mlfg-theme')
-          var known = ['dark', 'vesper', 'light', 'midnight', 'paper', 'terminal']
+          var known = ['dark', 'vesper', 'light', 'midnight', 'paper', 'terminal', 'expedition']
           var theme = 'dark'
           if (stored === 'system') {
             theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
@@ -23,6 +23,7 @@
             theme = stored
           }
           document.documentElement.setAttribute('data-theme', theme)
+          document.documentElement.setAttribute('data-bg', window.localStorage.getItem('mlfg-bg') === 'off' ? 'off' : 'on')
         } catch (e) {}
       })()
     </script>

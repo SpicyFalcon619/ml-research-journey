@@ -38,6 +38,28 @@ export const THEME_OPTIONS: ThemeOption[] = [
 
 const STORAGE_KEY = 'mlfg-theme'
 
+// The page's background pattern can be switched off. The roadmap page reads the same key, so one
+// choice covers both. Anything other than an explicit "off" means on.
+export const BACKGROUND_KEY = 'mlfg-bg'
+
+export function getStoredBackground(): boolean {
+  if (typeof window === 'undefined') return true
+  try {
+    return window.localStorage.getItem(BACKGROUND_KEY) !== 'off'
+  } catch {
+    return true
+  }
+}
+
+export function applyBackground(on: boolean) {
+  document.documentElement.setAttribute('data-bg', on ? 'on' : 'off')
+  try {
+    window.localStorage.setItem(BACKGROUND_KEY, on ? 'on' : 'off')
+  } catch {
+    // Not remembered; it still applies for this visit.
+  }
+}
+
 function isThemePreference(value: string | null): value is ThemePreference {
   return value !== null && THEME_OPTIONS.some((option) => option.id === value)
 }

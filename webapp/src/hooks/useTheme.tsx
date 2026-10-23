@@ -1,11 +1,13 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { applyTheme, getStoredPreference, getSystemTheme, type ThemeId, type ThemePreference } from '@/lib/theme'
+import { applyBackground, applyTheme, getStoredBackground, getStoredPreference, getSystemTheme, type ThemeId, type ThemePreference } from '@/lib/theme'
 
 // [theme actually on screen, setter for the user's preference, the preference itself].
 // The preference can be "system"; the first value is always a concrete theme.
 type ThemeContextValue = readonly [ThemeId, (preference: ThemePreference) => void, ThemePreference]
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
+// Whether the background pattern is shown: [on, setOn].
+const BackgroundContext = createContext<readonly [boolean, (on: boolean) => void] | null>(null)
 
 // A single shared theme state, provided once at the app root. Previously this
 // was a plain hook with its own useState, so every component calling it (the
@@ -26,17 +28,32 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => query.removeEventListener('change', handleChange)
   }, [])
 
+  const [background, setBackground] = useState<boolean>(getStoredBackground)
+  useEffect(() => {
+    applyBackground(background)
+  }, [background])
+
   const theme = preference === 'system' ? systemTheme : preference
 
   useEffect(() => {
     applyTheme(theme, preference)
   }, [theme, preference])
 
-  return <ThemeContext.Provider value={[theme, setPreference, preference]}>{children}</ThemeContext.Provider>
+  return (
+    <ThemeContext.Provider value={[theme, setPreference, preference]}>
+      <BackgroundContext.Provider value={[background, setBackground]}>{children}</BackgroundContext.Provider>
+    </ThemeContext.Provider>
+  )
 }
 
 export function useTheme() {
   const ctx = useContext(ThemeContext)
   if (!ctx) throw new Error('useTheme must be used within a ThemeProvider')
+  return ctx
+}
+
+export function useBackground() {
+  const ctx = useContext(BackgroundContext)
+  if (!ctx) throw new Error('useBackground must be used within a ThemeProvider')
   return ctx
 }

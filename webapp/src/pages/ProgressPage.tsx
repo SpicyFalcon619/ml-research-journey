@@ -11,7 +11,7 @@ import { useLibrary } from '@/hooks/useLibrary'
 import { useConfirm } from '@/hooks/useConfirm'
 import type { ConfirmOptions } from '@/components/ui/ConfirmDialog'
 import { loadChats } from '@/lib/chats'
-import { useTheme } from '@/hooks/useTheme'
+import { useBackground, useTheme } from '@/hooks/useTheme'
 import { useCodeFontSize } from '@/hooks/useCodeFontSize'
 import { GlassPanel } from '@/components/ui/GlassPanel'
 import { cn } from '@/lib/cn'
@@ -45,6 +45,7 @@ export function ProgressPage() {
   const lib = useLibrary()
   const chatCount = loadChats().chats.length
   const [theme, setTheme, themePreference] = useTheme()
+  const [background, setBackground] = useBackground()
   const [codeSize, setCodeSize] = useCodeFontSize()
   const importRef = useRef<HTMLInputElement>(null)
   const [notice, setNotice] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
@@ -280,6 +281,12 @@ export function ProgressPage() {
             hint="Turn this off if you'd rather the home page didn't remember your last lesson."
             checked={lib.prefs.showContinue}
             onChange={(showContinue) => lib.setPrefs({ showContinue })}
+          />
+          <Toggle
+            label="Show the background pattern"
+            hint="Each theme draws a faint pattern behind the page. Turn it off for a plain colour. This also applies to the roadmap page."
+            checked={background}
+            onChange={setBackground}
           />
           <Toggle
             label="Remember the lessons I open and the searches I make"
