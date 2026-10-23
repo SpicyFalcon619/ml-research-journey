@@ -64,7 +64,7 @@ export const BACKGROUNDS: { id: CaptureBackground; label: string }[] = [
 ]
 
 const STORAGE_KEY = 'mlfg-capture-style-v1'
-const THEME_IDS = ['dark', 'vesper', 'light', 'midnight', 'paper', 'terminal']
+const THEME_IDS = ['dark', 'vesper', 'light', 'midnight', 'paper', 'terminal', 'expedition']
 
 // Anything read back from storage is validated field by field, so a hand-edited or
 // out-of-date value can never put the dialog into a state it can't render.

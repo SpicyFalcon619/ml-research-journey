@@ -12,6 +12,7 @@ const CSV_PALETTE: Record<ThemeId, string[]> = {
   midnight: ['#7dcfff', '#9ece6a', '#ff9e64', '#bb9af7', '#f7768e', '#e0af68'],
   paper: ['#b4532a', '#2e6f68', '#6b4fa0', '#8a6d12', '#a3304a', '#3d6fa3'],
   terminal: ['#4ade80', '#facc15', '#5eead4', '#a3e635', '#fb923c', '#86efac'],
+  expedition: ['#d2a14e', '#7fb3a8', '#e39a6e', '#ecd29a', '#98c9bd', '#c9a2d6'],
 }
 
 function hexToRgb(hex: string): [number, number, number] {

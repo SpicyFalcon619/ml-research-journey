@@ -7,6 +7,7 @@
 <!-- Compass from the hero, as a favicon (the Field Guide app has its own chevron-and-cursor icon). -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c1118'/%3E%3Ccircle cx='16' cy='16' r='11.5' fill='none' stroke='%23d2a14e' stroke-width='1.6' stroke-opacity='.7'/%3E%3Cpath d='M16 4.5 L18.6 16 L16 27.5 L13.4 16 Z' fill='%23d2a14e'/%3E%3Cpath d='M4.5 16 L16 13.4 L27.5 16 L16 18.6 Z' fill='%23f3ecdb' fill-opacity='.5'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%230c1118'/%3E%3C/svg%3E">
 <meta name="theme-color" content="#0c1118">
+<noscript><style>.waypoint{opacity:1;transform:none;}</style></noscript>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -28,6 +29,7 @@
     --line: rgba(243,236,219,0.09);
     --line-strong: rgba(243,236,219,0.18);
     --max: 880px;
+    color-scheme: dark;
   }
 
   *{box-sizing:border-box;}
@@ -501,7 +503,7 @@
     margin-bottom:10px;
     display:block;
   }
-  .branch h4{
+  .branch h3{
     font-family:'Fraunces',serif;
     font-weight:500;
     font-size:1.25rem;
@@ -701,6 +703,148 @@
     .compass{animation:none;}
     .you-are-here .dot{animation:none;}
   }
+  /* ================= UX UPGRADES (added on top of the original look) ================= */
+  .sr-only{
+    position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  /* A one-column grid sizes to its widest content unless its track is allowed to shrink, which is
+     what pushed the fork cards (and the whole page) wider than a phone. */
+  .fork__grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .library__grid, .cache__grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dispatch__grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  @media(max-width:760px){ .dispatch__grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:680px){ .fork__grid{ grid-template-columns:minmax(0,1fr); } }
+  @media(max-width:640px){ .library__grid, .cache__grid{ grid-template-columns:minmax(0,1fr); } }
+  @media(max-width:520px){ .dispatch__grid{ grid-template-columns:minmax(0,1fr); } }
+  .branch, .book, .tool, .dispatch__item, .ticket, .ticket__body{ min-width:0; }
+  .ticket__title, .ticket__why, .book a, .tool a{ overflow-wrap:anywhere; }
+  @media(max-width:520px){
+    .ticket__body{ grid-template-columns:minmax(0,1fr); }
+    .ticket__source{ grid-column:1; grid-row:auto; justify-self:start; white-space:normal; }
+  }
+
+  /* Keyboard focus: a gold ring wherever you land. */
+  a:focus-visible, button:focus-visible, .ticket__check:focus-visible{
+    outline:2px solid var(--gold); outline-offset:3px; border-radius:4px;
+  }
+
+  /* Sections you jump to must not hide under the sticky progress bar. */
+  .waypoint, .fork, .cache, .library, .dispatch, .wisdom{ scroll-margin-top:96px; }
+
+  /* Progress bar: a little more to read and use. */
+  .progress-summary{
+    flex-wrap:wrap; max-width:100%; row-gap:8px;
+  }
+  .progress-pct{ color:var(--gold); min-width:3ch; text-align:right; }
+  .progress-bar-bg{ flex:0 0 100px; }
+  .progress-btn{
+    background:none;
+    border:1px solid rgba(255,255,255,0.12);
+    color:var(--cream-dim);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px; letter-spacing:0.04em;
+    padding:5px 11px; border-radius:20px; cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  .progress-btn:hover:not(:disabled){ border-color:var(--gold); color:var(--gold); }
+  .progress-btn:disabled{ opacity:0.4; cursor:default; }
+  .progress-btn[aria-pressed="true"]{
+    border-color:var(--teal); color:var(--teal); background:rgba(111,163,154,0.1);
+  }
+  @media(max-width:560px){
+    .progress-summary{ display:flex; width:100%; border-radius:18px; padding:12px 14px; gap:8px 10px; top:12px; }
+    .progress-bar-bg{ flex:1 1 90px; }
+  }
+
+  /* Jump strip */
+  .toc{
+    display:flex; gap:8px; margin:22px 0 0; padding:2px 0 6px;
+    overflow-x:auto; scrollbar-width:thin;
+    scrollbar-color:var(--line-strong) transparent;
+  }
+  .toc a{
+    flex:0 0 auto;
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px; letter-spacing:0.03em;
+    color:var(--cream-dim); text-decoration:none;
+    border:1px solid var(--line-strong);
+    padding:6px 12px; border-radius:20px;
+    transition:color .15s, border-color .15s, background .15s;
+    white-space:nowrap;
+  }
+  .toc a:hover{ color:var(--cream); border-color:rgba(243,236,219,0.4); }
+  .toc a[aria-current="true"]{
+    color:var(--gold); border-color:var(--gold-dim); background:rgba(210,161,78,0.08);
+  }
+  .toc__n{ color:var(--teal); }
+  .toc a.is-done .toc__n{ color:var(--gold); }
+
+  /* Basecamp: how far through it you are */
+  .waypoint__marker{ position:relative; }
+  .waypoint__marker .ring{
+    position:absolute; inset:-1px; width:calc(100% + 2px); height:calc(100% + 2px);
+    transform:rotate(-90deg); pointer-events:none;
+  }
+  .waypoint__marker .ring circle{
+    fill:none; stroke:var(--gold); stroke-width:2; stroke-linecap:round;
+    stroke-dasharray:0 100;
+    transition:stroke-dasharray 0.5s cubic-bezier(0.25,0.8,0.25,1);
+  }
+  .waypoint__count{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    color:var(--cream-dim); white-space:nowrap;
+  }
+  .waypoint.completed .waypoint__count{ color:var(--gold); }
+  .waypoint__practice{
+    margin:-8px 0 20px; font-family:'JetBrains Mono',monospace;
+    font-size:11.5px; letter-spacing:0.02em; color:var(--cream-dim);
+  }
+  .waypoint__practice a{ color:var(--teal); text-decoration:none; border-bottom:1px solid rgba(111,163,154,0.4); }
+  .waypoint__practice a:hover{ color:var(--gold); border-color:var(--gold-dim); }
+  .done-note{
+    display:none; margin:0; font-family:'JetBrains Mono',monospace;
+    font-size:12px; color:var(--cream-dim);
+    border:1px dashed var(--line-strong); border-radius:8px; padding:12px 16px;
+  }
+  body.hide-done .waypoint.completed .done-note{ display:block; }
+  body.hide-done .ticket.completed{ display:none; }
+  body.hide-done .branch.all-done{ display:none; }
+
+  /* A crisp tick instead of a text glyph */
+  .ticket__check:checked::before{ content:none; }
+  .ticket__check:checked{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%230c1118' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-size:15px; background-position:center; background-repeat:no-repeat;
+    animation:tick-pop 0.22s ease;
+  }
+  @keyframes tick-pop{ 0%{transform:scale(0.8);} 60%{transform:scale(1.12);} 100%{transform:scale(1);} }
+  .ticket__title::after{ content:' \2197'; font-weight:400; opacity:0.55; }
+  /* A hit area bigger than the box itself, for thumbs */
+  .ticket__check::after{ content:''; position:absolute; inset:-10px; }
+  .ticket.is-next{ outline:2px solid var(--gold); outline-offset:4px; animation:next-fade 2.4s ease forwards; }
+  @keyframes next-fade{ 0%,70%{outline-color:var(--gold);} 100%{outline-color:transparent;} }
+
+  /* Back to top */
+  .to-top{
+    position:fixed; right:18px; bottom:18px; z-index:90;
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.04em;
+    color:var(--cream-dim); background:var(--bg-soft);
+    border:1px solid var(--line-strong); border-radius:20px; padding:8px 14px;
+    cursor:pointer; opacity:0; transform:translateY(8px); pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease, color .15s, border-color .15s;
+  }
+  .to-top.is-shown{ opacity:1; transform:none; pointer-events:auto; }
+  .to-top:hover{ color:var(--gold); border-color:var(--gold-dim); }
+
+  @media (prefers-reduced-motion: reduce){
+    .ticket__check:checked{ animation:none; }
+    .ticket.is-next{ animation:none; }
+    .waypoint__marker .ring circle{ transition:none; }
+    .to-top{ transition:none; }
+  }
   /* The page's own "are you sure?" box, used instead of the browser's confirm() pop-up. */
   .confirm-backdrop {
     position: fixed; inset: 0; z-index: 100;
@@ -783,7 +927,7 @@
   </div>
 </header>
 
-<section class="legend">
+<section class="legend" aria-label="How to read this guide">
   <div class="wrap">
     <div class="legend__grid">
       <div class="legend__item">
@@ -804,12 +948,28 @@
 
 <main>
   <div class="wrap">
-    <div class="progress-summary">
-      <span id="progress-text">Progress: 0 / 0</span>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
+    <div class="progress-summary" role="group" aria-label="Your progress">
+      <span id="progress-text" role="status">Progress: 0 / 0</span>
+      <span class="progress-pct" id="progress-pct" aria-hidden="true">0%</span>
+      <div class="progress-bar-bg" id="progress-track" role="progressbar" aria-label="Overall progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar-fill" id="progress-bar"></div></div>
+      <button class="progress-btn" id="progress-next" type="button">Next step</button>
+      <button class="progress-btn" id="progress-hide" type="button" aria-pressed="false">Hide done</button>
       <button class="progress-reset" id="progress-reset" type="button">Reset</button>
     </div>
     <span class="milestone" id="milestone-msg"></span>
+
+    <nav class="toc" id="toc" aria-label="Jump to a stage">
+      <a href="#base-0" data-scope="#base-0">Base 00 &middot; Python <span class="toc__n"></span></a>
+      <a href="#base-math" data-scope="#base-math">Math <span class="toc__n"></span></a>
+      <a href="#base-1" data-scope="#base-1">Base 01 &middot; Classical ML <span class="toc__n"></span></a>
+      <a href="#base-2" data-scope="#base-2">Base 02 &middot; Deep learning <span class="toc__n"></span></a>
+      <a href="#base-3" data-scope="#base-3">Base 03 &middot; MLOps <span class="toc__n"></span></a>
+      <a href="#fork" data-scope="#fork">The fork <span class="toc__n"></span></a>
+      <a href="#cache" data-scope="#cache">Supply cache</a>
+      <a href="#library" data-scope="#library">Library</a>
+      <a href="#dispatch" data-scope="#dispatch">Dispatches</a>
+      <a href="#wisdom" data-scope="#wisdom">Wisdom</a>
+    </nav>
 
     <div class="section-intro">
       <h2>The main trail</h2>
@@ -826,11 +986,12 @@
           <span class="waypoint__time">1&ndash;2 weeks</span>
         </div>
         <p class="waypoint__note">Skip beginner-from-zero courses entirely. You need the syntax differences, the scientific stack, and comfort in notebooks &mdash; not "what is a variable."</p>
+        <p class="waypoint__practice">Practise it in the Field Guide: <a href="./#/c/python-tutorial">Python Tutorial</a> &middot; <a href="./#/c/numpy-basics">NumPy Basics</a> &middot; <a href="./#/c/pandas-basics">Pandas Basics</a></p>
         <div class="tickets">
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-py-tutorial">
             <div class="ticket__body">
-              <a href="https://docs.python.org/3/tutorial/index.html" target="_blank" rel="noopener" class="ticket__title">The Python Tutorial</a>
+              <a href="https://docs.python.org/3/tutorial/index.html" target="_blank" rel="noopener" class="ticket__title">The Python Tutorial<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">docs.python.org</span>
               <p class="ticket__why">The official tutorial. Fastest way to pick up syntax when you already think procedurally.</p>
             </div>
@@ -838,7 +999,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-numpy">
             <div class="ticket__body">
-              <a href="https://numpy.org/doc/stable/user/quickstart.html" target="_blank" rel="noopener" class="ticket__title">NumPy Quickstart</a>
+              <a href="https://numpy.org/doc/stable/user/quickstart.html" target="_blank" rel="noopener" class="ticket__title">NumPy Quickstart<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">numpy.org</span>
               <p class="ticket__why">Arrays and vectorized operations &mdash; the substrate everything else in ML sits on.</p>
             </div>
@@ -846,7 +1007,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-pandas">
             <div class="ticket__body">
-              <a href="https://pandas.pydata.org/docs/getting_started/index.html" target="_blank" rel="noopener" class="ticket__title">pandas: Getting Started</a>
+              <a href="https://pandas.pydata.org/docs/getting_started/index.html" target="_blank" rel="noopener" class="ticket__title">pandas: Getting Started<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">pandas.pydata.org</span>
               <p class="ticket__why">For wrangling real datasets &mdash; you'll use this constantly from Basecamp 1 onward.</p>
             </div>
@@ -866,7 +1027,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-linalg">
             <div class="ticket__body">
-              <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank" rel="noopener" class="ticket__title">Essence of Linear Algebra</a>
+              <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank" rel="noopener" class="ticket__title">Essence of Linear Algebra<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">3Blue1Brown</span>
               <p class="ticket__why">Vectors, matrices, dot products &mdash; the best visual intuition for this material anywhere, free.</p>
             </div>
@@ -874,7 +1035,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-calc">
             <div class="ticket__body">
-              <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr" target="_blank" rel="noopener" class="ticket__title">Essence of Calculus</a>
+              <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr" target="_blank" rel="noopener" class="ticket__title">Essence of Calculus<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">3Blue1Brown</span>
               <p class="ticket__why">Derivatives and gradients, the part that makes "gradient descent" stop being a magic phrase.</p>
             </div>
@@ -882,7 +1043,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-stats">
             <div class="ticket__body">
-              <a href="https://www.khanacademy.org/math/statistics-probability" target="_blank" rel="noopener" class="ticket__title">Statistics &amp; Probability</a>
+              <a href="https://www.khanacademy.org/math/statistics-probability" target="_blank" rel="noopener" class="ticket__title">Statistics &amp; Probability<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">Khan Academy</span>
               <p class="ticket__why">Distributions, expectation, Bayes' theorem &mdash; pull up specific lessons as they come up.</p>
             </div>
@@ -898,11 +1059,12 @@
           <span class="waypoint__time">4&ndash;6 weeks</span>
         </div>
         <p class="waypoint__note">Where you learn what ML actually is, before deep learning. Regression, classification, trees, the full real workflow of clean &rarr; train &rarr; evaluate &rarr; iterate.</p>
+        <p class="waypoint__practice">Practise it in the Field Guide: <a href="./#/c/classical-ml">Classical ML</a></p>
         <div class="tickets">
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-ml-spec" checked>
             <div class="ticket__body">
-              <a href="https://www.coursera.org/specializations/machine-learning-introduction" target="_blank" rel="noopener" class="ticket__title">Machine Learning Specialization</a>
+              <a href="https://www.coursera.org/specializations/machine-learning-introduction" target="_blank" rel="noopener" class="ticket__title">Machine Learning Specialization<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">Andrew Ng</span>
               <p class="ticket__why">Still the gold standard for building real intuition. Free to audit on Coursera.</p>
             </div>
@@ -910,7 +1072,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-sklearn" checked>
             <div class="ticket__body">
-              <a href="https://scikit-learn.org/stable/tutorial/index.html" target="_blank" rel="noopener" class="ticket__title">scikit-learn Tutorials</a>
+              <a href="https://scikit-learn.org/stable/tutorial/index.html" target="_blank" rel="noopener" class="ticket__title">scikit-learn Tutorials<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">scikit-learn.org</span>
               <p class="ticket__why">Implement everything from the course above on real data, in the library the field actually uses.</p>
             </div>
@@ -918,7 +1080,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-titanic" checked>
             <div class="ticket__body">
-              <a href="https://www.kaggle.com/competitions/titanic" target="_blank" rel="noopener" class="ticket__title">Titanic &mdash; Machine Learning from Disaster</a>
+              <a href="https://www.kaggle.com/competitions/titanic" target="_blank" rel="noopener" class="ticket__title">Titanic &mdash; Machine Learning from Disaster<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">Kaggle</span>
               <p class="ticket__why">The classic first project. Boring on purpose &mdash; it teaches the workflow, not the glamour.</p>
             </div>
@@ -934,11 +1096,12 @@
           <span class="waypoint__time">6&ndash;8 weeks</span>
         </div>
         <p class="waypoint__note">Where it gets fun. Neural networks, and the framework the field has standardized on &mdash; PyTorch.</p>
+        <p class="waypoint__practice">Practise it in the Field Guide: <a href="./#/c/deep-learning-pytorch">PyTorch lessons</a></p>
         <div class="tickets">
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-pytorch-zero-to-mastery" checked>
             <div class="ticket__body">
-              <a href="https://www.learnpytorch.io/" target="_blank" rel="noopener" class="ticket__title">Learn PyTorch for Deep Learning: Zero to Mastery</a>
+              <a href="https://www.learnpytorch.io/" target="_blank" rel="noopener" class="ticket__title">Learn PyTorch for Deep Learning: Zero to Mastery<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">Daniel Bourke</span>
               <p class="ticket__why">The definitive ground-up guide to building neural networks and standard PyTorch workflows.</p>
             </div>
@@ -946,7 +1109,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-fastai">
             <div class="ticket__body">
-              <a href="https://course.fast.ai/" target="_blank" rel="noopener" class="ticket__title">Practical Deep Learning for Coders</a>
+              <a href="https://course.fast.ai/" target="_blank" rel="noopener" class="ticket__title">Practical Deep Learning for Coders<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">fast.ai</span>
               <p class="ticket__why">Project-first: you'll train and deploy a real model by lesson two. Fits a coder's instinct to build before fully understanding theory.</p>
             </div>
@@ -954,7 +1117,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-dl-spec">
             <div class="ticket__body">
-              <a href="https://www.coursera.org/specializations/deep-learning" target="_blank" rel="noopener" class="ticket__title">Deep Learning Specialization</a>
+              <a href="https://www.coursera.org/specializations/deep-learning" target="_blank" rel="noopener" class="ticket__title">Deep Learning Specialization<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">Andrew Ng</span>
               <p class="ticket__why">More rigorous, theory-first. CNNs, RNNs, and the math underneath each architecture.</p>
             </div>
@@ -962,7 +1125,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-karpathy">
             <div class="ticket__body">
-              <a href="https://karpathy.ai/zero-to-hero.html" target="_blank" rel="noopener" class="ticket__title">Neural Networks: Zero to Hero</a>
+              <a href="https://karpathy.ai/zero-to-hero.html" target="_blank" rel="noopener" class="ticket__title">Neural Networks: Zero to Hero<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">Andrej Karpathy</span>
               <p class="ticket__why">Builds backprop and a GPT from scratch, in code, line by line. The single best "I actually understand this now" resource.</p>
             </div>
@@ -982,7 +1145,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-fsdl">
             <div class="ticket__body">
-              <a href="https://fullstackdeeplearning.com/" target="_blank" rel="noopener" class="ticket__title">Full Stack Deep Learning</a>
+              <a href="https://fullstackdeeplearning.com/" target="_blank" rel="noopener" class="ticket__title">Full Stack Deep Learning<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">FSDL</span>
               <p class="ticket__why">The premier course on what happens after you train a model. Serving, monitoring, and scaling.</p>
             </div>
@@ -990,7 +1153,7 @@
           <div class="ticket">
             <input type="checkbox" class="ticket__check" id="t-wandb">
             <div class="ticket__body">
-              <a href="https://wandb.ai/site/tutorials" target="_blank" rel="noopener" class="ticket__title">Weights & Biases (W&B)</a>
+              <a href="https://wandb.ai/site/tutorials" target="_blank" rel="noopener" class="ticket__title">Weights & Biases (W&B)<span class="sr-only"> (opens in a new tab)</span></a>
               <span class="ticket__source">wandb.ai</span>
               <p class="ticket__why">The industry standard for experiment tracking. Stop using spreadsheets to record your loss curves.</p>
             </div>
@@ -1001,7 +1164,7 @@
     </div>
 
     <!-- FORK -->
-    <div class="fork">
+    <div class="fork" id="fork">
       <div class="section-intro" style="padding-top:0;">
         <h2>The fork in the trail</h2>
         <p>Once the fundamentals click, you'll notice yourself pulled one direction. That pull is the answer to "what kind of AI work do I actually want to do".</p>
@@ -1010,13 +1173,13 @@
 
         <div class="branch">
           <span class="branch__label">If you're drawn to images</span>
-          <h4>Computer Vision</h4>
+          <h3>Computer Vision</h3>
           <p class="signal">Signal: you want to see what the model sees, and care how a pixel becomes a prediction.</p>
           <div class="tickets">
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-cv-cs231n">
               <div class="ticket__body">
-                <a href="https://cs231n.stanford.edu/" target="_blank" rel="noopener" class="ticket__title">CS231n: Computer Vision</a>
+                <a href="https://cs231n.stanford.edu/" target="_blank" rel="noopener" class="ticket__title">CS231n: Computer Vision<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">Stanford</span>
                 <p class="ticket__why">Lectures, notes, and assignments are all free and public.</p>
               </div>
@@ -1026,13 +1189,13 @@
 
         <div class="branch">
           <span class="branch__label">If you're drawn to language</span>
-          <h4>NLP &amp; LLMs</h4>
+          <h3>NLP &amp; LLMs</h3>
           <p class="signal">Signal: you keep wanting to build chatbots, text tools, or fine-tune something on your own data.</p>
           <div class="tickets">
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-nlp-cs224n">
               <div class="ticket__body">
-                <a href="https://web.stanford.edu/class/cs224n/" target="_blank" rel="noopener" class="ticket__title">CS224n: NLP with Deep Learning</a>
+                <a href="https://web.stanford.edu/class/cs224n/" target="_blank" rel="noopener" class="ticket__title">CS224n: NLP with Deep Learning<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">Stanford</span>
                 <p class="ticket__why">From word vectors to transformers to modern LLMs.</p>
               </div>
@@ -1040,7 +1203,7 @@
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-llm-hf">
               <div class="ticket__body">
-                <a href="https://huggingface.co/learn/llm-course" target="_blank" rel="noopener" class="ticket__title">The LLM Course</a>
+                <a href="https://huggingface.co/learn/llm-course" target="_blank" rel="noopener" class="ticket__title">The LLM Course<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">Hugging Face</span>
                 <p class="ticket__why">Hands-on companion &mdash; fine-tune real transformer models.</p>
               </div>
@@ -1050,13 +1213,13 @@
 
         <div class="branch">
           <span class="branch__label">If you're drawn to making things</span>
-          <h4>Generative &amp; Diffusion Models</h4>
+          <h3>Generative &amp; Diffusion Models</h3>
           <p class="signal">Signal: you want to generate images, music, or worlds.</p>
           <div class="tickets">
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-gen-fastai">
               <div class="ticket__body">
-                <a href="https://course.fast.ai/Lessons/part2.html" target="_blank" rel="noopener" class="ticket__title">Deep Learning to Stable Diffusion</a>
+                <a href="https://course.fast.ai/Lessons/part2.html" target="_blank" rel="noopener" class="ticket__title">Deep Learning to Stable Diffusion<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">fast.ai Part 2</span>
                 <p class="ticket__why">Builds diffusion models from scratch.</p>
               </div>
@@ -1066,13 +1229,13 @@
 
         <div class="branch">
           <span class="branch__label">If you're drawn to decision making</span>
-          <h4>Reinforcement Learning</h4>
+          <h3>Reinforcement Learning</h3>
           <p class="signal">Signal: you want AI agents that learn by interacting with environments (games, robotics).</p>
           <div class="tickets">
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-rl-spinningup">
               <div class="ticket__body">
-                <a href="https://spinningup.openai.com/en/latest/" target="_blank" rel="noopener" class="ticket__title">Spinning Up in Deep RL</a>
+                <a href="https://spinningup.openai.com/en/latest/" target="_blank" rel="noopener" class="ticket__title">Spinning Up in Deep RL<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">OpenAI</span>
                 <p class="ticket__why">The canonical introduction to modern deep reinforcement learning concepts and math.</p>
               </div>
@@ -1082,13 +1245,13 @@
         
         <div class="branch branch--wide">
           <span class="branch__label">The ultimate destination</span>
-          <h4>Reading Papers & Core Research</h4>
+          <h3>Reading Papers & Core Research</h3>
           <p class="signal">Signal: you want to implement things that aren't in libraries yet.</p>
           <div class="tickets">
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-res-read">
               <div class="ticket__body">
-                <a href="https://web.stanford.edu/class/ee384m/Handouts/HowtoReadPaper.pdf" target="_blank" rel="noopener" class="ticket__title">How to Read a Paper</a>
+                <a href="https://web.stanford.edu/class/ee384m/Handouts/HowtoReadPaper.pdf" target="_blank" rel="noopener" class="ticket__title">How to Read a Paper<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">S. Keshav</span>
                 <p class="ticket__why">Stop reading linearly. Learn the 3-pass method to digest dense research efficiently.</p>
               </div>
@@ -1096,7 +1259,7 @@
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-res-arxiv">
               <div class="ticket__body">
-                <a href="https://huggingface.co/papers" target="_blank" rel="noopener" class="ticket__title">Hugging Face Daily Papers</a>
+                <a href="https://huggingface.co/papers" target="_blank" rel="noopener" class="ticket__title">Hugging Face Daily Papers<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">Hugging Face</span>
                 <p class="ticket__why">The firehose of new research (arXiv cs.LG) curated into a digestible daily feed.</p>
               </div>
@@ -1104,7 +1267,7 @@
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-res-attention">
               <div class="ticket__body">
-                <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener" class="ticket__title">Attention Is All You Need</a>
+                <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener" class="ticket__title">Attention Is All You Need<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">arXiv &middot; Vaswani et al., 2017</span>
                 <p class="ticket__why">The paper that introduced the Transformer. Everything from BERT to GPT to Claude traces back to this one.</p>
               </div>
@@ -1112,7 +1275,7 @@
             <div class="ticket">
               <input type="checkbox" class="ticket__check" id="f-res-resnet">
               <div class="ticket__body">
-                <a href="https://arxiv.org/abs/1512.03385" target="_blank" rel="noopener" class="ticket__title">Deep Residual Learning for Image Recognition</a>
+                <a href="https://arxiv.org/abs/1512.03385" target="_blank" rel="noopener" class="ticket__title">Deep Residual Learning for Image Recognition<span class="sr-only"> (opens in a new tab)</span></a>
                 <span class="ticket__source">arXiv &middot; He et al., 2015</span>
                 <p class="ticket__why">Introduces ResNet and skip connections &mdash; the trick that made truly deep networks trainable.</p>
               </div>
@@ -1124,7 +1287,7 @@
     </div>
 
     <!-- SUPPLY CACHE -->
-    <div class="cache">
+    <div class="cache" id="cache">
       <div class="section-intro" style="padding-top:0;">
         <h2>The supply cache</h2>
         <p>Tools and platforms you'll reach for constantly, regardless of which branch you take.</p>
@@ -1158,7 +1321,7 @@
     </div>
 
     <!-- REFERENCE LIBRARY -->
-    <div class="library">
+    <div class="library" id="library">
       <div class="section-intro" style="padding-top:0;">
         <h2>The reference library</h2>
         <p>Not sequential reading &mdash; books to keep nearby and dip into when a course moves too fast or you want the fuller picture.</p>
@@ -1200,7 +1363,7 @@
     </div>
 
     <!-- DISPATCH: STAYING CURRENT -->
-    <div class="dispatch">
+    <div class="dispatch" id="dispatch">
       <div class="section-intro" style="padding-top:0;">
         <h2>Dispatches from further up the trail</h2>
         <p>The field moves fast. These are how you keep hearing about it without doom-scrolling Twitter.</p>
@@ -1240,7 +1403,7 @@
     </div>
 
     <!-- TRAIL WISDOM -->
-    <div class="wisdom">
+    <div class="wisdom" id="wisdom">
       <div class="section-intro" style="padding-top:0;">
         <h2>Trail wisdom</h2>
         <p>How to actually walk this, not just read the map.</p>
@@ -1254,6 +1417,8 @@
 
   </div>
 </main>
+
+<button type="button" class="to-top" id="to-top" aria-label="Back to the top">&uarr; Top</button>
 
 <footer>
   <div class="wrap">
@@ -1287,6 +1452,34 @@
     { at: 25,  text: 'Good pace &mdash; the fundamentals are starting to stick.' },
   ];
 
+  const pctText = document.getElementById('progress-pct');
+  const progressTrack = document.getElementById('progress-track');
+  const nextBtn = document.getElementById('progress-next');
+  const hideBtn = document.getElementById('progress-hide');
+  const toTop = document.getElementById('to-top');
+  const waypoints = Array.from(document.querySelectorAll('.waypoint'));
+  const tocLinks = Array.from(document.querySelectorAll('.toc a'));
+  const HIDE_KEY = 'roadmapui-hide-done'; // not "roadmap-": that prefix is reserved for ticks
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Add what the plain HTML doesn't carry: a ring on each marker, a count beside each heading, a
+  // note for when a basecamp is hidden because it's finished, and a spoken name for every checkbox.
+  waypoints.forEach(wp => {
+    wp.querySelector('.waypoint__marker').insertAdjacentHTML('beforeend', '<svg class="ring" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="31" pathLength="100"/></svg>');
+    wp.querySelector('.waypoint__head').insertAdjacentHTML('beforeend', '<span class="waypoint__count"></span>');
+    wp.insertAdjacentHTML('beforeend', '<p class="done-note">Every step in this basecamp is ticked off.</p>');
+  });
+  checkboxes.forEach(chk => {
+    const title = chk.closest('.ticket').querySelector('.ticket__title');
+    const name = title ? title.firstChild.textContent.trim() : chk.id;
+    chk.setAttribute('aria-label', 'Done: ' + name);
+  });
+
+  const tally = scope => {
+    const checks = scope.querySelectorAll('.ticket__check');
+    return { done: Array.from(checks).filter(c => c.checked).length, total: checks.length };
+  };
+
   function updateProgress() {
     const total = checkboxes.length;
     const completed = Array.from(checkboxes).filter(chk => chk.checked).length;
@@ -1294,6 +1487,8 @@
 
     progressBar.style.width = `${percentage}%`;
     progressText.innerText = `Progress: ${completed} / ${total}`;
+    pctText.textContent = `${Math.round(percentage)}%`;
+    progressTrack.setAttribute('aria-valuenow', String(Math.round(percentage)));
 
     // Add completed class to parent tickets
     checkboxes.forEach(chk => {
@@ -1302,15 +1497,35 @@
       else ticket.classList.remove('completed');
     });
 
-    // Check if entire waypoint is completed
-    document.querySelectorAll('.waypoint').forEach(waypoint => {
-      const checks = waypoint.querySelectorAll('.ticket__check');
-      if(checks.length === 0) return;
-
-      const allChecked = Array.from(checks).every(c => c.checked);
-      if(allChecked) waypoint.classList.add('completed');
+    // Each basecamp: its count, its ring, and whether it is finished
+    waypoints.forEach(waypoint => {
+      const { done, total: n } = tally(waypoint);
+      if (n === 0) return;
+      waypoint.querySelector('.waypoint__count').textContent = `${done} / ${n}`;
+      waypoint.querySelector('.ring circle').style.strokeDasharray = `${(done / n) * 100} 100`;
+      if (done === n) waypoint.classList.add('completed');
       else waypoint.classList.remove('completed');
     });
+    // A fork branch with everything ticked can be hidden along with its tickets
+    document.querySelectorAll('.branch').forEach(branch => {
+      const { done, total: n } = tally(branch);
+      branch.classList.toggle('all-done', n > 0 && done === n);
+    });
+
+    // The jump strip shows the same counts
+    tocLinks.forEach(link => {
+      const scope = document.querySelector(link.dataset.scope);
+      const badge = link.querySelector('.toc__n');
+      if (!scope || !badge) return;
+      const { done, total: n } = tally(scope);
+      badge.textContent = n ? `${done}/${n}` : '';
+      link.classList.toggle('is-done', n > 0 && done === n);
+    });
+
+    // "Next step" goes to the first thing not ticked yet
+    const first = Array.from(checkboxes).find(c => !c.checked);
+    nextBtn.disabled = !first;
+    nextBtn.textContent = !first ? 'All done' : completed === 0 ? 'Start here' : 'Next step';
 
     // Milestone message
     const hit = MILESTONES.find(m => percentage >= m.at);
@@ -1321,6 +1536,56 @@
       milestoneMsg.classList.remove('is-shown');
     }
   }
+
+  nextBtn.addEventListener('click', () => {
+    const first = Array.from(checkboxes).find(c => !c.checked);
+    if (!first) return;
+    const ticket = first.closest('.ticket');
+    ticket.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+    ticket.classList.remove('is-next');
+    void ticket.offsetWidth; // restart the highlight if it was already showing
+    ticket.classList.add('is-next');
+    setTimeout(() => ticket.classList.remove('is-next'), 2500);
+    first.focus({ preventScroll: true });
+  });
+
+  // Hide finished steps: remembered, off by default.
+  function setHideDone(on) {
+    document.body.classList.toggle('hide-done', on);
+    hideBtn.setAttribute('aria-pressed', String(on));
+    hideBtn.textContent = on ? 'Show done' : 'Hide done';
+    try { localStorage.setItem(HIDE_KEY, on ? '1' : '0'); } catch (e) { /* not remembered */ }
+  }
+  hideBtn.addEventListener('click', () => setHideDone(hideBtn.getAttribute('aria-pressed') !== 'true'));
+  try { if (localStorage.getItem(HIDE_KEY) === '1') setHideDone(true); } catch (e) { /* ignore */ }
+
+  // Where you are on the page, shown in the jump strip, and the back-to-top button
+  const spy = tocLinks.map(link => ({ link, el: document.querySelector(link.dataset.scope) })).filter(x => x.el);
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      let current = null;
+      spy.forEach(x => { if (x.el.getBoundingClientRect().top <= 140) current = x; });
+      spy.forEach(x => {
+        if (x === current) x.link.setAttribute('aria-current', 'true');
+        else x.link.removeAttribute('aria-current');
+      });
+      if (current) {
+        const strip = current.link.parentElement;
+        const l = current.link;
+        if (l.offsetLeft < strip.scrollLeft || l.offsetLeft + l.offsetWidth > strip.scrollLeft + strip.clientWidth) {
+          strip.scrollTo({ left: l.offsetLeft - 20, behavior: reduceMotion ? 'auto' : 'smooth' });
+        }
+      }
+      toTop.classList.toggle('is-shown', window.scrollY > 700);
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }));
+  onScroll();
 
   // Load state from local storage. A saved choice wins in both directions, so
   // un-ticking a box that ships ticked in the HTML is remembered too (the ticks
