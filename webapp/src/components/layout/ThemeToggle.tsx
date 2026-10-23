@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, ChevronDown, Palette } from 'lucide-react'
 import { THEME_OPTIONS, type ThemeOption, type ThemeSwatch } from '@/lib/theme'
-import { useTheme } from '@/hooks/useTheme'
+import { useBackground, useTheme } from '@/hooks/useTheme'
 import { cn } from '@/lib/cn'
 
 // A small round swatch of a theme: its page color with the accent as the center dot and
@@ -39,6 +39,7 @@ export function ThemeDot({ option, size }: { option: ThemeOption; size: number }
 
 export function ThemeToggle() {
   const [, setTheme, preference] = useTheme()
+  const [background, setBackground] = useBackground()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -115,6 +116,35 @@ export function ThemeToggle() {
                 </button>
               )
             })}
+            {/* The pattern behind the page is part of each theme; this turns it off for a plain colour. */}
+            <div className="mt-1 border-t border-[var(--color-border)] pt-1">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={background}
+                onClick={() => setBackground(!background)}
+                className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-[var(--color-surface-hover)]"
+              >
+                <span className="flex flex-col leading-tight">
+                  <span className="text-sm text-[var(--color-ink-dim)]">Background pattern</span>
+                  <span className="text-[10px] text-[var(--color-ink-faint)]">{background ? 'Each theme draws its own' : 'Plain colour'}</span>
+                </span>
+                <span
+                  aria-hidden
+                  className={cn(
+                    'relative h-5 w-9 shrink-0 rounded-full border transition-colors',
+                    background ? 'border-[var(--color-accent)] bg-[var(--color-accent)]' : 'border-[var(--color-border-strong)] bg-[var(--color-surface)]',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full transition-all',
+                      background ? 'left-[calc(100%-1.0625rem)] bg-[var(--color-accent-ink)]' : 'left-0.5 bg-[var(--color-ink-faint)]',
+                    )}
+                  />
+                </span>
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
