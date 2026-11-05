@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { EditorState } from '@codemirror/state'
-import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers } from '@codemirror/view'
+import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, tooltips } from '@codemirror/view'
+import { acceptCompletion, autocompletion, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
 import { defaultKeymap, history, historyKeymap, indentLess, indentMore } from '@codemirror/commands'
 import { bracketMatching, indentOnInput, indentUnit, syntaxHighlighting } from '@codemirror/language'
 import { python } from '@codemirror/lang-python'
 import { classHighlighter } from '@lezer/highlight'
+import { pythonCompletions } from '@/lib/pyCompletions'
 
 interface PyEditorProps {
   value: string
@@ -32,6 +34,20 @@ const editorTheme = EditorView.theme({
     backgroundColor: 'var(--color-code-accent-glow)',
   },
   '.cm-matchingBracket': { backgroundColor: 'var(--color-code-accent-glow)', outline: 'none' },
+  // The suggestion popup, drawn from the same palette.
+  '.cm-tooltip': {
+    border: '1px solid var(--color-code-border-strong)',
+    borderRadius: '4px',
+    backgroundColor: 'var(--color-code-bg)',
+    color: 'var(--color-code-ink)',
+    boxShadow: '0 8px 24px -8px rgb(0 0 0 / 0.5)',
+  },
+  '.cm-tooltip-autocomplete > ul': { fontFamily: 'var(--font-mono)', fontSize: 'var(--code-font-size)', maxHeight: '14rem' },
+  '.cm-tooltip-autocomplete > ul > li': { padding: '2px 10px 2px 6px', lineHeight: '1.6' },
+  '.cm-tooltip-autocomplete > ul > li[aria-selected]': { backgroundColor: 'var(--color-code-accent-glow)', color: 'var(--color-code-ink)' },
+  '.cm-completionDetail': { marginLeft: '1em', fontStyle: 'normal', color: 'var(--color-code-ink-dim)' },
+  '.cm-completionMatchedText': { textDecoration: 'none', fontWeight: '700', color: 'var(--color-code-accent-soft)' },
+  '.cm-completionIcon': { opacity: '0.8', width: '1.1em' },
 })
 
 export default function PyEditor({ value, onChange, onRun, firstLine = 1, label }: PyEditorProps) {
@@ -64,6 +80,10 @@ export default function PyEditor({ value, onChange, onRun, firstLine = 1, label 
           drawSelection(),
           indentOnInput(),
           bracketMatching(),
+          closeBrackets(),
+          // Popups attach to the page, because a lesson block clips anything that overflows it.
+          tooltips({ parent: document.body }),
+          autocompletion({ override: pythonCompletions, icons: true, maxRenderedOptions: 14 }),
           indentUnit.of('    '),
           EditorState.tabSize.of(4),
           python(),
@@ -85,8 +105,9 @@ export default function PyEditor({ value, onChange, onRun, firstLine = 1, label 
                 return true
               },
             },
-            { key: 'Tab', run: (v) => tab(v, indentMore) },
+            { key: 'Tab', run: (v) => acceptCompletion(v) || tab(v, indentMore) },
             { key: 'Shift-Tab', run: (v) => tab(v, indentLess) },
+            ...closeBracketsKeymap,
             ...defaultKeymap,
             ...historyKeymap,
           ]),
