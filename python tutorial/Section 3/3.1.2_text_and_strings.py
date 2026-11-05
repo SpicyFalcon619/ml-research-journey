@@ -16,8 +16,8 @@ Python Reference: Text and strings
 # A STRING (type: str) is a piece of text. Wrap it in quotes so Python can tell
 # it apart from variable names and numbers. Single or double quotes both work.
 
-greeting = "Hello"
-also_greeting = "Hello"
+greeting = "Hello"  # double quotes
+also_greeting = 'Hello'  # single quotes
 print(greeting == also_greeting)  # True: the two kinds of quote make the same string
 
 # Why two kinds? So you can put one kind of quote INSIDE the other.
@@ -27,7 +27,7 @@ print('She said "hi"')
 # A backslash \ starts an ESCAPE SEQUENCE: a special character typed with two keys.
 print("Line one\nLine two")  # \n = new line
 print("Column A\tColumn B")  # \t = tab
-print("It\'s also easy")  # \' = a plain quote that cannot end the string
+print('It\'s also easy')  # \' = a plain quote that cannot end the string
 
 # Raw strings: put r in front and backslashes stay as normal characters.
 # Handy for Windows file paths.

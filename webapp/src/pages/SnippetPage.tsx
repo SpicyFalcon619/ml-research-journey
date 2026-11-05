@@ -18,7 +18,6 @@ import { cn } from '@/lib/cn'
 import { DoneButton } from '@/components/snippet/DoneButton'
 import { FavoriteButton } from '@/components/snippet/FavoriteButton'
 import { Outline } from '@/components/snippet/Outline'
-import { LessonFinish } from '@/components/snippet/LessonFinish'
 import { TickRail } from '@/components/snippet/TickRail'
 import { lineColor, trackIndexOf } from '@/lib/journey'
 import { allLessons } from '@/lib/progress'
@@ -228,9 +227,7 @@ export function SnippetPage() {
         ))}
       </div>
 
-      <LessonFinish snippet={snippet} next={next} />
-
-      <PrevNext prev={prev} next={next} />
+      <PrevNext snippet={snippet} prev={prev} next={next} />
       </div>
 
       {activeView !== 'original' && <Outline snippet={{ ...snippet, topics: viewTopics }} />}

@@ -141,11 +141,6 @@ function Section({
                       {isData && <FileSpreadsheet className="h-3 w-3 shrink-0 text-[var(--color-ink-faint)]" aria-hidden />}
                       <span className="truncate">{snippet.title}</span>
                       <span className="ml-auto flex shrink-0 items-center gap-1.5">
-                        {state === 'next' && (
-                          <span className="rounded-[3px] bg-[var(--color-accent-glow)]/30 px-1.5 text-xs font-medium text-[var(--color-accent-soft)]">
-                            next
-                          </span>
-                        )}
                         {isFavorite(snippet.id) && (
                           <Star aria-label="Saved" className="h-3 w-3 fill-[var(--color-accent)] text-[var(--color-accent)]" />
                         )}

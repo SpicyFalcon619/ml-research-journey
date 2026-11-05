@@ -73,12 +73,12 @@ function Prose({ nodes }: { nodes: ProseNode[] }) {
           }
           default:
             return node.callout ? (
-              <aside key={index} className="guide-callout">
+              <div key={index} role="note" className="guide-callout">
                 <p className={node.breaks ? 'guide-breaks' : undefined}>
                   <span className="guide-callout-label">{node.callout}.</span>
                   <Inline text={node.text} />
                 </p>
-              </aside>
+              </div>
             ) : (
               <p key={index} className={node.breaks ? 'guide-breaks' : undefined}>
                 <Inline text={node.text} />

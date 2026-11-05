@@ -1,84 +1,111 @@
 """
-PyTorch Fundamentals: Exercises (Solutions)
+PyTorch Fundamentals: Exercises (solutions)
 """
+
+# =============================================================================
+# WHAT YOU WILL LEARN
+#   - One worked answer for each exercise in lesson 10, with the reasoning
+#   - How to check your own answer: compare shapes first, then values
+#
+# Spoiler warning: try lesson 10 on your own before reading this. A solution you
+# read is forgotten by tomorrow. A solution you wrote stays.
+# =============================================================================
+
 import torch
 
-### Topic 1: Create a random tensor with shape (7, 7) ###
-print("--- Exercise 2: Create a random tensor with shape (7, 7) ---")
+
+### Exercise 2: A random tensor ###
+# torch.rand takes the shape. Values come out between 0 and 1.
 x = torch.rand(size=(7, 7))
-print(f"x:\n{x}\nShape: {x.shape}\n")
+print("x shape:", x.shape)
 
 
-### Topic 2: Perform a matrix multiplication ###
-print("--- Exercise 3: Perform a matrix multiplication ---")
+### Exercise 3: Matrix multiplication ###
+# x is (7, 7). y is (1, 7). Inner dimensions: 7 and 1 do not match, so transpose y
+# to (7, 1). Now (7, 7) @ (7, 1) works and the result is the outer dimensions: (7, 1).
 y = torch.rand(size=(1, 7))
-print(f"y:\n{y}\nShape: {y.shape}\n")
-
-# Matrix multiply tensors
 z = torch.matmul(x, y.T)
-print(f"Result (z = x * y.T):\n{z}\nShape: {z.shape}\n")
+print("y shape:", y.shape)
+print("z = x @ y.T shape:", z.shape)
 
 
-### Topic 3: Random Seeds ###
-print("--- Exercise 4: Random Seeds ---")
+### Exercise 4: Random seeds ###
+# The seed is set ONCE, before x. Both tensors are then drawn from one repeatable
+# sequence, which is what produces the exact numbers the exercise showed.
+# (Re-seeding before y would give y the same start as x and change the answer.)
 RANDOM_SEED = 0
-
 torch.manual_seed(RANDOM_SEED)
 x = torch.rand(size=(7, 7))
-
-torch.manual_seed(RANDOM_SEED)
 y = torch.rand(size=(1, 7))
-
 z = torch.matmul(x, y.T)
-print(f"Result with seed {RANDOM_SEED}:\n{z}\nShape: {z.shape}\n")
+print("Result with seed 0:")
+print(z)
+print("Shape:", z.shape)
 
 
-### Topic 4: GPU Random Seeds ###
-print("--- Exercise 5: GPU Random Seeds ---")
-torch.cuda.manual_seed(1234)
-gpu_x = torch.rand(7, 1)
-print(f"Random tensor with GPU seed 1234:\n{gpu_x}\n")
-
-
-### Topic 5: Tensors on GPU ###
-print("--- Exercise 6: Tensors on GPU ---")
-torch.manual_seed(1234)
+### Exercise 5: GPU random seeds ###
+# The GPU has its own random generator, set with torch.cuda.manual_seed. (Use
+# torch.cuda.manual_seed_all to cover several GPUs.) It is harmless without a GPU.
 device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"Device: {device}")
+torch.cuda.manual_seed(1234)
+gpu_x = torch.rand(7, 1, device=device)  # created ON the device, so the GPU seed matters
+print(f"Random tensor made on {device}:")
+print(gpu_x)
 
+
+### Exercise 6: Tensors on the GPU ###
+# Build on the CPU with the CPU seed, then move with .to(device).
+torch.manual_seed(1234)
 tensor_A = torch.rand(size=(2, 3)).to(device)
 tensor_B = torch.rand(size=(2, 3)).to(device)
-print(f"Tensor A:\n{tensor_A}")
-print(f"Tensor B:\n{tensor_B}\n")
+print("Device:", device)
+print("Tensor A:")
+print(tensor_A)
+print("Tensor B:")
+print(tensor_B)
 
 
-### Topic 6: GPU Matrix Multiplication ###
-print("--- Exercise 7: GPU Matrix Multiplication ---")
-tensor_C = torch.mm(tensor_A, tensor_B.T)
-print(f"Result (A * B.T):\n{tensor_C}\nShape: {tensor_C.shape}\n")
+### Exercise 7: GPU matrix multiplication ###
+# Both are (2, 3): the inner numbers (3 and 2) clash, so transpose B to (3, 2).
+# (2, 3) @ (3, 2) gives the outer dimensions (2, 2).
+tensor_C = torch.matmul(tensor_A, tensor_B.T)
+print("A @ B.T:")
+print(tensor_C)
+print("Shape:", tensor_C.shape)
 
 
-### Topic 7: Max and Min ###
-print("--- Exercise 8: Max and Min ---")
+### Exercise 8: Max and min ###
 max_val = torch.max(tensor_C)
 min_val = torch.min(tensor_C)
-print(f"Max: {max_val}")
-print(f"Min: {min_val}\n")
+print("Max:", max_val)
+print("Min:", min_val)
 
 
-### Topic 8: Argmax and Argmin ###
-print("--- Exercise 9: Argmax and Argmin ---")
+### Exercise 9: Argmax and argmin ###
+# These give a position in the FLATTENED tensor (counting across rows), not a
+# (row, column) pair. In a (2, 2) tensor the positions are 0 to 3.
 arg_max = torch.argmax(tensor_C)
 arg_min = torch.argmin(tensor_C)
-print(f"Argmax (index of max): {arg_max}")
-print(f"Argmin (index of min): {arg_min}\n")
+print("Argmax (index of max):", arg_max)
+print("Argmin (index of min):", arg_min)
 
 
-### Topic 9: Squeezing Tensors ###
-print("--- Exercise 10: Squeezing Tensors ---")
+### Exercise 10: Squeezing ###
 torch.manual_seed(7)
 tensor_1 = torch.rand(size=(1, 1, 1, 10))
-tensor_2 = tensor_1.squeeze()
+tensor_2 = tensor_1.squeeze()  # removes every dimension of size 1
+print("Original tensor:")
+print(tensor_1)
+print("Shape:", tensor_1.shape)
+print("Squeezed tensor:")
+print(tensor_2)
+print("Shape:", tensor_2.shape)
 
-print(f"Original tensor:\n{tensor_1}\nShape: {tensor_1.shape}\n")
-print(f"Squeezed tensor:\n{tensor_2}\nShape: {tensor_2.shape}")
+
+# =============================================================================
+# YOUR TURN  (write these in a scratch file, not here)
+#   1. Which exercise did you get wrong first time? Re-do it from scratch tomorrow.
+#   2. Rewrite Exercise 7 using the @ operator instead of torch.matmul.
+#   3. Make up two NEW exercises of your own for a friend, covering lessons 5 and 6.
+#   4. Why does Exercise 4 give different numbers when the seed is set twice?
+# =============================================================================

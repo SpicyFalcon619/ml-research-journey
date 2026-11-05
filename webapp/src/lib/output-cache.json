@@ -1,129 +1,129 @@
 {
   "Classical_ML/1_linear_regression.py": {
     "status": "ok",
-    "stdout": "[ 90000. 100000.]\n",
+    "stdout": "   Years_Experience  Salary\n0                 1   40000\n1                 2   50000\n2                 3   60000\n3                 4   70000\n4                 5   80000\nX is a DataFrame with shape (5, 1)\ny is a Series with shape (5,)\nSlope: 10000.0\nIntercept: 30000.0\n[ 90000. 100000.]\nBy hand: 90000\nValueError: Expected a 2-dimensional container but got <class 'pandas.Series'> instead. Pass a DataFrame containing a single row (i.e. single sample) or a single column (i.e. single feature) instead.\n",
     "stderr": "",
-    "durationMs": 2579,
-    "capturedAt": "2026-11-05T01:07:55.297Z"
+    "durationMs": 3013,
+    "capturedAt": "2026-11-05T06:04:54.860Z"
   },
   "Classical_ML/2_multiple_regression.py": {
     "status": "ok",
-    "stdout": "[419733.33333333]\n",
+    "stdout": "   Size_SqFt  Bedrooms   Price\n0       1000         2  200000\n1       1500         3  300000\n2       2000         3  380000\n3       2500         4  500000\n4       3000         4  580000\nX shape: (5, 2)\nSize_SqFt: 165.33\nBedrooms: 26666.67\nIntercept: -24000.00\n[419733.33333333]\nValueError: The feature names should match those that were passed during fit.\nR-squared on the training data: 0.999\n",
     "stderr": "",
-    "durationMs": 2018,
-    "capturedAt": "2026-11-05T01:07:57.877Z"
+    "durationMs": 2601,
+    "capturedAt": "2026-11-05T06:04:57.875Z"
   },
   "Classical_ML/3_logistic_regression.py": {
     "status": "ok",
-    "stdout": "[1 0]\n",
+    "stdout": "   Links  Word_Winner  Is_Spam\n0      0            0        0\n1      1            0        0\n2      5            2        1\n3      8            5        1\n4      0            0        0\n5     10            7        1\n[1 0]\n   P(not spam)  P(spam)\n0        0.059    0.941\n1        0.830    0.170\nBy hand: 0.941  |  predict_proba: 0.941\n",
     "stderr": "",
-    "durationMs": 2024,
-    "capturedAt": "2026-11-05T01:07:59.895Z"
+    "durationMs": 2550,
+    "capturedAt": "2026-11-05T06:05:00.476Z"
   },
   "Classical_ML/4_train_test_split.py": {
     "status": "ok",
-    "stdout": "[0 1 0]\n1.0\n",
+    "stdout": "Training rows: 16\nTesting rows: 4\n    Actual  Predicted\n0        0          0\n17       0          0\n15       0          0\n1        0          0\nAccuracy: 1.0\nBy hand: 1.0\nAccuracy on data it trained on: 1.0\nrandom_state=0: accuracy 1.00\nrandom_state=1: accuracy 1.00\nrandom_state=2: accuracy 0.80\nrandom_state=3: accuracy 1.00\nrandom_state=4: accuracy 1.00\n",
     "stderr": "",
-    "durationMs": 1983,
-    "capturedAt": "2026-11-05T01:08:01.920Z"
+    "durationMs": 2479,
+    "capturedAt": "2026-11-05T06:05:03.027Z"
   },
   "Classical_ML/5_decision_trees.py": {
     "status": "ok",
-    "stdout": "[0 1]\n1.0\n",
+    "stdout": "|--- Fever <= 99.25\n|   |--- class: 0\n|--- Fever >  99.25\n|   |--- Age <= 73.50\n|   |   |--- class: 1\n|   |--- Age >  73.50\n|   |   |--- Fever <= 101.00\n|   |   |   |--- class: 0\n|   |   |--- Fever >  101.00\n|   |   |   |--- class: 1\n\nPredictions: [0 0 1 1]\nAccuracy: 0.75\nAge: 0.10\nFever: 0.90\nmax_depth=None: train accuracy 1.00, test accuracy 0.75\nmax_depth=1: train accuracy 0.94, test accuracy 0.75\n",
     "stderr": "",
-    "durationMs": 2118,
-    "capturedAt": "2026-11-05T01:08:03.904Z"
+    "durationMs": 2534,
+    "capturedAt": "2026-11-05T06:05:05.507Z"
   },
   "Classical_ML/6_titanic_survival.py": {
     "status": "ok",
-    "stdout": "Loading Kaggle datasets...\nTraining Data size: (891, 12)\nTest Data size: (418, 11)\nTarining Data: \n <bound method NDFrame.head of      PassengerId  Survived  Pclass  ...     Fare Cabin  Embarked\n0              1         0       3  ...   7.2500   NaN         S\n1              2         1       1  ...  71.2833   C85         C\n2              3         1       3  ...   7.9250   NaN         S\n3              4         1       1  ...  53.1000  C123         S\n4              5         0       3  ...   8.0500   NaN         S\n..           ...       ...     ...  ...      ...   ...       ...\n886          887         0       2  ...  13.0000   NaN         S\n887          888         1       1  ...  30.0000   B42         S\n888          889         0       3  ...  23.4500   NaN         S\n889          890         1       1  ...  30.0000  C148         C\n890          891         0       3  ...   7.7500   NaN         Q\n\n[891 rows x 12 columns]>\nTest Data: \n <bound method NDFrame.head of      PassengerId  Pclass  ... Cabin Embarked\n0            892       3  ...   NaN        Q\n1            893       3  ...   NaN        S\n2            894       2  ...   NaN        Q\n3            895       3  ...   NaN        S\n4            896       3  ...   NaN        S\n..           ...     ...  ...   ...      ...\n413         1305       3  ...   NaN        S\n414         1306       1  ...  C105        C\n415         1307       3  ...   NaN        S\n416         1308       3  ...   NaN        S\n417         1309       3  ...   NaN        C\n\n[418 rows x 11 columns]>\nSaved submission.csv! Upload this file to Kaggle.\n\nMy First Kaggle Score: 0.74641 (74.6%)\n",
+    "stdout": "Training data size: (891, 12)\nTest data size: (418, 11)\n   Survived  Pclass     Sex   Age     Fare\n0         0       3    male  22.0   7.2500\n1         1       1  female  38.0  71.2833\n2         1       3  female  26.0   7.9250\n3         1       1  female  35.0  53.1000\n4         0       3    male  35.0   8.0500\nMissing in train:\nAge     177\nFare      0\ndtype: int64\nMissing in test:\nAge     86\nFare     1\ndtype: int64\nMissing after cleaning: 0\nTraining accuracy: 0.98\n   PassengerId  Survived\n0          892         0\n1          893         0\n2          894         1\n3          895         1\n4          896         1\nPredicted survivors: 154 of 418\nSaved submission.csv! Upload this file to Kaggle.\n",
     "stderr": "",
-    "durationMs": 2273,
-    "capturedAt": "2026-11-05T01:08:06.022Z"
+    "durationMs": 2526,
+    "capturedAt": "2026-11-05T06:05:08.042Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/01_intro_to_tensors.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: Creating Tensors ---\nScalar: 7\nScalar ndim: 0\nScalar as Python int: 7\n\nVector: tensor([7, 7])\nVector ndim: 1\nVector shape: torch.Size([2])\n\nMatrix:\ntensor([[ 7,  8],\n        [ 9, 10]])\nMatrix ndim: 2\nMatrix shape: torch.Size([2, 2])\nMatrix[0]: tensor([7, 8])\nMatrix[0][1]: 8\n\nTensor (3D):\ntensor([[[4, 7, 2],\n         [9, 1, 5],\n         [3, 2, 8]],\n\n        [[3, 6, 2],\n         [9, 8, 4],\n         [4, 2, 6]],\n\n        [[8, 3, 3],\n         [9, 7, 5],\n         [8, 4, 7]]])\nTensor ndim: 3\nTensor shape: torch.Size([3, 3, 3])\n\n--- Topic 2: Random Tensors ---\nRandom Tensor (3x4):\ntensor([[0.7579, 0.5789, 0.3355, 0.7983],\n        [0.2492, 0.7210, 0.1850, 0.2591],\n        [0.6838, 0.6025, 0.0525, 0.2580]])\nData type: torch.float32\n\nRandom Image-size Tensor shape: torch.Size([224, 224, 3])\nRandom Image-size Tensor ndim: 3\n\n--- Topic 3: Zeros and Ones ---\nTensor of Zeros:\ntensor([[0., 0., 0., 0.],\n        [0., 0., 0., 0.],\n        [0., 0., 0., 0.]])\nData type: torch.float32\n\nTensor of Ones:\ntensor([[1., 1., 1., 1.],\n        [1., 1., 1., 1.],\n        [1., 1., 1., 1.]])\nData type: torch.float32\n\n--- Topic 4: Creating a Range ---\nRange tensor (1 to 10): tensor([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10])\nZeros like the range tensor: tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])\n\n",
+    "stdout": "Scalar: tensor(7)\nScalar ndim: 0\nAs a plain Python int: 7\nVector: tensor([7, 7])\nVector ndim: 1\nVector shape: torch.Size([2])\nMatrix:\ntensor([[ 7,  8],\n        [ 9, 10]])\nMatrix ndim: 2\nMatrix shape: torch.Size([2, 2])\nMatrix[0]: tensor([7, 8])\nMatrix[0][1]: tensor(8)\nTensor (3D):\ntensor([[[4, 7, 2],\n         [9, 1, 5],\n         [3, 2, 8]],\n\n        [[3, 6, 2],\n         [9, 8, 4],\n         [4, 2, 6]],\n\n        [[8, 3, 3],\n         [9, 7, 5],\n         [8, 4, 7]]])\nTensor ndim: 3\nTensor shape: torch.Size([3, 3, 3])\nRandom tensor (3x4):\ntensor([[0.8823, 0.9150, 0.3829, 0.9593],\n        [0.3904, 0.6009, 0.2566, 0.7936],\n        [0.9408, 0.1332, 0.9346, 0.5936]])\nData type: torch.float32\nRandom image shape: torch.Size([224, 224, 3])\nRandom image ndim: 3\nZeros:\ntensor([[0., 0., 0., 0.],\n        [0., 0., 0., 0.],\n        [0., 0., 0., 0.]])\nOnes:\ntensor([[1., 1., 1., 1.],\n        [1., 1., 1., 1.],\n        [1., 1., 1., 1.]])\nTheir data types: torch.float32 torch.float32\nRange: tensor([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10])\nZeros like it: tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])\n",
     "stderr": "",
-    "durationMs": 4323,
-    "capturedAt": "2026-11-05T01:08:08.298Z"
+    "durationMs": 2932,
+    "capturedAt": "2026-11-05T06:05:10.570Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/02_tensor_datatypes_and_info.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: Tensor Datatypes ---\nFloat 32 Tensor: tensor([3., 6., 9.])\nData type: torch.float32\n\nFloat 16 Tensor: tensor([3., 6., 9.], dtype=torch.float16)\nData type: torch.float16\n\nInt 32 Tensor: tensor([3, 6, 9], dtype=torch.int32)\nMultiplying Int32 and Float32: tensor([ 9., 36., 81.])\n\n--- Topic 2: Getting information from tensors ---\nHere is our tensor:\ntensor([[0.2459, 0.3371, 0.3027, 0.6603],\n        [0.4132, 0.0823, 0.4746, 0.5176],\n        [0.9930, 0.1797, 0.1680, 0.8230]])\n\n1. Datatype of tensor: torch.float32\n2. Shape of tensor: torch.Size([3, 4])\n3. Device tensor is on: cpu\n",
+    "stdout": "Float32 tensor: tensor([3., 6., 9.])\nIts dtype: torch.float32\nFloat16 tensor: tensor([3., 6., 9.], dtype=torch.float16)\nIts dtype: torch.float16\nOriginal is still: torch.float32\nInt32 tensor: tensor([3, 6, 9], dtype=torch.int32)\nInt32 * Float32: tensor([ 9., 36., 81.])\nRuntimeError: mean(): could not infer output dtype. Input dtype must be either a floating point or complex dtype. Got: Int\nHere is our tensor:\ntensor([[0.8823, 0.9150, 0.3829, 0.9593],\n        [0.3904, 0.6009, 0.2566, 0.7936],\n        [0.9408, 0.1332, 0.9346, 0.5936]])\n1. Datatype of tensor: torch.float32\n2. Shape of tensor: torch.Size([3, 4])\n3. Device tensor is on: cpu\n",
     "stderr": "",
-    "durationMs": 2337,
-    "capturedAt": "2026-11-05T01:08:12.626Z"
+    "durationMs": 3014,
+    "capturedAt": "2026-11-05T06:05:13.502Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/03_tensor_operations.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: Basic Operations ---\nOriginal tensor: tensor([1, 2, 3])\ntensor + 10: tensor([11, 12, 13])\ntensor * 10: tensor([10, 20, 30])\ntensor - 10: tensor([-9, -8, -7])\ntorch.mul(tensor, 10): tensor([10, 20, 30])\ntorch.add(tensor, 10): tensor([11, 12, 13])\n\n--- Topic 2: Matrix Multiplication ---\nElement-wise: tensor([1, 2, 3]) * tensor([1, 2, 3]) = tensor([1, 4, 9])\nDot product (torch.matmul): 14\n\n--- Topic 3: Shape Errors & Transposing ---\ntensor_A shape: torch.Size([3, 2])\ntensor_B shape: torch.Size([3, 2])\n\ntensor_B transposed (.T) shape: torch.Size([2, 3])\n\nMultiplying: torch.Size([3, 2]) * torch.Size([2, 3]) <- inner dimensions match\nOutput:\ntensor([[ 27.,  30.,  33.],\n        [ 61.,  68.,  75.],\n        [ 95., 106., 117.]])\nOutput shape: torch.Size([3, 3])\n",
+    "stdout": "Original tensor: tensor([1, 2, 3])\ntensor + 10: tensor([11, 12, 13])\ntensor * 10: tensor([10, 20, 30])\ntensor - 10: tensor([-9, -8, -7])\ntorch.mul(tensor, 10): tensor([10, 20, 30])\ntorch.add(tensor, 10): tensor([11, 12, 13])\nElement-wise: tensor([1, 2, 3]) * tensor([1, 2, 3]) = tensor([1, 4, 9])\nDot product (torch.matmul): tensor(14)\nSame thing with @: tensor(14)\ntensor_A shape: torch.Size([3, 2])\ntensor_B shape: torch.Size([3, 2])\nRuntimeError: mat1 and mat2 shapes cannot be multiplied (3x2 and 3x2)\ntensor_B transposed (.T) shape: torch.Size([2, 3])\nMultiplying: torch.Size([3, 2]) @ torch.Size([2, 3]) <- inner dimensions match\nOutput:\ntensor([[ 27.,  30.,  33.],\n        [ 61.,  68.,  75.],\n        [ 95., 106., 117.]])\nOutput shape: torch.Size([3, 3])\n",
     "stderr": "",
-    "durationMs": 2339,
-    "capturedAt": "2026-11-05T01:08:14.968Z"
+    "durationMs": 2854,
+    "capturedAt": "2026-11-05T06:05:16.518Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/04_tensor_aggregation.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: Finding min, max, mean, sum ---\nTensor x: tensor([ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90])\nMinimum: 0 (or torch.min(x): 0)\nMaximum: 90 (or torch.max(x): 90)\nMean: 45.0 (or torch.mean(x.type(torch.float32)): 45.0)\nSum: 450 (or torch.sum(x): 450)\n\n--- Topic 2: Positional min/max (argmin/argmax) ---\nTensor: tensor([ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90])\nIndex where max value occurs (argmax): 9\nIndex where min value occurs (argmin): 0\n\n--- Topic 3: Change tensor datatype dynamically ---\nOriginal tensor dtype: torch.float32\nNew tensor dtype after using .type(torch.float16): torch.float16\n",
+    "stdout": "Tensor x: tensor([ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90])\nMinimum: tensor(0) | torch.min(x): tensor(0)\nMaximum: tensor(90) | torch.max(x): tensor(90)\nSum: tensor(450) | torch.sum(x): tensor(450)\nMinimum as a normal number: 0\nRuntimeError: mean(): could not infer output dtype. Input dtype must be either a floating point or complex dtype. Got: Long\nMean: tensor(45.) | torch.mean(...): tensor(45.)\nTensor: tensor([ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90])\nIndex where max value occurs (argmax): tensor(9)\nIndex where min value occurs (argmin): tensor(0)\ntensor[9]: tensor(90)\nOriginal dtype: torch.float32\nNew dtype after .type(torch.float16): torch.float16\n",
     "stderr": "",
-    "durationMs": 2302,
-    "capturedAt": "2026-11-05T01:08:17.308Z"
+    "durationMs": 2777,
+    "capturedAt": "2026-11-05T06:05:19.373Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/05_reshaping_and_stacking.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: Reshaping tensors ---\nOriginal tensor:\ntensor([ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.])\nOriginal shape: torch.Size([10])\n\nReshaped to (5, 2):\ntensor([[ 1.,  2.],\n        [ 3.,  4.],\n        [ 5.,  6.],\n        [ 7.,  8.],\n        [ 9., 10.]])\nReshaped shape: torch.Size([5, 2])\n\n--- Topic 2: Changing the view ---\nView z (1, 10): tensor([[ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]])\nWe changed z[:, 0] to 5.\nz is now: tensor([[ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]])\nx is now: tensor([ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.])\n\n--- Topic 3: Stacking tensors ---\nStacked (dim=0):\ntensor([[ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.],\n        [ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.],\n        [ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]])\n\nStacked (dim=1):\ntensor([[ 5.,  5.,  5.],\n        [ 2.,  2.,  2.],\n        [ 3.,  3.,  3.],\n        [ 4.,  4.,  4.],\n        [ 5.,  5.,  5.],\n        [ 6.,  6.,  6.],\n        [ 7.,  7.,  7.],\n        [ 8.,  8.,  8.],\n        [ 9.,  9.,  9.],\n        [10., 10., 10.]])\n\n--- Topic 4: Squeezing and Unsqueezing ---\nBefore squeeze: tensor([[ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]]) | Shape: torch.Size([1, 10])\nAfter squeeze: tensor([ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]) | Shape: torch.Size([10])\n\nAfter unsqueeze (dim=0): tensor([[ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]]) | Shape: torch.Size([1, 10])\n\n--- Topic 5: Permuting dimensions ---\nOriginal image shape: torch.Size([224, 224, 3]) -> [height, width, color_channels]\nPermuted image shape: torch.Size([3, 224, 224]) -> [color_channels, height, width]\n",
+    "stdout": "Original tensor: tensor([ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.])\nOriginal shape: torch.Size([10])\nReshaped to (5, 2):\ntensor([[ 1.,  2.],\n        [ 3.,  4.],\n        [ 5.,  6.],\n        [ 7.,  8.],\n        [ 9., 10.]])\nReshaped shape: torch.Size([5, 2])\nRuntimeError: shape '[3, 3]' is invalid for input of size 10\nView z (1, 10): tensor([[ 1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]])\nWe changed z[:, 0] to 5.\nz is now: tensor([[ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]])\nx is now: tensor([ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.])\nStacked (dim=0):\ntensor([[ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.],\n        [ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.],\n        [ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]])\nShape: torch.Size([3, 10])\nStacked (dim=1):\ntensor([[ 5.,  5.,  5.],\n        [ 2.,  2.,  2.],\n        [ 3.,  3.,  3.],\n        [ 4.,  4.,  4.],\n        [ 5.,  5.,  5.],\n        [ 6.,  6.,  6.],\n        [ 7.,  7.,  7.],\n        [ 8.,  8.,  8.],\n        [ 9.,  9.,  9.],\n        [10., 10., 10.]])\nShape: torch.Size([10, 3])\nBefore squeeze: tensor([[ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]]) | Shape: torch.Size([1, 10])\nAfter squeeze: tensor([ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]) | Shape: torch.Size([10])\nAfter unsqueeze (dim=0): tensor([[ 5.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10.]]) | Shape: torch.Size([1, 10])\nOriginal image shape: torch.Size([224, 224, 3]) -> [height, width, colour_channels]\nPermuted image shape: torch.Size([3, 224, 224]) -> [colour_channels, height, width]\nChanged the original's corner. The permuted one sees it: 999.0\n",
     "stderr": "",
-    "durationMs": 2285,
-    "capturedAt": "2026-11-05T01:08:19.616Z"
+    "durationMs": 2893,
+    "capturedAt": "2026-11-05T06:05:22.151Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/06_tensor_indexing.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: Indexing ---\nTensor:\ntensor([[[1, 2, 3],\n         [4, 5, 6],\n         [7, 8, 9]]])\nShape: torch.Size([1, 3, 3])\n\nIndexing the first dimension (x[0]):\ntensor([[1, 2, 3],\n        [4, 5, 6],\n        [7, 8, 9]])\n\nIndexing the middle dimension (x[0][0] or x[0, 0]):\ntensor([1, 2, 3])\n\nIndexing the inner-most dimension (x[0][0][0] or x[0, 0, 0]):\n1\n\nGet all values of 0th dimension and the 0th index of 1st dimension (x[:, 0]):\ntensor([[1, 2, 3]])\n\nGet all values of 0th and 1st dimensions but only index 1 of 2nd dimension (x[:, :, 1]):\ntensor([[2, 5, 8]])\n\nGet all values of 0th dimension but only the 1 index value of 1st and 2nd dimension (x[:, 1, 1]):\ntensor([5])\n\nGet index 0 of 0th and 1st dimension and all values of 2nd dimension (x[0, 0, :]):\ntensor([1, 2, 3])\n",
+    "stdout": "Tensor:\ntensor([[[1, 2, 3],\n         [4, 5, 6],\n         [7, 8, 9]]])\nShape: torch.Size([1, 3, 3])\nx[0]:\ntensor([[1, 2, 3],\n        [4, 5, 6],\n        [7, 8, 9]])\nx[0][0] or x[0, 0]: tensor([1, 2, 3])\nx[0][0][0] or x[0, 0, 0]: tensor(1)\nx[:, 0] (all blocks, row 0):\ntensor([[1, 2, 3]])\nx[:, :, 1] (all blocks, all rows, column 1):\ntensor([[2, 5, 8]])\nx[:, 1, 1] (all blocks, row 1, column 1):\ntensor([5])\nx[0, 0, :] (block 0, row 0, all columns):\ntensor([1, 2, 3])\nx[0, :2, :2] (the top-left 2x2 corner):\ntensor([[1, 2],\n        [4, 5]])\nx[0, -1, -1] (the bottom-right value): tensor(9)\n",
     "stderr": "",
-    "durationMs": 2306,
-    "capturedAt": "2026-11-05T01:08:21.905Z"
+    "durationMs": 2778,
+    "capturedAt": "2026-11-05T06:05:25.044Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/07_pytorch_and_numpy.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: NumPy to Tensor ---\nNumPy array: [1. 2. 3. 4. 5. 6. 7.]\nPyTorch tensor: tensor([1., 2., 3., 4., 5., 6., 7.], dtype=torch.float64)\nTensor dtype: torch.float64 (inherited from NumPy!)\n\nAdded 1 to array.\nArray is now: [2. 3. 4. 5. 6. 7. 8.]\nTensor remains: tensor([1., 2., 3., 4., 5., 6., 7.], dtype=torch.float64)\n\n--- Topic 2: Tensor to NumPy ---\nPyTorch tensor: tensor([1., 1., 1., 1., 1., 1., 1.])\nNumPy array: [1. 1. 1. 1. 1. 1. 1.]\n\nAdded 1 to tensor.\nTensor is now: tensor([2., 2., 2., 2., 2., 2., 2.])\nNumPy array remains: [1. 1. 1. 1. 1. 1. 1.]\n",
+    "stdout": "NumPy array: [1. 2. 3. 4. 5. 6. 7.]\nPyTorch tensor: tensor([1., 2., 3., 4., 5., 6., 7.], dtype=torch.float64)\nTensor dtype: torch.float64\nAfter .type(torch.float32): torch.float32\nPyTorch tensor: tensor([1., 1., 1., 1., 1., 1., 1.])\nNumPy array: [1. 1. 1. 1. 1. 1. 1.]\nNumPy dtype: float32\nAfter shared_array += 10\nArray: [11. 12. 13.]\nTensor: tensor([11., 12., 13.], dtype=torch.float64)\nAfter shared_array = shared_array + 1\nArray: [12. 13. 14.]\nTensor: tensor([11., 12., 13.], dtype=torch.float64)\nAfter t.add_(5) -> tensor: tensor([6., 6., 6.]) | array: [6. 6. 6.]\ntorch.tensor(...) makes an independent copy: tensor([1., 2., 3.], dtype=torch.float64)\n",
     "stderr": "",
-    "durationMs": 2335,
-    "capturedAt": "2026-11-05T01:08:24.215Z"
+    "durationMs": 2812,
+    "capturedAt": "2026-11-05T06:05:27.822Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/08_reproducibility.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: Random Seeds ---\nTensor A:\ntensor([[0.2486, 0.4679, 0.0388, 0.1212],\n        [0.3009, 0.6221, 0.4428, 0.8927],\n        [0.3780, 0.9511, 0.5178, 0.2844]])\nTensor B:\ntensor([[0.0292, 0.9190, 0.2239, 0.3428],\n        [0.6092, 0.1347, 0.1839, 0.7953],\n        [0.5209, 0.0549, 0.7192, 0.2867]])\nAre they equal? tensor([[False, False, False, False],\n        [False, False, False, False],\n        [False, False, False, False]])\n\n--- Using Random Seeds ---\nTensor C (Seed 42):\ntensor([[0.8823, 0.9150, 0.3829, 0.9593],\n        [0.3904, 0.6009, 0.2566, 0.7936],\n        [0.9408, 0.1332, 0.9346, 0.5936]])\nTensor D (Seed 42):\ntensor([[0.8823, 0.9150, 0.3829, 0.9593],\n        [0.3904, 0.6009, 0.2566, 0.7936],\n        [0.9408, 0.1332, 0.9346, 0.5936]])\nAre they equal now? tensor([[True, True, True, True],\n        [True, True, True, True],\n        [True, True, True, True]])\n",
+    "stdout": "Tensor A:\ntensor([[0.5356, 0.6208, 0.3577, 0.6804],\n        [0.8890, 0.0517, 0.4571, 0.1454],\n        [0.4960, 0.6221, 0.4677, 0.9586]])\nTensor B:\ntensor([[0.2818, 0.5802, 0.6834, 0.4493],\n        [0.7495, 0.5348, 0.9483, 0.8550],\n        [0.5549, 0.9979, 0.1727, 0.4065]])\nAre they equal?\ntensor([[False, False, False, False],\n        [False, False, False, False],\n        [False, False, False, False]])\nTensor C (seed 42):\ntensor([[0.8823, 0.9150, 0.3829, 0.9593],\n        [0.3904, 0.6009, 0.2566, 0.7936],\n        [0.9408, 0.1332, 0.9346, 0.5936]])\nTensor D (seed 42):\ntensor([[0.8823, 0.9150, 0.3829, 0.9593],\n        [0.3904, 0.6009, 0.2566, 0.7936],\n        [0.9408, 0.1332, 0.9346, 0.5936]])\nAre they equal now?\ntensor([[True, True, True, True],\n        [True, True, True, True],\n        [True, True, True, True]])\nTwo draws after ONE seed are different: tensor([0.8823, 0.9150]) tensor([0.3829, 0.9593])\nSeed 0: tensor([0.4963, 0.7682])\nSeed 1234: tensor([0.0290, 0.4019])\n",
     "stderr": "",
-    "durationMs": 2737,
-    "capturedAt": "2026-11-05T01:08:26.557Z"
+    "durationMs": 2756,
+    "capturedAt": "2026-11-05T06:05:30.635Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/09_gpu_and_pytorch.py": {
     "status": "ok",
-    "stdout": "--- Topic 1: Checking for GPU access ---\nIs CUDA available? True\nNumber of GPUs available: 1\n\n--- Topic 2: Setup device-agnostic code ---\nUsing device: cuda\n\n--- Topic 3: Moving tensors to and from the GPU ---\nOriginal tensor: tensor([1, 2, 3])\nOriginal tensor device: cpu\n\nTensor on GPU: tensor([1, 2, 3], device='cuda:0')\nTensor on GPU device: cuda:0\n\nTensor back on CPU: tensor([1, 2, 3])\nTensor back on CPU device: cpu\nNow we can use NumPy: [1 2 3]\n",
+    "stdout": "Is CUDA available? True\nNumber of GPUs available: 1\nUsing device: cuda\nOriginal tensor: tensor([1, 2, 3])\nOriginal tensor device: cpu\nTensor on cuda: tensor([1, 2, 3], device='cuda:0')\nIts device: cuda:0\nTensor back on CPU: tensor([1, 2, 3])\nIts device: cpu\nNow we can use NumPy: [1 2 3]\nBoth on the same device, so this works: tensor([4., 6.], device='cuda:0')\n",
     "stderr": "",
-    "durationMs": 2887,
-    "capturedAt": "2026-11-05T01:08:29.298Z"
+    "durationMs": 3200,
+    "capturedAt": "2026-11-05T06:05:33.392Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/10_exercises.py": {
     "status": "ok",
-    "stdout": "Welcome to the PyTorch Fundamentals Exercises!\nTry to write the code for these exercises in your own editor before checking the solutions file.\n\n--- Exercise 2: Create a random tensor with shape (7, 7) ---\n# Write your code here:\n# x = ...\n\n--- Exercise 3: Perform a matrix multiplication ---\nMultiply the tensor from Exercise 2 with another random tensor with shape (1, 7).\nHint: you may have to transpose the second tensor.\n# Write your code here:\n# y = ...\n# z = ...\n\n--- Exercise 4: Random Seeds ---\nSet the random seed to 0 and do exercises 2 & 3 over again.\nThe output should be:\n(tensor([[1.8542],\n         [1.9611],\n         [2.2884],\n         [3.0481],\n         [1.7067],\n         [2.5290],\n         [1.7989]]), torch.Size([7, 1]))\n# Write your code here:\n# RANDOM_SEED = ...\n\n--- Exercise 5: GPU Random Seeds ---\nWe saw how to set it with torch.manual_seed() but is there a GPU equivalent?\nIf there is, set the GPU random seed to 1234.\n# Write your code here:\n# torch.cuda...\n\n--- Exercise 6: Tensors on GPU ---\nCreate two random tensors of shape (2, 3) and send them both to the GPU.\nSet torch.manual_seed(1234) when creating the tensors.\n# Write your code here:\n# device = ...\n\n--- Exercise 7: GPU Matrix Multiplication ---\nPerform a matrix multiplication on the tensors you created in Exercise 6.\n# Write your code here:\n# z = ...\n\n--- Exercise 8: Max and Min ---\nFind the maximum and minimum values of the output of Exercise 7.\n# Write your code here:\n# max = ...\n# min = ...\n\n--- Exercise 9: Argmax and Argmin ---\nFind the maximum and minimum index values of the output of Exercise 7.\n# Write your code here:\n# arg_max = ...\n# arg_min = ...\n\n--- Exercise 10: Squeezing Tensors ---\nMake a random tensor with shape (1, 1, 1, 10) and then create a new tensor with all the 1 dimensions removed to be left with a tensor of shape (10).\nSet the seed to 7 when you create it.\n# Write your code here:\n# x = ...\n# y = ...\n\n",
+    "stdout": "Exercises for PyTorch Fundamentals. Write the code in your own editor.\nThe solutions are in the next lesson. Try first!\n",
     "stderr": "",
-    "durationMs": 2792,
-    "capturedAt": "2026-11-05T01:08:32.190Z"
+    "durationMs": 2856,
+    "capturedAt": "2026-11-05T06:05:36.593Z"
   },
   "Deep_Learning_PyTorch/00_PyTorch_Fundamentals/11_exercises_solutions.py": {
     "status": "ok",
-    "stdout": "--- Exercise 2: Create a random tensor with shape (7, 7) ---\nx:\ntensor([[0.4409, 0.4737, 0.3395, 0.2347, 0.7646, 0.0899, 0.5611],\n        [0.0905, 0.1409, 0.8211, 0.1368, 0.4085, 0.6327, 0.0500],\n        [0.2352, 0.5466, 0.8963, 0.3860, 0.5061, 0.1648, 0.1582],\n        [0.9483, 0.9585, 0.0683, 0.0445, 0.4595, 0.1192, 0.6726],\n        [0.0608, 0.9255, 0.1665, 0.1029, 0.9510, 0.6422, 0.5849],\n        [0.6525, 0.8325, 0.8116, 0.0012, 0.7294, 0.7464, 0.5049],\n        [0.2097, 0.7112, 0.2600, 0.0634, 0.6613, 0.0289, 0.7639]])\nShape: torch.Size([7, 7])\n\n--- Exercise 3: Perform a matrix multiplication ---\ny:\ntensor([[0.0377, 0.6044, 0.0206, 0.2779, 0.2191, 0.1009, 0.8287]])\nShape: torch.Size([1, 7])\n\nResult (z = x * y.T):\ntensor([[1.0167],\n        [0.3383],\n        [0.7236],\n        [1.2990],\n        [1.3516],\n        [1.1984],\n        [1.2417]])\nShape: torch.Size([7, 1])\n\n--- Exercise 4: Random Seeds ---\nResult with seed 0:\ntensor([[1.5985],\n        [1.1173],\n        [1.2741],\n        [1.6838],\n        [0.8279],\n        [1.0347],\n        [1.2498]])\nShape: torch.Size([7, 1])\n\n--- Exercise 5: GPU Random Seeds ---\nRandom tensor with GPU seed 1234:\ntensor([[0.8964],\n        [0.4556],\n        [0.6323],\n        [0.3489],\n        [0.4017],\n        [0.0223],\n        [0.1689]])\n\n--- Exercise 6: Tensors on GPU ---\nDevice: cuda\nTensor A:\ntensor([[0.0290, 0.4019, 0.2598],\n        [0.3666, 0.0583, 0.7006]], device='cuda:0')\nTensor B:\ntensor([[0.0518, 0.4681, 0.6738],\n        [0.3315, 0.7837, 0.5631]], device='cuda:0')\n\n--- Exercise 7: GPU Matrix Multiplication ---\nResult (A * B.T):\ntensor([[0.3647, 0.4709],\n        [0.5184, 0.5617]], device='cuda:0')\nShape: torch.Size([2, 2])\n\n--- Exercise 8: Max and Min ---\nMax: 0.5617256760597229\nMin: 0.3647301495075226\n\n--- Exercise 9: Argmax and Argmin ---\nArgmax (index of max): 3\nArgmin (index of min): 0\n\n--- Exercise 10: Squeezing Tensors ---\nOriginal tensor:\ntensor([[[[0.5349, 0.1988, 0.6592, 0.6569, 0.2328, 0.4251, 0.2071, 0.6297,\n           0.3653, 0.8513]]]])\nShape: torch.Size([1, 1, 1, 10])\n\nSqueezed tensor:\ntensor([0.5349, 0.1988, 0.6592, 0.6569, 0.2328, 0.4251, 0.2071, 0.6297, 0.3653,\n        0.8513])\nShape: torch.Size([10])\n",
+    "stdout": "x shape: torch.Size([7, 7])\ny shape: torch.Size([1, 7])\nz = x @ y.T shape: torch.Size([7, 1])\nResult with seed 0:\ntensor([[1.8542],\n        [1.9611],\n        [2.2884],\n        [3.0481],\n        [1.7067],\n        [2.5290],\n        [1.7989]])\nShape: torch.Size([7, 1])\nRandom tensor made on cuda:\ntensor([[0.1272],\n        [0.8167],\n        [0.5440],\n        [0.6601],\n        [0.2721],\n        [0.9737],\n        [0.3903]], device='cuda:0')\nDevice: cuda\nTensor A:\ntensor([[0.0290, 0.4019, 0.2598],\n        [0.3666, 0.0583, 0.7006]], device='cuda:0')\nTensor B:\ntensor([[0.0518, 0.4681, 0.6738],\n        [0.3315, 0.7837, 0.5631]], device='cuda:0')\nA @ B.T:\ntensor([[0.3647, 0.4709],\n        [0.5184, 0.5617]], device='cuda:0')\nShape: torch.Size([2, 2])\nMax: tensor(0.5617, device='cuda:0')\nMin: tensor(0.3647, device='cuda:0')\nArgmax (index of max): tensor(3, device='cuda:0')\nArgmin (index of min): tensor(0, device='cuda:0')\nOriginal tensor:\ntensor([[[[0.5349, 0.1988, 0.6592, 0.6569, 0.2328, 0.4251, 0.2071, 0.6297,\n           0.3653, 0.8513]]]])\nShape: torch.Size([1, 1, 1, 10])\nSqueezed tensor:\ntensor([0.5349, 0.1988, 0.6592, 0.6569, 0.2328, 0.4251, 0.2071, 0.6297, 0.3653,\n        0.8513])\nShape: torch.Size([10])\n",
     "stderr": "",
-    "durationMs": 3233,
-    "capturedAt": "2026-11-05T01:08:34.986Z"
+    "durationMs": 3130,
+    "capturedAt": "2026-11-05T06:05:39.449Z"
   },
   "Deep_Learning_PyTorch/01_PyTorch_Workflow/01_linear_regression.py": {
     "status": "ok",
-    "stdout": "Total data points: 50\nTraining data: 40\nTesting data: 10\n\nInitial model parameters (randomly guessed):\n[Parameter containing:\ntensor([0.3367], requires_grad=True), Parameter containing:\ntensor([0.1288], requires_grad=True)]\nEpoch:   0 | Train loss: 0.3129 | Test loss: 0.4811\nEpoch:  20 | Train loss: 0.0891 | Test loss: 0.2173\nEpoch:  40 | Train loss: 0.0454 | Test loss: 0.1136\nEpoch:  60 | Train loss: 0.0382 | Test loss: 0.0889\nEpoch:  80 | Train loss: 0.0313 | Test loss: 0.0723\nEpoch: 100 | Train loss: 0.0245 | Test loss: 0.0565\nEpoch: 120 | Train loss: 0.0176 | Test loss: 0.0406\nEpoch: 140 | Train loss: 0.0107 | Test loss: 0.0241\nEpoch: 160 | Train loss: 0.0039 | Test loss: 0.0082\nEpoch: 180 | Train loss: 0.0089 | Test loss: 0.0050\n\n--- Training Complete ---\nFinal model parameters (learned):\n[Parameter containing:\ntensor([0.6990], requires_grad=True), Parameter containing:\ntensor([0.3093], requires_grad=True)]\n\nTarget parameters were: weight=0.7, bias=0.3\nThe machine learned the parameters almost perfectly!\n",
+    "stdout": "First five X: tensor([0.0000, 0.0200, 0.0400, 0.0600, 0.0800])\nFirst five y: tensor([0.3000, 0.3140, 0.3280, 0.3420, 0.3560])\nX shape: torch.Size([50, 1])\nTotal data points: 50\nTraining data: 40\nTesting data: 10\nInitial parameters (random guesses):\n[Parameter containing:\ntensor([0.3367], requires_grad=True), Parameter containing:\ntensor([0.1288], requires_grad=True)]\nNamed: OrderedDict({'weights': tensor([0.3367]), 'bias': tensor([0.1288])})\nBefore training, first prediction: 0.39816170930862427\nThe true value: 0.8600000143051147\nEpoch:   0 | Train loss: 0.3129 | Test loss: 0.4811\nEpoch:  20 | Train loss: 0.0891 | Test loss: 0.2173\nEpoch:  40 | Train loss: 0.0454 | Test loss: 0.1136\nEpoch:  60 | Train loss: 0.0382 | Test loss: 0.0889\nEpoch:  80 | Train loss: 0.0313 | Test loss: 0.0723\nEpoch: 100 | Train loss: 0.0245 | Test loss: 0.0565\nEpoch: 120 | Train loss: 0.0176 | Test loss: 0.0406\nEpoch: 140 | Train loss: 0.0107 | Test loss: 0.0241\nEpoch: 160 | Train loss: 0.0039 | Test loss: 0.0082\nEpoch: 180 | Train loss: 0.0089 | Test loss: 0.0050\nFinal parameters (learned):\nOrderedDict({'weights': tensor([0.6990]), 'bias': tensor([0.3093])})\nTarget parameters were: weight = 0.7 , bias = 0.3\n",
     "stderr": "",
-    "durationMs": 5738,
-    "capturedAt": "2026-11-05T01:08:38.223Z",
+    "durationMs": 6580,
+    "capturedAt": "2026-11-05T06:05:42.580Z",
     "images": [
       "/outputs/Deep_Learning_PyTorch/01_PyTorch_Workflow/01_linear_regression/regression_plot.png"
     ]
@@ -132,169 +132,169 @@
     "status": "ok",
     "stdout": "[False  True False  True False]\n[25 40]\n[25 40]\n[25 15]\n[ 5 40]\n[10  5 15]\nValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()\n4\n0.4\n[0 5 0 8]\n['ok' 'hot' 'ok' 'hot' 'ok' 'ok' 'hot' 'ok' 'hot' 'ok']\n",
     "stderr": "",
-    "durationMs": 234,
-    "capturedAt": "2026-11-05T01:08:43.963Z"
+    "durationMs": 247,
+    "capturedAt": "2026-11-05T06:05:49.165Z"
   },
   "NumPy_Basics/11_stacking.py": {
     "status": "ok",
     "stdout": "[85 90 88 78 82 80]\n[[85 90 88]\n [78 82 80]]\n(2, 3)\n[85 90 88 78 82 80]\n[[ 1  2 10 20]\n [ 3  4 30 40]]\n[[ 1  2]\n [ 3  4]\n [10 20]\n [30 40]]\nValueError: all the input array dimensions except for the concatenation axis must match exactly, but along dimension 1, the array at index 0 has size 3 and the array at index 1 has size 2\n[['John' 'Felipe' 'Michael' '1' '2' '3']\n ['Russel' 'Jim' 'Andrew' '4' '5' '6']]\n<U21\n",
     "stderr": "",
-    "durationMs": 211,
-    "capturedAt": "2026-11-05T01:08:44.199Z"
+    "durationMs": 248,
+    "capturedAt": "2026-11-05T06:05:49.413Z"
   },
   "NumPy_Basics/12_random_numbers.py": {
     "status": "ok",
     "stdout": "0\n[[52 93 15]\n [72 61 21]\n [83 87 75]]\n[28.36995568 23.34834445 15.71467272 36.03553892 12.25646316]\n[[38.87995089 47.54210836 10.03115063 49.68846237]\n [34.69926039 34.46612642 10.28265221 10.922497  ]]\n[0.52477466 0.39986097 0.04666566 0.97375552 0.23277134]\n[[0.09060643 0.61838601 0.38246199]\n [0.98323089 0.46676289 0.85994041]\n [0.68030754 0.45049925 0.01326496]]\n[ 0.09512578  0.66465434 -0.1402185  -0.0331934  -0.74907652]\nDi\n['Bob' 'Ed' 'Cy']\n[4 2 1 3 0]\n[0.07630829 0.77991879 0.43840923]\n[0.07630829 0.77991879 0.43840923]\nIdentical? True\n[0.77395605 0.43887844 0.85859792]\n[1 5 2 1 4]\n[ 0.1278404  -0.31624259 -0.01680116]\ntrain: [80 50 30 20 60  0 10 40]\ntest : [90 70]\n",
     "stderr": "",
-    "durationMs": 217,
-    "capturedAt": "2026-11-05T01:08:44.411Z"
+    "durationMs": 260,
+    "capturedAt": "2026-11-05T06:05:49.662Z"
   },
   "NumPy_Basics/1_numpy_speed_test.py": {
     "status": "ok",
-    "stdout": "Creating the massive lists...\nDone! Let's race.\n\nStarting Standard Python...\nStandard Python took: 0.2791 seconds\n\nStarting NumPy...\nNumPy took: 0.0119 seconds\n\n--- NumPy was 23.6x faster! ---\n[1 2 3]\n[1.  2.5 3. ]\n",
+    "stdout": "Creating the massive lists...\nDone! Let's race.\n\nStarting Standard Python...\nStandard Python took: 0.3661 seconds\n\nStarting NumPy...\nNumPy took: 0.0123 seconds\n\n--- NumPy was 29.9x faster! ---\n[1 2 3]\n[1.  2.5 3. ]\n",
     "stderr": "",
-    "durationMs": 673,
-    "capturedAt": "2026-11-05T01:08:44.628Z"
+    "durationMs": 839,
+    "capturedAt": "2026-11-05T06:05:49.923Z"
   },
   "NumPy_Basics/2_creating_arrays.py": {
     "status": "ok",
     "stdout": "[1 2 3 4]\n[1 2 3 4]\n[1, 2, 3, 4]\n<class 'list'> <class 'numpy.ndarray'>\nint64\nfloat64\n['1' 'two' '3']\n[1. 2. 3.]\n[1, 2, 3, 1, 2, 3]\n[2 4 6]\n[1, 2, 3, 1, 2, 3]\n[2 4 6]\n[7 8 9]\n[0 1 2 3 4]\n",
     "stderr": "",
-    "durationMs": 253,
-    "capturedAt": "2026-11-05T01:08:45.302Z"
+    "durationMs": 233,
+    "capturedAt": "2026-11-05T06:05:50.763Z"
   },
   "NumPy_Basics/3_2d_arrays.py": {
     "status": "ok",
     "stdout": "[[1 2 3]\n [4 5 6]\n [7 8 9]]\n[[90 85]\n [70 60]\n [88 92]]\n(3, 3)\n(3, 2)\n(3,)\nValueError: setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (2,) + inhomogeneous part.\n(2, 2, 3)\n3 dimensions\n",
     "stderr": "",
-    "durationMs": 189,
-    "capturedAt": "2026-11-05T01:08:45.555Z"
+    "durationMs": 226,
+    "capturedAt": "2026-11-05T06:05:50.996Z"
   },
   "NumPy_Basics/4_array_generators.py": {
     "status": "ok",
     "stdout": "[0. 0. 0.]\n[1. 1. 1.]\n[0 0 0]\n[[0. 0. 0.]\n [0. 0. 0.]]\n[[1. 1.]\n [1. 1.]\n [1. 1.]]\n[[7 7]\n [7 7]]\n[[1. 0. 0.]\n [0. 1. 0.]\n [0. 0. 1.]]\n[0 1 2 3]\n[2 5 8]\n[0.   0.25 0.5  0.75]\n[0.   0.25 0.5  0.75 1.  ]\n",
     "stderr": "",
-    "durationMs": 199,
-    "capturedAt": "2026-11-05T01:08:45.745Z"
+    "durationMs": 230,
+    "capturedAt": "2026-11-05T06:05:51.222Z"
   },
   "NumPy_Basics/5_array_math.py": {
     "status": "ok",
     "stdout": "[4 5 6]\n[ 20  40  60  80 100]\n[ 5 15 25 35 45]\n[1. 2. 3. 4. 5.]\n[ 100  400  900 1600 2500]\n[10  0 10  0 10]\n[11 22 33]\n[10 40 90]\nValueError: operands could not be broadcast together with shapes (3,) (2,) \n[1. 2. 3. 4.]\n[1.         2.71828183]\n[0. 1.]\n[3 2 1]\n[[11 22 33]\n [14 25 36]]\n[-1.34164079 -0.4472136   0.4472136   1.34164079]\n[False False  True  True  True]\n[False False  True False False]\n",
     "stderr": "",
-    "durationMs": 235,
-    "capturedAt": "2026-11-05T01:08:45.944Z"
+    "durationMs": 220,
+    "capturedAt": "2026-11-05T06:05:51.452Z"
   },
   "NumPy_Basics/6_array_attributes.py": {
     "status": "ok",
     "stdout": "(2, 3)\n2\nint64\n6\n2\n(3, 3)\n2\nfloat64\n[1 2 3]\nfloat32\n[ True False  True]\n[1 2 3]\n",
     "stderr": "",
-    "durationMs": 219,
-    "capturedAt": "2026-11-05T01:08:46.181Z"
+    "durationMs": 215,
+    "capturedAt": "2026-11-05T06:05:51.673Z"
   },
   "NumPy_Basics/7_indexing.py": {
     "status": "ok",
     "stdout": "10\n40\n[20 30]\n[10 20]\n[30 40]\n[10 30]\n1\n4\n6\n[1 2 3]\n[1 4]\n[[1 2 3]\n [4 5 6]]\n[[2 3]\n [5 6]]\n[10 40]\n[40 40 10]\n[[4 5 6]\n [1 2 3]]\n[99  2  3  0  0]\n[  1 100   3   4   5]\n[  1 100   3   4   5]\n",
     "stderr": "",
-    "durationMs": 190,
-    "capturedAt": "2026-11-05T01:08:46.400Z"
+    "durationMs": 229,
+    "capturedAt": "2026-11-05T06:05:51.889Z"
   },
   "NumPy_Basics/8_array_functions.py": {
     "status": "ok",
     "stdout": "12\n4.0\n5\n3\n0.816496580927726\n12 4.0\n21\n3.5\n6\n1\n1.707825127659933\n[5 7 9]\n[ 6 15]\n[2. 5.]\n1\n0\n[1 2 3]\n[ 1  3  6 10]\nAverage per student: [82.33333333 87.33333333 65.         87.66666667]\nAverage per subject: [77.75 80.5  83.5 ]\nBest student is number 3\n",
     "stderr": "",
-    "durationMs": 214,
-    "capturedAt": "2026-11-05T01:08:46.591Z"
+    "durationMs": 218,
+    "capturedAt": "2026-11-05T06:05:52.119Z"
   },
   "NumPy_Basics/9_reshaping.py": {
     "status": "ok",
     "stdout": "[0 1 2 3 4 5 6 7 8]\n[[0 1 2]\n [3 4 5]\n [6 7 8]]\nValueError: cannot reshape array of size 9 into shape (3,4)\n[[ 1  2  3  4]\n [ 5  6  7  8]\n [ 9 10 11 12]]\n[[ 1  2]\n [ 3  4]\n [ 5  6]\n [ 7  8]\n [ 9 10]\n [11 12]]\n[[[ 1  2]\n  [ 3  4]\n  [ 5  6]]\n\n [[ 7  8]\n  [ 9 10]\n  [11 12]]]\n[0 1 2 3 4 5 6 7 8]\n[0 1 2 3 4 5 6 7 8]\n(2, 3) -> (3, 2)\n[[1 4]\n [2 5]\n [3 6]]\n(100, 784)\n",
     "stderr": "",
-    "durationMs": 344,
-    "capturedAt": "2026-11-05T01:08:46.805Z"
+    "durationMs": 204,
+    "capturedAt": "2026-11-05T06:05:52.338Z"
   },
   "Pandas_Basics/1_intro_to_pandas.py": {
     "status": "ok",
     "stdout": "0     Apple\n1    Banana\n2    Cherry\ndtype: str\nBanana\n3\n0.5\napple     2.4\nbanana    1.0\ncherry    6.0\ndtype: float64\n    Brand  Price  Electric\n0  Toyota  25000     False\n1    Ford  30000     False\n2   Tesla  50000      True\nBrand         str\nPrice       int64\nElectric     bool\ndtype: object\n(3, 3)\nIndex(['Brand', 'Price', 'Electric'], dtype='str')\nRangeIndex(start=0, stop=3, step=1)\n0    Toyota\n1      Ford\n2     Tesla\nName: Brand, dtype: str\n<class 'pandas.Series'>\n    Brand  Price  Electric\n1  Toyota  25000     False\n2    Ford  30000     False\n3   Tesla  50000      True\n        Price  Electric\nBrand                  \nToyota  25000     False\nFord    30000     False\nTesla   50000      True\n",
     "stderr": "",
     "durationMs": 804,
-    "capturedAt": "2026-11-05T01:08:47.150Z"
+    "capturedAt": "2026-11-05T06:05:52.542Z"
   },
   "Pandas_Basics/2_loading_data.py": {
     "status": "ok",
     "stdout": "   id     name  age           city  salary\n0   1    Alice   28       New York   85000\n1   2      Bob   34  San Francisco  120000\n2   3  Charlie   22        Chicago   65000\n3   4    Diana   29         Austin   90000\n4   5    Ethan   41       New York  110000\n(5, 5)\n['id', 'name', 'age', 'city', 'salary']\n5\nFileNotFoundError: [Errno 2] No such file or directory: 'this_file_does_not_exist.csv'\n   id   name  age           city  salary\n0   1  Alice   28       New York   85000\n1   2    Bob   34  San Francisco  120000\n      name  age\n0    Alice   28\n1      Bob   34\n2  Charlie   22\n3    Diana   29\n4    Ethan   41\n       name  age           city  salary\nid                                     \n1     Alice   28       New York   85000\n2       Bob   34  San Francisco  120000\n3   Charlie   22        Chicago   65000\n4     Diana   29         Austin   90000\n5     Ethan   41       New York  110000\n",
     "stderr": "",
-    "durationMs": 764,
-    "capturedAt": "2026-11-05T01:08:47.955Z"
+    "durationMs": 792,
+    "capturedAt": "2026-11-05T06:05:53.347Z"
   },
   "Pandas_Basics/3_inspecting_data.py": {
     "status": "ok",
     "stdout": "   id   name  age           city  salary\n0   1  Alice   28       New York   85000\n1   2    Bob   34  San Francisco  120000\n\n   id   name  age      city  salary\n3   4  Diana   29    Austin   90000\n4   5  Ethan   41  New York  110000\n<class 'pandas.DataFrame'>\nRangeIndex: 5 entries, 0 to 4\nData columns (total 5 columns):\n #   Column  Non-Null Count  Dtype\n---  ------  --------------  -----\n 0   id      5 non-null      int64\n 1   name    5 non-null      str  \n 2   age     5 non-null      int64\n 3   city    5 non-null      str  \n 4   salary  5 non-null      int64\ndtypes: int64(3), str(2)\nmemory usage: 332.0 bytes\n             id        age        salary\ncount  5.000000   5.000000       5.00000\nmean   3.000000  30.800000   94000.00000\nstd    1.581139   7.120393   21621.74831\nmin    1.000000  22.000000   65000.00000\n25%    2.000000  28.000000   85000.00000\n50%    3.000000  29.000000   90000.00000\n75%    4.000000  34.000000  110000.00000\nmax    5.000000  41.000000  120000.00000\nid        int64\nname        str\nage       int64\ncity        str\nsalary    int64\ndtype: object\n<StringArray>\n['New York', 'San Francisco', 'Chicago', 'Austin']\nLength: 4, dtype: str\n4\ncity\nNew York         2\nSan Francisco    1\nChicago          1\nAustin           1\nName: count, dtype: int64\nid        0\nname      0\nage       0\ncity      0\nsalary    0\ndtype: int64\n",
     "stderr": "",
-    "durationMs": 959,
-    "capturedAt": "2026-11-05T01:08:48.720Z"
+    "durationMs": 787,
+    "capturedAt": "2026-11-05T06:05:54.140Z"
   },
   "Pandas_Basics/4_selecting_data.py": {
     "status": "ok",
     "stdout": "   id     name  age           city  salary\n0   1    Alice   28       New York   85000\n1   2      Bob   34  San Francisco  120000\n2   3  Charlie   22        Chicago   65000\n3   4    Diana   29         Austin   90000\n4   5    Ethan   41       New York  110000\n0      Alice\n1        Bob\n2    Charlie\n3      Diana\n4      Ethan\nName: name, dtype: str\n      name  age\n0    Alice   28\n1      Bob   34\n2  Charlie   22\n3    Diana   29\n4    Ethan   41\nid              3\nname      Charlie\nage            22\ncity      Chicago\nsalary      65000\nName: 2, dtype: object\nChicago\n      name  salary\n1      Bob  120000\n2  Charlie   65000\n3    Diana   90000\n[28, 34, 22, 29, 41]\nid               1\nname         Alice\nage             28\ncity      New York\nsalary       85000\nName: 0, dtype: object\n    name  age\n0  Alice   28\n1    Bob   34\n0    False\n1     True\n2    False\n3    False\n4     True\nName: age, dtype: bool\n   id   name  age           city  salary\n1   2    Bob   34  San Francisco  120000\n4   5  Ethan   41       New York  110000\n   id   name  age           city  salary\n1   2    Bob   34  San Francisco  120000\n3   4  Diana   29         Austin   90000\n4   5  Ethan   41       New York  110000\n   id   name  age           city  salary\n0   2    Bob   34  San Francisco  120000\n1   4  Diana   29         Austin   90000\n2   5  Ethan   41       New York  110000\n   id   name  age      city  salary\n0   1  Alice   28  New York   85000\n3   4  Diana   29    Austin   90000\n   id     name  age     city  salary\n2   3  Charlie   22  Chicago   65000\n3   4    Diana   29   Austin   90000\n   id     name  age     city  salary\n2   3  Charlie   22  Chicago   65000\n3   4    Diana   29   Austin   90000\n   id     name  age           city  salary\n2   3  Charlie   22        Chicago   65000\n0   1    Alice   28       New York   85000\n3   4    Diana   29         Austin   90000\n4   5    Ethan   41       New York  110000\n1   2      Bob   34  San Francisco  120000\n   id     name  age           city  salary\n1   2      Bob   34  San Francisco  120000\n4   5    Ethan   41       New York  110000\n3   4    Diana   29         Austin   90000\n0   1    Alice   28       New York   85000\n2   3  Charlie   22        Chicago   65000\n   id   name  age           city  salary\n1   2    Bob   34  San Francisco  120000\n4   5  Ethan   41       New York  110000\n",
     "stderr": "",
-    "durationMs": 981,
-    "capturedAt": "2026-11-05T01:08:49.679Z"
+    "durationMs": 834,
+    "capturedAt": "2026-11-05T06:05:54.928Z"
   },
   "Pandas_Basics/5_missing_data.py": {
     "status": "ok",
     "stdout": "--- Original Messy Data ---\n      Name   Age    Salary           City\n0    Alice  28.0   85000.0       New York\n1      Bob   NaN  120000.0  San Francisco\n2  Charlie  22.0       NaN        Chicago\n3    Diana  29.0   90000.0            NaN\n4    Ethan  41.0  110000.0       New York\n\n\n    Name    Age  Salary   City\n0  False  False   False  False\n1  False   True   False  False\n2  False  False    True  False\n3  False  False   False   True\n4  False  False   False  False\nName      0\nAge       1\nSalary    1\nCity      1\ndtype: int64\n3\n    Name   Age    Salary      City\n0  Alice  28.0   85000.0  New York\n4  Ethan  41.0  110000.0  New York\n      Name   Age    Salary      City\n0    Alice  28.0   85000.0  New York\n2  Charlie  22.0       NaN   Chicago\n3    Diana  29.0   90000.0       NaN\n4    Ethan  41.0  110000.0  New York\n      Name   Age    Salary           City\n0    Alice  28.0   85000.0       New York\n1      Bob   NaN  120000.0  San Francisco\n2  Charlie  22.0       NaN        Chicago\n3    Diana  29.0   90000.0            NaN\n4    Ethan  41.0  110000.0       New York\n(5, 4) -> (2, 4)\n      Name   Age    Salary           City\n0    Alice  28.0   85000.0       New York\n1      Bob   0.0  120000.0  San Francisco\n2  Charlie  22.0       0.0        Chicago\n3    Diana  29.0   90000.0              0\n4    Ethan  41.0  110000.0       New York\n      Name   Age    Salary           City\n0    Alice  28.0   85000.0       New York\n1      Bob   0.0  120000.0  San Francisco\n2  Charlie  22.0       0.0        Chicago\n3    Diana  29.0   90000.0        Unknown\n4    Ethan  41.0  110000.0       New York\n--- Data Filled with Column Averages ---\n      Name   Age    Salary           City\n0    Alice  28.0   85000.0       New York\n1      Bob  30.0  120000.0  San Francisco\n2  Charlie  22.0  101250.0        Chicago\n3    Diana  29.0   90000.0        Unknown\n4    Ethan  41.0  110000.0       New York\n",
     "stderr": "",
-    "durationMs": 998,
-    "capturedAt": "2026-11-05T01:08:50.662Z"
+    "durationMs": 838,
+    "capturedAt": "2026-11-05T06:05:55.763Z"
   },
   "Pandas_Basics/6_grouping_data.py": {
     "status": "ok",
     "stdout": "--- All Employees ---\n      Name   Department  Salary  Experience_Years\n0    Alice  Engineering   85000                 3\n1      Bob        Sales   60000                 1\n2  Charlie  Engineering   95000                 5\n3    Diana           HR   70000                 2\n4    Ethan        Sales   75000                 4\n5    Fiona  Engineering  110000                 8\n\n\nDepartment\nEngineering    96666.666667\nHR             70000.000000\nSales          67500.000000\nName: Salary, dtype: float64\n\nDepartment\nEngineering    8\nHR             2\nSales          4\nName: Experience_Years, dtype: int64\n\nDepartment\nEngineering    290000\nHR              70000\nSales          135000\nName: Salary, dtype: int64\nDepartment\nEngineering    3\nHR             1\nSales          2\ndtype: int64\n                     mean    min     max\nDepartment                              \nEngineering  96666.666667  85000  110000\nHR           70000.000000  70000   70000\nSales        67500.000000  60000   75000\n                   Salary  Experience_Years\nDepartment                                 \nEngineering  96666.666667                 8\nHR           70000.000000                 2\nSales        67500.000000                 4\n    Department        Salary\n0  Engineering  96666.666667\n1           HR  70000.000000\n2        Sales  67500.000000\n    Department        Salary\n2        Sales  67500.000000\n1           HR  70000.000000\n0  Engineering  96666.666667\nDepartment   Senior\nEngineering  False      85000.0\n             True      102500.0\nHR           False      70000.0\nSales        False      60000.0\n             True       75000.0\nName: Salary, dtype: float64\n",
     "stderr": "",
-    "durationMs": 965,
-    "capturedAt": "2026-11-05T01:08:51.660Z"
+    "durationMs": 789,
+    "capturedAt": "2026-11-05T06:05:56.602Z"
   },
   "Pandas_Basics/7_data_transformation.py": {
     "status": "ok",
     "stdout": "--- Original Data ---\n  Passenger     Sex Ticket_Class  Fare\n0     Alice  female        First  80.0\n1       Bob    male        Third   7.5\n2   Charlie    male       Second  21.0\n3     Diana  female        Third   8.1\n\n\n--- Data After Mapping Sex to 1s and 0s ---\n  Passenger     Sex Ticket_Class  Fare  Sex_Encoded\n0     Alice  female        First  80.0            1\n1       Bob    male        Third   7.5            0\n2   Charlie    male       Second  21.0            0\n3     Diana  female        Third   8.1            1\n\n\n--- Data After Mapping Classes to Numbers ---\n  Passenger     Sex Ticket_Class  Fare  Sex_Encoded  Class_Number\n0     Alice  female        First  80.0            1             1\n1       Bob    male        Third   7.5            0             3\n2   Charlie    male       Second  21.0            0             2\n3     Diana  female        Third   8.1            1             3\n\n\n  Passenger  Fare  Fare_Doubled  Is_Cheap\n0     Alice  80.0         160.0     False\n1       Bob   7.5          15.0      True\n2   Charlie  21.0          42.0     False\n3     Diana   8.1          16.2      True\n\n  Passenger  Name_Length\n0     Alice            5\n1       Bob            3\n2   Charlie            7\n3     Diana            5\n\n0      ALICE\n1        BOB\n2    CHARLIE\n3      DIANA\nName: Passenger, dtype: str\n   City_Austin  City_Boston  City_Chicago\n0            1            0             0\n1            0            0             1\n2            1            0             0\n3            0            1             0\n",
     "stderr": "",
-    "durationMs": 859,
-    "capturedAt": "2026-11-05T01:08:52.625Z"
+    "durationMs": 809,
+    "capturedAt": "2026-11-05T06:05:57.391Z"
   },
   "python tutorial/Section 3/3.1.1_numbers_and_variables.py": {
     "status": "ok",
     "stdout": "Hello, world!\n2024\nTwo things\n\n5\n6\n42\n3.5\n3\n1\n1024\n0 1\n14\n20\n<class 'int'>\n<class 'float'>\n4.0\n4\n3.0\n3\n3.14\n1000000\n0.001 2500000.0\n0.30000000000000004\nFalse\n60\n100\n2\n<class 'int'>\n<class 'float'>\n20 0 0\n2 1\nTrue <class 'bool'>\nTrue\nFalse\nTrue\nNone\n<class 'NoneType'>\n",
     "stderr": "",
     "durationMs": 40,
-    "capturedAt": "2026-11-05T01:08:53.485Z"
+    "capturedAt": "2026-11-05T06:05:58.201Z"
   },
   "python tutorial/Section 3/3.1.2_text_and_strings.py": {
     "status": "ok",
     "stdout": "True\nIt's easy\nShe said \"hi\"\nLine one\nLine two\nColumn A\tColumn B\nIt's also easy\nC:\new_folder\nC:\\new_folder\nRoses are red,\nViolets are blue.\nAda Lovelace\nhahaha\n------------------------------\nAge: 30\n6\nP\nn\nn\no\nPy\ntho\nPy\nthon\nPython\nPto\nnohtyP\non\n''\nJython\n  MACHINE LEARNING IS FUN  \n  machine learning is fun  \nMachine Learning is fun\n  Machine Learning is fun  \nMachine Learning is powerful\nTrue\nTrue\n8\n4\nTrue\n['Alice', '34', 'London']\n['Machine', 'Learning', 'is', 'fun']\nMachine-Learning-is-fun\nAda is 36 years old.\n3 items cost 13.5\n3.14\n1,234,567\n25.6%\n[     Ada]\n[Ada     ]\naccuracy=0.9231\n",
     "stderr": "",
-    "durationMs": 37,
-    "capturedAt": "2026-11-05T01:08:53.527Z"
+    "durationMs": 42,
+    "capturedAt": "2026-11-05T06:05:58.242Z"
   },
   "python tutorial/Section 3/3.1.3_lists_basics.py": {
     "status": "ok",
     "stdout": "[72, 88, 95, 60, 81]\n<class 'list'>\n['Ada', 36, 5.5, True] []\n5\n72\n95\n81\n[88, 95, 60]\n[72, 88]\n[60, 81]\n[72, 95, 81]\n[81, 60, 95, 88, 72]\n[75, 88, 95, 60, 81]\n[75, 88, 95, 60, 81, 99]\n[75, 70, 88, 95, 60, 81, 99]\n[75, 70, 88, 95, 81, 99]\nRemoved: 99 -> now [75, 70, 88, 95, 81]\n[1, 2, 3, 4]\n[0, 0, 0, 0, 0]\nTrue\nFalse\n70 95 409\n[70, 75, 81, 88, 95]\n[1, 2, 3]\n6\n[1, 2, 3, 4]\nTrue\n[1, 2, 3, 4]\n[1, 2, 3, 4, 5]\n",
     "stderr": "",
-    "durationMs": 37,
-    "capturedAt": "2026-11-05T01:08:53.564Z"
+    "durationMs": 43,
+    "capturedAt": "2026-11-05T06:05:58.285Z"
   },
   "python tutorial/Section 3/3.2_first_steps.py": {
     "status": "ok",
     "stdout": "0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987 \ncount is 0\ncount is 1\ncount is 2\nloop finished, count is 3\n",
     "stderr": "",
     "durationMs": 37,
-    "capturedAt": "2026-11-05T01:08:53.602Z"
+    "capturedAt": "2026-11-05T06:05:58.329Z"
   },
   "python tutorial/Section 4/4.1_if_statements.py": {
     "status": "interactive",
     "stdout": "",
     "stderr": "",
     "durationMs": 0,
-    "capturedAt": "2026-11-05T01:08:53.639Z",
+    "capturedAt": "2026-11-05T06:05:58.367Z",
     "scenarios": [
       {
         "label": "Negative number",
@@ -330,43 +330,43 @@
     "status": "ok",
     "stdout": "Cat 3\nWatermelon 10\nXong Xina 9\nI like apple\nI like banana\nH\ni\n!\nTotal: 108\nAverage: 18.0\nHans\nEleonore\nKeitaro\n72\n55\n90\nHans scored 72\nEleonore scored 55\nKeitaro scored 90\nError: dictionary changed size during iteration\n{'Hans': 'active', '景太郎': 'active'}\n{'Hans': 'active', '景太郎': 'active'}\n",
     "stderr": "",
-    "durationMs": 35,
-    "capturedAt": "2026-11-05T01:08:53.783Z"
+    "durationMs": 39,
+    "capturedAt": "2026-11-05T06:05:58.513Z"
   },
   "python tutorial/Section 4/4.3_range_function.py": {
     "status": "ok",
     "stdout": "0 1 2 3 4 \nHello!\nHello!\nHello!\n[5, 6, 7, 8, 9]\n[0, 3, 6, 9]\n[10, 8, 6, 4, 2]\n[-10, -30, -50, -70, -90]\n[]\n3 ...\n2 ...\n1 ...\nLiftoff!\n0 Rahim\n1 had\n2 a\n3 little\n4 lamb\nrange(0, 10)\n45\n1000000000\nTrue\n",
     "stderr": "",
-    "durationMs": 35,
-    "capturedAt": "2026-11-05T01:08:53.819Z"
+    "durationMs": 37,
+    "capturedAt": "2026-11-05T06:05:58.553Z"
   },
   "python tutorial/Section 4/4.4_break_continue_statements.py": {
     "status": "ok",
     "stdout": "Checking 7\nChecking 13\nChecking 22\nFound the first even number: 22\nSearch finished.\nGave up after 3 attempts\nFound an even number 2\nFound an odd number 3\nFound an even number 4\nFound an odd number 5\nFound an even number 6\nFound an odd number 7\nFound an even number 8\nFound an odd number 9\nValid reading: 21.5\nValid reading: 22.1\nValid reading: 23.0\n2 * 2 = 4\n2 * 3 = 6\n3 * 2 = 6\n2 * 4 = 8\n4 * 2 = 8\n3 * 3 = 9\n2 * 5 = 10\n5 * 2 = 10\n2 * 6 = 12\n3 * 4 = 12\n4 * 3 = 12\n6 * 2 = 12\n2 * 7 = 14\n7 * 2 = 14\n3 * 5 = 15\n5 * 3 = 15\n2 * 8 = 16\n4 * 4 = 16\n8 * 2 = 16\n2 * 9 = 18\n3 * 6 = 18\n6 * 3 = 18\n9 * 2 = 18\n",
     "stderr": "",
-    "durationMs": 34,
-    "capturedAt": "2026-11-05T01:08:53.855Z"
+    "durationMs": 39,
+    "capturedAt": "2026-11-05T06:05:58.591Z"
   },
   "python tutorial/Section 4/4.5_else_clause_on_loops.py": {
     "status": "ok",
     "stdout": "No even numbers in the list\nFound an even number: 4\n(flag version) No even numbers in the list\n2 is a prime number\n3 is a prime number\n2 * 2 = 4\n5 is a prime number\n2 * 3 = 6\n7 is a prime number\n2 * 4 = 8\n3 * 3 = 9\n2 * 5 = 10\n11 is a prime number\n2 * 6 = 12\n13 is a prime number\n2 * 7 = 14\n3 * 5 = 15\n2 * 8 = 16\n17 is a prime number\n2 * 9 = 18\n19 is a prime number\n",
     "stderr": "",
-    "durationMs": 34,
-    "capturedAt": "2026-11-05T01:08:53.890Z"
+    "durationMs": 35,
+    "capturedAt": "2026-11-05T06:05:58.630Z"
   },
   "python tutorial/Section 4/4.6_pass_statements.py": {
     "status": "ok",
     "stdout": "load_data() returned: None\nMade an object: <class '__main__.MyEmptyClass'>\nTemperature is fine\n",
     "stderr": "",
-    "durationMs": 31,
-    "capturedAt": "2026-11-05T01:08:53.925Z"
+    "durationMs": 36,
+    "capturedAt": "2026-11-05T06:05:58.666Z"
   },
   "python tutorial/Section 4/4.7_match_statements.py": {
     "status": "interactive",
     "stdout": "",
     "stderr": "",
     "durationMs": 0,
-    "capturedAt": "2026-11-05T01:08:53.956Z",
+    "capturedAt": "2026-11-05T06:05:58.702Z",
     "scenarios": [
       {
         "label": "Bad request · origin point",
@@ -410,15 +410,15 @@
     "status": "ok",
     "stdout": "Hello, Ada\nHello, Bob\n0 1 1 2 3 5 8 13 21 34 55 89 144 \n0 1 1 2 3 5 8 13 21 34 55 89 144 \n0 \nNone\n[0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]\nHow many terms? 13\nlow: 2 high: 9\n100\nError: name 'total' is not defined\nouter counter is still 0\nadult minor invalid age\n",
     "stderr": "",
-    "durationMs": 42,
-    "capturedAt": "2026-11-05T01:08:54.094Z"
+    "durationMs": 38,
+    "capturedAt": "2026-11-05T06:05:58.847Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.1_default_argument_values.py": {
     "status": "interactive",
     "stdout": "",
     "stderr": "",
     "durationMs": 0,
-    "capturedAt": "2026-11-05T01:08:54.137Z",
+    "capturedAt": "2026-11-05T06:05:58.886Z",
     "scenarios": [
       {
         "label": "Answer \"yes\"",
@@ -448,169 +448,169 @@
     "status": "ok",
     "stdout": "-- This parrot wouldn't voom if you put 1000 volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's a stiff !\n\n-- This parrot wouldn't voom if you put 1000 volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's a stiff !\n\n-- This parrot wouldn't VOOOOOM if you put 1000000 volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's a stiff !\n\n-- This parrot wouldn't VOOOOOM if you put 1000000 volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's a stiff !\n\n-- This parrot wouldn't jump if you put a million volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's bereft of life !\n\n-- This parrot wouldn't voom if you put a thousand volts through it.\n-- Lovely plumage, the Norwegian Blue\n-- It's pushing up the daisies !\n\n1) parrot() missing 1 required positional argument: 'voltage'\n2) parrot() got multiple values for argument 'voltage'\n3) parrot() got an unexpected keyword argument 'actor'. Did you mean 'action'?\n-- Do you have any Limburger ?\n-- I'm sorry, we're all out of Limburger\nIt's very runny, sir.\nIt's really very, VERY runny, sir.\n----------------------------------------\nshopkeeper : Michael Palin\nclient : John Cleese\nsketch : Cheese Shop Sketch\n\nargs   = (1, 2, 3) <class 'tuple'>\nkwargs = {'color': 'red', 'size': 10} <class 'dict'>\n--- Ordering a Large pizza ---\nPepperoni\nExtra Cheese\nOlives\n------------------------------\nname : John Doe\naddress : 123 Main St\ntip : 5\n",
     "stderr": "",
-    "durationMs": 38,
-    "capturedAt": "2026-11-05T01:08:54.259Z"
+    "durationMs": 41,
+    "capturedAt": "2026-11-05T06:05:59.000Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.3_special_parameters.py": {
     "status": "ok",
     "stdout": "2\n2\n1\nError: pos_only_arg() got some positional-only arguments passed as keyword arguments: 'arg'\n3\nError: kwd_only_arg() takes 0 positional arguments but 1 was given\n1 2 3\n1 2 3\nError: combined_example() takes 2 positional arguments but 3 were given\nError: combined_example() got some positional-only arguments passed as keyword arguments: 'pos_only'\nTrue\n",
     "stderr": "",
-    "durationMs": 40,
-    "capturedAt": "2026-11-05T01:08:54.297Z"
+    "durationMs": 43,
+    "capturedAt": "2026-11-05T06:05:59.042Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.4_arbitrary_argument_lists.py": {
     "status": "ok",
     "stdout": "I received 0 arguments: ()\nI received 1 arguments: ('a',)\nI received 3 arguments: ('a', 'b', 'c')\nearth/mars/venus\nearth.mars.venus\nearth/mars/.\n6.0\n3.0\n",
     "stderr": "",
-    "durationMs": 40,
-    "capturedAt": "2026-11-05T01:08:54.337Z"
+    "durationMs": 41,
+    "capturedAt": "2026-11-05T06:05:59.085Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.5_unpacking_argument_lists.py": {
     "status": "ok",
     "stdout": "[3, 4, 5]\n[3, 4, 5]\n10 20 30\n-- This parrot wouldn't VOOM if you put four million volts through it. E's bleedin' demised !\nTraining for 5 epochs at lr=0.01, verbose=True\nTraining for 5 epochs at lr=0.01, verbose=False\n",
     "stderr": "",
-    "durationMs": 42,
-    "capturedAt": "2026-11-05T01:08:54.378Z"
+    "durationMs": 41,
+    "capturedAt": "2026-11-05T06:05:59.127Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.6_lambda_expressions.py": {
     "status": "ok",
     "stdout": "5 5\n[(4, 'four'), (1, 'one'), (3, 'three'), (2, 'two')]\n['fig', 'kiwi', 'apple', 'banana']\n['banana', 'apple', 'fig', 'kiwi']\nbanana\n[2, 4, 6]\n[2, 3]\n42\n43\n11\n",
     "stderr": "",
-    "durationMs": 41,
-    "capturedAt": "2026-11-05T01:08:54.420Z"
+    "durationMs": 38,
+    "capturedAt": "2026-11-05T06:05:59.169Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.7_documentation_strings.py": {
     "status": "ok",
     "stdout": "Help on function my_function in module __main__:\n\nmy_function()\n    Do nothing, but document it.\n\n    No, really, it doesn't do anything:\n\n        >>> my_function()\n        >>>\n\nDo nothing, but document it.\n\nNo, really, it doesn't do anything:\n\n    >>> my_function()\n    >>>\n\n2.5\nHelp on function mean_squared_error in module __main__:\n\nmean_squared_error(predictions, targets)\n    Return the average squared difference between two lists.\n\n    Args:\n        predictions: list of numbers the model produced.\n        targets: list of the correct numbers, same length as predictions.\n\n    Returns:\n        A single float. Lower is better, 0.0 means a perfect match.\n\nThis file's docstring: Python Reference: Documentation strings\n",
     "stderr": "",
-    "durationMs": 113,
-    "capturedAt": "2026-11-05T01:08:54.462Z"
+    "durationMs": 117,
+    "capturedAt": "2026-11-05T06:05:59.207Z"
   },
   "python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.8_function_annotations.py": {
     "status": "ok",
     "stdout": "Annotations: {'ham': <class 'str'>, 'eggs': <class 'str'>, 'return': <class 'str'>}\nArguments: spam eggs\nspam and eggs\n42\nabab\n3.0\n1\nNone\nHints stored on find_index: {'items': list[str], 'target': <class 'str'>, 'return': int | None}\n",
     "stderr": "",
-    "durationMs": 36,
-    "capturedAt": "2026-11-05T01:08:54.575Z"
+    "durationMs": 44,
+    "capturedAt": "2026-11-05T06:05:59.325Z"
   },
   "python tutorial/Section 5/5.1.1_using_lists_as_stacks.py": {
     "status": "ok",
     "stdout": "Initial stack: [3, 4, 5]\nAfter appending 6 and 7: [3, 4, 5, 6, 7]\nPopped item: 7\nStack after one pop: [3, 4, 5, 6]\nPopped item: 6\nPopped item: 5\nFinal stack: [3, 4]\nNothing to pop\nTrue\nFalse\nFalse\n",
     "stderr": "",
-    "durationMs": 37,
-    "capturedAt": "2026-11-05T01:08:54.611Z"
+    "durationMs": 45,
+    "capturedAt": "2026-11-05T06:05:59.370Z"
   },
   "python tutorial/Section 5/5.1.2_using_lists_as_queues.py": {
     "status": "ok",
     "stdout": "Initial queue: ['Eric', 'John', 'Michael']\nAfter Terry and Graham arrive: ['Eric', 'John', 'Michael', 'Terry', 'Graham']\nServed and left the queue: Eric\nServed and left the queue: John\nRemaining queue: ['Michael', 'Terry', 'Graham']\nAfter VIP arrives: ['VIP', 'Michael', 'Terry', 'Graham']\nRight end leaves: Graham\n",
     "stderr": "",
-    "durationMs": 40,
-    "capturedAt": "2026-11-05T01:08:54.649Z"
+    "durationMs": 51,
+    "capturedAt": "2026-11-05T06:05:59.416Z"
   },
   "python tutorial/Section 5/5.1.3_list_comprehensions.py": {
     "status": "ok",
     "stdout": "Traditional loop: [1, 4, 9, 16, 25, 36, 49, 64, 81]\nMap and Lambda: [1, 4, 9, 16, 25, 36, 49, 64, 81]\nList Comprehension: [1, 4, 9, 16, 25, 36, 49, 64, 81]\n\nPositive only: [0, 2, 4]\nEvens up to 10: [0, 2, 4, 6, 8, 10]\nSame, with a loop: [0, 2, 4]\n\nDoubled: [-8, -4, 0, 4, 8]\nAbsolute values: [4, 2, 0, 2, 4]\nStripped strings: ['banana', 'loganberry', 'passion fruit']\nTuples: [(0, 0), (1, 1), (2, 4), (3, 9), (4, 16), (5, 25)]\nLabels: ['even', 'odd', 'even', 'odd', 'even']\n\nNested Loop: [(1, 3), (1, 4), (2, 3), (2, 1), (2, 4), (3, 1), (3, 4)]\nNested Comprehension: [(1, 3), (1, 4), (2, 3), (2, 1), (2, 4), (3, 1), (3, 4)]\nFlattened list: [1, 2, 3, 4, 5, 6, 7, 8, 9]\nPi rounded: ['3.1', '3.14', '3.142', '3.1416', '3.14159']\nDict: {1: 1, 2: 4, 3: 9, 4: 16}\nSet: {1, 2, 3}\n",
     "stderr": "",
-    "durationMs": 35,
-    "capturedAt": "2026-11-05T01:08:54.690Z"
+    "durationMs": 37,
+    "capturedAt": "2026-11-05T06:05:59.467Z"
   },
   "python tutorial/Section 5/5.1.4_nested_list_comprehensions.py": {
     "status": "ok",
     "stdout": "Original Matrix:\n[1, 2, 3, 4]\n[5, 6, 7, 8]\n[9, 10, 11, 12]\n\nmatrix[1][2] = 7\n\nTransposed Matrix:\n[1, 5, 9]\n[2, 6, 10]\n[3, 7, 11]\n[4, 8, 12]\n\nSame result with loops? True\n\nTransposed using zip():\n[(1, 5, 9), (2, 6, 10), (3, 7, 11), (4, 8, 12)]\n",
     "stderr": "",
-    "durationMs": 35,
-    "capturedAt": "2026-11-05T01:08:54.725Z"
+    "durationMs": 40,
+    "capturedAt": "2026-11-05T06:05:59.505Z"
   },
   "python tutorial/Section 5/5.1_more_on_lists.py": {
     "status": "ok",
     "stdout": "Original list: ['orange', 'apple', 'pear', 'banana', 'kiwi', 'apple', 'banana']\nAfter .append('grape'): ['orange', 'apple', 'pear', 'banana', 'kiwi', 'apple', 'banana', 'grape']\nAfter .extend([...]): ['orange', 'apple', 'pear', 'banana', 'kiwi', 'apple', 'banana', 'grape', 'mango', 'lime']\nAfter .insert(0, 'cherry'): ['cherry', 'orange', 'apple', 'pear', 'banana', 'kiwi', 'apple', 'banana', 'grape', 'mango', 'lime']\n[1, 2, [3, 4]]\n[1, 2, 3, 4]\nAfter .remove('lime'): ['cherry', 'orange', 'apple', 'pear', 'banana', 'kiwi', 'apple', 'banana', 'grape', 'mango']\nPopped item: mango\nAfter .pop(): ['cherry', 'orange', 'apple', 'pear', 'banana', 'kiwi', 'apple', 'banana', 'grape']\nPopped position 0: cherry\nCount of 'apple': 2\nCount of 'tangerine': 0\nIndex of 'banana': 3\nIndex of 'banana' starting search at position 4: 6\nIs 'kiwi' in the list? True\nAfter .reverse(): ['grape', 'banana', 'apple', 'kiwi', 'banana', 'pear', 'apple', 'orange']\nAfter .sort(): ['apple', 'apple', 'banana', 'banana', 'grape', 'kiwi', 'orange', 'pear']\nAfter .sort(reverse=True): ['pear', 'orange', 'kiwi', 'grape', 'banana', 'banana', 'apple', 'apple']\noops is: None\n[3, 1, 2] [1, 2, 3]\nfruits after .clear(): []\nbackup is safe: ['apple', 'apple', 'banana', 'banana', 'grape', 'kiwi', 'orange', 'pear']\n",
     "stderr": "",
-    "durationMs": 36,
-    "capturedAt": "2026-11-05T01:08:54.761Z"
+    "durationMs": 38,
+    "capturedAt": "2026-11-05T06:05:59.546Z"
   },
   "python tutorial/Section 5/5.2_the_del_statement.py": {
     "status": "ok",
     "stdout": "Original: [-1, 1, 66.25, 333, 333, 1234.5]\nDeleted index 0: [1, 66.25, 333, 333, 1234.5]\nDeleted slice [2:4]: [1, 66.25, 1234.5]\nDeleted all elements: []\n\nCrash Avoided! Error caught: NameError(\"name 'a' is not defined\")\n{'Ada': 36}\n",
     "stderr": "",
-    "durationMs": 38,
-    "capturedAt": "2026-11-05T01:08:54.797Z"
+    "durationMs": 45,
+    "capturedAt": "2026-11-05T06:05:59.584Z"
   },
   "python tutorial/Section 5/5.3_tuples_and_sequences.py": {
     "status": "ok",
     "stdout": "Tuple t: (12345, 54321, 'hello!')\nFirst item in t: 12345\nLast two: (54321, 'hello!')\nLength: 3\n\nNested tuple u: ((12345, 54321, 'hello!'), (1, 2, 3, 4, 5))\n\nAttempting to change t[0] to 88888...\nCrash Avoided! Error caught: TypeError(\"'tuple' object does not support item assignment\")\n\nTuple containing lists: ([1, 2, 3], [3, 2, 1])\nAfter v[0].append(99): ([1, 2, 3, 99], [3, 2, 1])\n\nempty: () <class 'tuple'>\nsingleton: ('hello',) <class 'tuple'>\nno comma: hello <class 'str'>\n\nx = 12345  y = 54321  z = hello!\nswapped: 2 1\nlow/high: 2 9\n1 [2, 3, 4] 5\n\nDictionary with tuple keys: far away\nchannels: 3 height: 224 width: 224\n2 3\n",
     "stderr": "",
-    "durationMs": 32,
-    "capturedAt": "2026-11-05T01:08:54.836Z"
+    "durationMs": 39,
+    "capturedAt": "2026-11-05T06:05:59.630Z"
   },
   "python tutorial/Section 5/5.4_sets.py": {
     "status": "ok",
     "stdout": "Basket (duplicates removed!): ['apple', 'banana', 'orange', 'pear']\nSize: 4\nUnique labels: ['bird', 'cat', 'dog']\n<class 'dict'> <class 'set'>\nIs 'orange' in basket? True\nIs 'crabgrass' in basket? False\n\nAfter add: ['apple', 'kiwi', 'pear']\nAfter remove/discard: ['apple', 'kiwi']\n\nSet A (unique letters in 'abracadabra'): ['a', 'b', 'c', 'd', 'r']\nSet B (unique letters in 'alacazam'): ['a', 'c', 'l', 'm', 'z']\n\na - b (Difference): ['b', 'd', 'r']\na | b (Union): ['a', 'b', 'c', 'd', 'l', 'm', 'r', 'z']\na & b (Intersection): ['a', 'c']\na ^ b (Symmetric Difference): ['b', 'd', 'l', 'm', 'r', 'z']\n\n{1, 2} is a subset of {1, 2, 3}? True\n{1, 2} and {3, 4} share nothing? True\n\nLast letters: ['g', 'l', 't']\n\nLEAK! These samples are in both sets: [6]\n",
     "stderr": "",
-    "durationMs": 36,
-    "capturedAt": "2026-11-05T01:08:54.870Z"
+    "durationMs": 39,
+    "capturedAt": "2026-11-05T06:05:59.670Z"
   },
   "python tutorial/Section 5/5.5_dictionaries.py": {
     "status": "ok",
     "stdout": "Initial Dictionary: {'jack': 4098, 'sape': 4139}\n<class 'dict'>\nNumber of entries: 2\nJack's number: 4098\nAfter adding guido: {'jack': 4098, 'sape': 4139, 'guido': 4127}\nAfter changing jack: {'jack': 5000, 'sape': 4139, 'guido': 4127}\nKeyError for key: 'irv'\nIrv's number (using .get safely): None\nWith a default: no number on file\nirv is not in the dictionary\nRemoved jack, who had: 5000\nAfter deleting sape and jack, adding irv: {'guido': 4127, 'irv': 4127}\n\nList of Keys: ['guido', 'irv']\nSorted Keys: ['guido', 'irv']\n.keys()  : ['guido', 'irv']\n.values(): [4127, 4127]\n.items() : [('guido', 4127), ('irv', 4127)]\nIs 'guido' a key in tel? True\nIs 'jack' NOT a key in tel? True\nIs 4127 a key in tel? False\nkey: guido\nkey: irv\nguido -> 4127\nirv -> 4127\n\nLearning rate: 0.001\nFirst dataset: train.csv\nEpochs now: 50\n\nMerged: {'epochs': 10, 'lr': 0.1, 'batch_size': 32}\nUpdated in place: {'epochs': 10, 'lr': 0.1, 'batch_size': 32}\n\nTypeError: cannot use 'list' as a dict key (unhashable type: 'list')\n\nWord counts: {'to': 2, 'be': 2, 'or': 1, 'not': 1}\n\ndict1 == dict2: True\n{'a': 1, 'b': 2, 'c': 3}\n\nDict Comprehension: {2: 4, 4: 16, 6: 36}\n",
     "stderr": "",
-    "durationMs": 34,
-    "capturedAt": "2026-11-05T01:08:54.906Z"
+    "durationMs": 38,
+    "capturedAt": "2026-11-05T06:05:59.710Z"
   },
   "python tutorial/Section 5/5.6_looping_techniques.py": {
     "status": "ok",
     "stdout": "--- Dictionary Looping ---\ngallahad the pure\nrobin the brave\n\n--- Enumerate ---\nIndex 0: tic\nIndex 1: tac\nIndex 2: toe\nItem 1: tic\nItem 2: tac\nItem 3: toe\n\n--- Zip ---\nWhat is your name?  It is lancelot.\nWhat is your quest?  It is the holy grail.\nWhat is your favorite color?  It is blue.\n[(1, 'a'), (2, 'b')]\n\n--- Reversed ---\n9\n7\n5\n3\n1\n\n--- Sorted ---\napple\napple\nbanana\norange\norange\npear\nOriginal is untouched: ['apple', 'orange', 'apple', 'pear', 'orange', 'banana']\n\n--- Sorted Set ---\napple\nbanana\norange\npear\n\nIs NaN equal to itself? False\n\n--- Filtering NaN ---\nOriginal: [56.2, nan, 51.7, 55.3, 52.5, nan, 47.8]\nFiltered: [56.2, 51.7, 55.3, 52.5, 47.8]\nComprehension: [56.2, 51.7, 55.3, 52.5, 47.8]\n",
     "stderr": "",
-    "durationMs": 34,
-    "capturedAt": "2026-11-05T01:08:54.941Z"
+    "durationMs": 39,
+    "capturedAt": "2026-11-05T06:05:59.749Z"
   },
   "python tutorial/Section 5/5.7_more_on_conditions.py": {
     "status": "ok",
     "stdout": "     0 counts as False\n     1 counts as True\n    -5 counts as True\n    '' counts as False\n  'hi' counts as True\n    [] counts as False\n   [0] counts as True\n  None counts as False\n\nNo items yet\n\n0 or 7     -> 7\n5 or 7     -> 5\n5 and 7    -> 7\n0 and 7    -> 0\n\nSafe division check: False\n\nThe first non-empty string is: Trondheim\nHello, Anonymous\n\n10 < x < 20 : True\n1 == 1 < 2  : True\n\nlist_a == list_b: True\nlist_a is list_b: False\nlist_a is list_c: True\nNo result yet\n",
     "stderr": "",
-    "durationMs": 47,
-    "capturedAt": "2026-11-05T01:08:54.975Z"
+    "durationMs": 36,
+    "capturedAt": "2026-11-05T06:05:59.789Z"
   },
   "python tutorial/Section 5/5.8_comparing_sequences_and_other_types.py": {
     "status": "ok",
     "stdout": "Tuple comparison: True\nList comparison: True\nDecided on the first item: True\n\nString comparison: True\nord('A') = 65  ord('a') = 97\n'Zebra' < 'apple'? True\nCase-insensitive: False\n\nLength comparison: True\nLength comparison 2: True\n\nInt vs Float: True\n\nNested comparison: True\n\nTypeError: '<' not supported between instances of 'int' and 'str'\n1 == 'a': False\n",
     "stderr": "",
-    "durationMs": 34,
-    "capturedAt": "2026-11-05T01:08:55.023Z"
+    "durationMs": 35,
+    "capturedAt": "2026-11-05T06:05:59.826Z"
   },
   "python tutorial/Section 6/6.1_modules_and_import.py": {
     "status": "ok",
     "stdout": "3.141592653589793\n4.0\n3 4\n5.0 3.141592653589793\n2.718281828459045\n62 public names in math. The first ten: ['acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh', 'cbrt', 'ceil', 'comb']\nHelp on built-in function sqrt in module math:\n\nsqrt(x, /)\n    Return the square root of x.\n\nTrue\n1.0\n1.0\nTrue\n120\nError: No module named 'some_package_that_does_not_exist'\n__name__ here is: __main__\nRunning as a script!\n",
     "stderr": "",
-    "durationMs": 105,
-    "capturedAt": "2026-11-05T01:08:55.057Z"
+    "durationMs": 118,
+    "capturedAt": "2026-11-05T06:05:59.862Z"
   },
   "python tutorial/Section 6/6.2_random_numbers.py": {
     "status": "ok",
     "stdout": "First run : [0.6394267984578837, 0.025010755222666936, 0.27502931836911926]\nSecond run: [0.6394267984578837, 0.025010755222666936, 0.27502931836911926]\nIdentical? True\n\nrandom(): 0.47009071843107064\nuniform(10, 20): 17.282642914232078\nrandint(1, 6) (a dice roll): 3\nrandrange(0, 10, 2) (even number below 10): 2\ngauss(0, 1): 0.7804002858623748\n\nchoice: blue\nsample 3: ['purple', 'green', 'blue']\nchoices 3: ['purple', 'blue', 'blue']\nshuffled: [1, 3, 4, 2, 5, 6]\n\n6000 dice rolls: {1: 1031, 2: 1019, 3: 956, 4: 972, 5: 976, 6: 1046}\n\ntrain: [9, 4, 2, 5, 8, 1, 10, 7]\ntest : [3, 6]\nNo overlap? True\n",
     "stderr": "",
-    "durationMs": 38,
-    "capturedAt": "2026-11-05T01:08:55.163Z"
+    "durationMs": 44,
+    "capturedAt": "2026-11-05T06:05:59.981Z"
   },
   "python tutorial/Section 8/8.1_syntax_errors.py": {
     "status": "ok",
     "stdout": "missing colon             -> SyntaxError: invalid syntax\nmissing closing bracket   -> SyntaxError: '(' was never closed\nunclosed string           -> SyntaxError: unterminated string literal (detected at line 1)\nbad indentation           -> IndentationError: expected an indented block after 'if' statement on line 1\n= instead of ==           -> SyntaxError: cannot assign to literal here. Maybe you meant '==' instead of '='?\n",
     "stderr": "",
-    "durationMs": 34,
-    "capturedAt": "2026-11-05T01:08:55.201Z"
+    "durationMs": 48,
+    "capturedAt": "2026-11-05T06:06:00.026Z"
   },
   "python tutorial/Section 8/8.2_exceptions.py": {
     "status": "ok",
     "stdout": "'10 * (1/0)'                        -> ZeroDivisionError: division by zero\n'4 + spam*3'                        -> NameError: name 'spam' is not defined\n\"'2' + 2\"                           -> TypeError: can only concatenate str (not \"int\") to str\n\"int('abc')\"                        -> ValueError: invalid literal for int() with base 10: 'abc'\n'[1, 2, 3][10]'                     -> IndexError: list index out of range\n\"{'a': 1}['b']\"                     -> KeyError: 'b'\n\"'hello'.push('x')\"                 -> AttributeError: 'str' object has no attribute 'push'\n\"open('no_such_file.txt')\"          -> FileNotFoundError: [Errno 2] No such file or directory: 'no_such_file.txt'\n'import not_a_module'               -> ModuleNotFoundError: No module named 'not_a_module'\n",
     "stderr": "",
-    "durationMs": 35,
-    "capturedAt": "2026-11-05T01:08:55.237Z"
+    "durationMs": 42,
+    "capturedAt": "2026-11-05T06:06:00.074Z"
   },
   "python tutorial/Section 8/8.3_handling_exceptions.py": {
     "status": "interactive",
     "stdout": "",
     "stderr": "",
     "durationMs": 0,
-    "capturedAt": "2026-11-05T01:08:55.272Z",
+    "capturedAt": "2026-11-05T06:06:00.117Z",
     "scenarios": [
       {
         "label": "Valid number right away",
@@ -633,42 +633,42 @@
     "status": "ok",
     "stdout": "An exception flew by! (We caught the custom error we just raised)\n0.01\nValueError: learning rate must be positive, got -1\nTypeError: learning rate must be a number, got str\nLogging: a division by zero happened\nThe outer code received it too\nassert passed\nAssertionError: expected 5 features\n",
     "stderr": "",
-    "durationMs": 38,
-    "capturedAt": "2026-11-05T01:08:55.337Z"
+    "durationMs": 40,
+    "capturedAt": "2026-11-05T06:06:00.189Z"
   },
   "python tutorial/Section 8/8.5_exception_chaining.py": {
     "status": "ok",
     "stdout": "Caught: Failed to open database\nCaused by: ConnectionError('server did not answer')\n\nContext: ZeroDivisionError('division by zero')\n\nCause: None\nSuppressed context: True\n",
     "stderr": "",
-    "durationMs": 37,
-    "capturedAt": "2026-11-05T01:08:55.376Z"
+    "durationMs": 41,
+    "capturedAt": "2026-11-05T06:06:00.229Z"
   },
   "python tutorial/Section 8/8.6_user_defined_exceptions.py": {
     "status": "ok",
     "stdout": "Caught: This is a custom error!\nCaught: score must be between 0 and 100, got 150\nThe bad score was: 150\nhandled a missing column\nhandled a general data error: 0 rows\n",
     "stderr": "",
-    "durationMs": 35,
-    "capturedAt": "2026-11-05T01:08:55.414Z"
+    "durationMs": 40,
+    "capturedAt": "2026-11-05T06:06:00.271Z"
   },
   "python tutorial/Section 8/8.7_defining_clean_up_actions.py": {
     "status": "ok",
     "stdout": "Trying something risky...\nGoodbye, world! (This runs no matter what, even if it crashes)\n\nStarting a job...\nCleaning up (this still ran)\n...and the error reached the outside code\n\nfinally runs BEFORE the function actually returns\nfrom try\n",
     "stderr": "",
-    "durationMs": 39,
-    "capturedAt": "2026-11-05T01:08:55.449Z"
+    "durationMs": 44,
+    "capturedAt": "2026-11-05T06:06:00.311Z"
   },
   "python tutorial/Section 8/8.8_predefined_clean_up_actions.py": {
     "status": "ok",
     "stdout": "Is the file closed? True\nWhole file: 'Hello, world!\\nSecond line\\n'\n1 Hello, world!\n2 Second line\nNow has 3 lines\ndummy.txt exists? False\n",
     "stderr": "",
-    "durationMs": 56,
-    "capturedAt": "2026-11-05T01:08:55.490Z"
+    "durationMs": 44,
+    "capturedAt": "2026-11-05T06:06:00.355Z"
   },
   "python tutorial/Section 9/9.1_classes_and_oop.py": {
     "status": "ok",
     "stdout": "--- Topic 1: Basic Classes ---\nSpawned: Goblin Scout with 30 HP\nSpawned: Orc Warrior with 100 HP\nGoblin Scout took 15 damage! Health is now 15.\nGoblin Scout took 20 damage! Health is now -5.\nGoblin Scout has been defeated!\n\n--- Topic 2: Inheritance & super() ---\nAncient Dragon took 500 damage! Health is now 4500.\nAncient Dragon unleashes Hellfire Breath!!!\nTrue True\nFalse\n\n--- Topic 3: Objects are independent ---\nGoblin HP: -5, Orc HP: 100\nOrc Warrior took 40 damage! Health is now 60.\nGoblin HP: -5, Orc HP: 60\nOrc healed back to 100\n\n--- Topic 4: __str__ ---\nSmall Potion (heals 25)\n",
     "stderr": "",
-    "durationMs": 44,
-    "capturedAt": "2026-11-05T01:08:55.547Z"
+    "durationMs": 42,
+    "capturedAt": "2026-11-05T06:06:00.400Z"
   }
 }

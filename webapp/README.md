@@ -37,6 +37,7 @@ Lesson pages have four views: **Guided** (the explanations as readable text, wit
 - Comment lines at column 0 become prose; indented comments and trailing `# ...` comments stay inside the code, so keep short notes there.
 - In prose: `#   - item` and `#   1. item` make lists; indented lines or lines with 3+ spaces in a row stay monospaced (diagrams, tables); a double space inside a line keeps that paragraph's line breaks; `# --- Title -----` is a sub-heading; `# NOTE:`, `# WARNING:` and `# TIP:` become callouts; `` `backticks` `` and `name(...)` calls are shown as code.
 - Never write the text `input(` in a comment unless the file really calls it: the capture script treats any mention as an interactive lesson.
+- Do not run an auto-formatter (Black, Ruff format) over a lesson. It rewrites single quotes to double quotes, which silently breaks lessons that teach "both kinds of quote make the same string". Check what a comment claims against what the code actually prints.
 - **The Original view:** before rewriting a lesson, copy the old file into `src/originals/` using the same folder layout (`src/originals/NumPy_Basics/2_creating_arrays.py`). It is deliberately outside the content folders, so it is not listed as a lesson. A lesson with no file there has no Original tab.
 
 ## After adding or editing a lesson: capture its output

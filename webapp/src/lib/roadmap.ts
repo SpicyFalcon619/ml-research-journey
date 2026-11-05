@@ -38,7 +38,8 @@ function countChecklist(items: ChecklistItem[]): { done: number; total: number }
 }
 
 function parseBasecamps(markdown: string): Basecamp[] {
-  const lines = markdown.split('\n')
+  // Windows checks the file out with CRLF line endings; a stray \r would stop every heading from matching.
+  const lines = markdown.split(/\r?\n/)
   const basecamps: Basecamp[] = []
 
   let current: { title: string; tagline?: string; bodyLines: string[] } | null = null
