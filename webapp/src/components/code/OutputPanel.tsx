@@ -4,11 +4,11 @@ import { AlertTriangle, Clock, ImageIcon, Keyboard, Maximize2, Terminal, X } fro
 import type { CapturedOutput } from '@/lib/outputs'
 import { cn } from '@/lib/cn'
 
-function withBase(path: string) {
+export function withBase(path: string) {
   return `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`
 }
 
-function ImageLightbox({ src, onClose }: { src: string; onClose: () => void }) {
+export function ImageLightbox({ src, onClose }: { src: string; onClose: () => void }) {
   const [zoomed, setZoomed] = useState(false)
 
   useEffect(() => {
@@ -79,7 +79,7 @@ function OutputImages({ images }: { images: string[] }) {
                 e.preventDefault()
                 setOpenSrc(url)
               }}
-              className="group relative block h-20 overflow-hidden rounded-lg border border-[var(--color-code-border)] bg-[var(--color-code-surface)] transition-colors hover:border-[var(--color-code-border-strong)]"
+              className="group relative block h-36 overflow-hidden rounded-lg border border-[var(--color-code-border)] bg-[var(--color-code-surface)] transition-colors hover:border-[var(--color-code-border-strong)]"
             >
               <img src={url} alt="" className="h-full w-auto" />
               <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-150 group-hover:bg-black/40 group-hover:opacity-100">

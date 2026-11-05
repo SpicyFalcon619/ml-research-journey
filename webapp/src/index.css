@@ -1053,6 +1053,26 @@ samp,
   white-space: pre;
   tab-size: 4;
 }
+.guide-part-figure {
+  display: block;
+  margin: 0.25rem 1rem 1rem;
+  max-width: calc(100% - 2rem);
+  padding: 0;
+  overflow: hidden;
+  cursor: zoom-in;
+  border: 1px solid var(--color-code-border);
+  border-radius: 4px;
+  background: #fff;
+}
+.guide-part-figure img {
+  display: block;
+  width: 100%;
+  max-width: 40rem;
+  height: auto;
+}
+.guide-part-figure:hover {
+  border-color: var(--color-code-border-strong);
+}
 .guide-part-none {
   margin: 0;
   padding: 0.75rem 1rem;

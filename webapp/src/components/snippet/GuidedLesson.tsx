@@ -3,13 +3,13 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { chunkTransformer, getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
 import type { BannerSection, LessonBlock, ProseNode } from '@/lib/lesson'
-import { outputForLines, partHasOutput, type CapturedOutput } from '@/lib/outputs'
+import { figuresForLines, outputForLines, partHasOutput, type CapturedOutput } from '@/lib/outputs'
 import type { Topic } from '@/types'
 import { useTheme } from '@/hooks/useTheme'
 import { CopyButton } from '@/components/code/CopyButton'
 import { FontSizeControl } from '@/components/code/FontSizeControl'
 import { CaptureDialogButton } from '@/components/code/CaptureDialog'
-import { OutputPanel } from '@/components/code/OutputPanel'
+import { ImageLightbox, OutputPanel, withBase } from '@/components/code/OutputPanel'
 import { cn } from '@/lib/cn'
 
 interface GuidedLessonProps {
@@ -169,6 +169,8 @@ function PartRun({
   onScenario: (index: number) => void
 }) {
   const text = outputForLines(output, first, last, scenario)
+  const figures = figuresForLines(output, first, last)
+  const [zoomed, setZoomed] = useState<string | null>(null)
   const scenarios = output.scenarios ?? []
   return (
     <>
@@ -205,13 +207,24 @@ function PartRun({
       </div>
       {open && (
         <div className="guide-part-out" role="region" aria-label="Output of this part">
-          {text ? (
-            <pre tabIndex={0}>{text}</pre>
-          ) : (
+          {text && <pre tabIndex={0}>{text}</pre>}
+          {figures.map((src) => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => setZoomed(withBase(src))}
+              aria-label="Enlarge the figure drawn by this part"
+              className="guide-part-figure"
+            >
+              <img src={withBase(src)} alt="Figure drawn by this part of the lesson" />
+            </button>
+          ))}
+          {!text && figures.length === 0 && (
             <p className="guide-part-none">This part prints nothing for the input you picked.</p>
           )}
         </div>
       )}
+      {zoomed && <ImageLightbox src={zoomed} onClose={() => setZoomed(null)} />}
     </>
   )
 }

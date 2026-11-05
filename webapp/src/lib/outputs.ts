@@ -21,6 +21,8 @@ export interface CapturedOutput {
   scenarios?: InteractiveScenario[]
   images?: string[]
   segments?: OutputSegment[]
+  /** Each figure with the lesson line that drew it: [line, url]. */
+  figures?: [number, string][]
 }
 
 const outputCache = rawCache as unknown as Record<string, CapturedOutput>
@@ -44,9 +46,15 @@ export function outputForLines(
   return text.trim() ? text.replace(/\s+$/, '') : undefined
 }
 
-/** Does any scenario (or the single run) print something for these lines? */
+/** The figures drawn by lines first..last, in the order they were drawn. */
+export function figuresForLines(output: CapturedOutput | undefined, first: number, last: number): string[] {
+  return (output?.figures ?? []).filter(([line]) => line >= first && line <= last).map(([, url]) => url)
+}
+
+/** Does any scenario (or the single run) print or draw something for these lines? */
 export function partHasOutput(output: CapturedOutput | undefined, first: number, last: number): boolean {
   if (!output) return false
+  if (figuresForLines(output, first, last).length) return true
   const runs = output.scenarios?.length ? output.scenarios.length : 1
   for (let i = 0; i < runs; i++) if (outputForLines(output, first, last, i)) return true
   return false

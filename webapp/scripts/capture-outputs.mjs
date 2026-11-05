@@ -146,15 +146,17 @@ function runLesson(file, { inputs, timeout }) {
   result.stderr = normalize(result.stderr)
 
   let segments
+  let figures = []
   try {
     const parsed = JSON.parse(readFileSync(recordFile, 'utf8'))
-    if (parsed.map((p) => p[1]).join('') === result.stdout) segments = parsed
+    if (parsed.segments.map((p) => p[1]).join('') === result.stdout) segments = parsed.segments
     else console.log(`  (per-part output does not match stdout for ${relative(repoRoot, file)}; skipped)`)
+    figures = parsed.figures ?? []
   } catch {
     // The run died before writing a record (timeout/crash): the whole-lesson output still works.
   }
   rmSync(recordFile, { force: true })
-  return { result, segments }
+  return { result, segments, figures }
 }
 
 // Isolated scratch cwd so side effects (e.g. a lesson writing "dummy.txt") never
@@ -200,10 +202,14 @@ for (const dir of contentDirs) {
 
     const imagesBefore = listImageFiles(scratchDir)
     const start = Date.now()
-    const { result, segments } = runLesson(file, { inputs: '', timeout: 15000 })
+    const { result, segments, figures } = runLesson(file, { inputs: '', timeout: 15000 })
     const durationMs = Date.now() - start
     const timedOut = Boolean(result.signal) || result.error?.code === 'ETIMEDOUT'
     const images = captureImages(scratchDir, imagesBefore, relPath)
+    // [line, url] for each figure, so the Guided view can show it under the block that drew it.
+    const figureRefs = figures
+      .map(([line, name]) => [line, images?.find((url) => url.endsWith(`/${name}`))])
+      .filter(([, url]) => url)
 
     if (timedOut) {
       cache[relPath] = {
@@ -228,11 +234,11 @@ for (const dir of contentDirs) {
       counts.error++
       console.log(`ERROR        ${relPath}`)
     } else if (!result.stdout || !result.stdout.trim()) {
-      cache[relPath] = { status: 'empty', stdout: '', stderr: result.stderr ?? '', durationMs, capturedAt, images }
+      cache[relPath] = { status: 'empty', stdout: '', stderr: result.stderr ?? '', durationMs, capturedAt, images, figures: figureRefs }
       counts.empty++
       console.log(`empty        ${relPath}${images ? `  (${images.length} image${images.length === 1 ? '' : 's'})` : ''}`)
     } else {
-      cache[relPath] = { status: 'ok', stdout: result.stdout, stderr: result.stderr ?? '', durationMs, capturedAt, images, segments }
+      cache[relPath] = { status: 'ok', stdout: result.stdout, stderr: result.stderr ?? '', durationMs, capturedAt, images, segments, figures: figureRefs }
       counts.ok++
       console.log(`ok           ${relPath}  (${durationMs}ms)${images ? ` +${images.length} image${images.length === 1 ? '' : 's'}` : ''}`)
     }
