@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { Check, ChevronRight, FileSpreadsheet, Star } from 'lucide-react'
+import { BarChart3, Check, ChevronRight, Compass, FileSpreadsheet, Star, Terminal } from 'lucide-react'
 import { ancestorSlugs, flattenNavItems, navGroups, orderedEntries, parseBasecampLabel } from '@/lib/roadmap'
 import { getSnippetById } from '@/lib/content'
 import { allLessons, nextUpLesson, overallProgress } from '@/lib/progress'
@@ -208,6 +208,33 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         >
           <div className="h-full rounded-full bg-[var(--color-accent)] transition-[width] duration-500" style={{ width: `${progress.percent}%` }} />
         </div>
+      </div>
+
+      {/* The top bar hides its menu below 768px, so on a phone these pages live here. */}
+      <div className="flex flex-col md:hidden">
+        {[
+          { to: '/playground', label: 'Playground', note: 'Write and run your own Python', icon: Terminal },
+          { to: '/explore', label: 'Explore', note: 'Browse everything', icon: Compass },
+          { to: '/me', label: 'Progress', note: 'What you have finished', icon: BarChart3 },
+        ].map(({ to, label, note, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-2.5 rounded-md px-2 py-2 text-sm transition-colors hover:bg-[var(--color-surface-hover)]',
+                isActive ? 'bg-[var(--color-surface-hover)] font-medium text-[var(--color-ink)]' : 'text-[var(--color-ink-dim)] hover:text-[var(--color-ink)]',
+              )
+            }
+          >
+            <Icon className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="min-w-0">
+              <span className="block leading-tight">{label}</span>
+              <span className="block truncate text-xs text-[var(--color-ink-faint)]">{note}</span>
+            </span>
+          </NavLink>
+        ))}
       </div>
 
       {savedLessons.length > 0 && (

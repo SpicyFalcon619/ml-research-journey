@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, MessageSquareText, Search } from 'lucide-react'
+import { ArrowRight, MessageSquareText, Search, Terminal } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
 import { trailOrder } from '@/lib/roadmap'
 import { allLessons, nextUpLesson, overallProgress } from '@/lib/progress'
@@ -48,6 +48,10 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
           <Link to={`/s/${focus.id}`} className="plate">
             {returning ? 'Keep reading' : 'Start learning'}
             <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link to="/playground" className={quietLink}>
+            <Terminal className="h-3.5 w-3.5" />
+            Try Python yourself
           </Link>
           <button onClick={onOpenSearch} className={`${quietLink} max-sm:hidden`}>
             <Search className="h-3.5 w-3.5" />
