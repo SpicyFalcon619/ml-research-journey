@@ -50,9 +50,9 @@ export function TopBar({
         <Menu className="h-4 w-4" />
       </button>
 
-      <Link to="/" aria-label="Field Guide home" className="flex shrink-0 items-center gap-2 pr-2 font-semibold tracking-tight text-[var(--color-ink)]">
+      <Link to="/" aria-label="ML Field Guide home" className="flex shrink-0 items-center gap-2 pr-2 font-semibold tracking-tight text-[var(--color-ink)]">
         <Logo className="h-7 w-7 shrink-0" />
-        <span className="hidden sm:inline">Field Guide</span>
+        <span className="hidden sm:inline">ML Field Guide</span>
       </Link>
 
       <nav aria-label="Site" className="hidden items-center gap-0.5 md:flex">

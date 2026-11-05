@@ -1,4 +1,4 @@
-# Field Guide
+# ML Field Guide
 
 A learning site for the lessons in this repo: Python, NumPy, Pandas, scikit-learn and PyTorch, explained for beginners and drawn as one rail map (every track a coloured line, every lesson a stop). It reads the `.py` files directly from the sibling folders, so nothing is duplicated: adding or editing a lesson file is all that's needed for it to show up.
 

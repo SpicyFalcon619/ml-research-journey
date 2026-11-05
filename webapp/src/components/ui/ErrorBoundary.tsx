@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('Field Guide: a page failed to render.', error, info.componentStack)
+    console.error('ML Field Guide: a page failed to render.', error, info.componentStack)
     if (CHUNK_ERROR.test(error.message)) reloadOnceForStaleCode()
   }
 
