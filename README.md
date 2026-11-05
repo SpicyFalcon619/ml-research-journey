@@ -1,37 +1,27 @@
 # ML Research Journey
 
-Hey there, welcome to my machine learning and AI research repository. I created this to document my progress from the absolute basics of programming all the way up to advanced machine learning concepts, models, and independent research.
+My notes and code from learning machine learning and AI, from the first line of Python up to deep learning. Everything is written to be followed by a beginner, in order.
 
-## Field Guide
+## The Field Guide
 
-Every snippet in this repo — Python, NumPy, Pandas, scikit-learn — is browsable and searchable in one place:
-[Open the Field Guide](https://SpicyFalcon619.github.io/ml-research-journey/)
+The easiest way to use this repo is the site: **[Open the Field Guide](https://SpicyFalcon619.github.io/ml-research-journey/)**.
 
-It auto-parses the `.py` files below, so it always reflects what's actually in the repo. Search by topic or function name (e.g. "linear regression", "pandas dropna"), and hit **Run** on any snippet to see its real, pre-captured output. Source lives in [webapp/](webapp/) — see [webapp/README.md](webapp/README.md) for how to run it locally and keep it up to date.
+Every lesson is explained step by step, shows the code next to the real output it produced, and is searchable ("linear regression", "pandas dropna"). It is built from the `.py` files in this repo, so it always matches what is here. Its source is in [webapp/](webapp/); see [webapp/README.md](webapp/README.md) to run it locally or add a lesson.
 
-## The Roadmap
+## The roadmap
 
-I'm following a comprehensive roadmap to keep myself on track. I've hosted a live version of the original roadmap here:
-[View My ML Research Roadmap](https://SpicyFalcon619.github.io/ml-research-journey/ml-research-roadmap.html)
+The path I'm following, and where each lesson fits on it, is on the site's Roadmap page. The original interactive version lives [here](https://SpicyFalcon619.github.io/ml-research-journey/ml-research-roadmap.html), and its checklist source is [ROADMAP.md](ROADMAP.md).
 
-I have also added a markdown version of my learning checklist in [ROADMAP.md](ROADMAP.md) to track my day-to-day progress.
+## What's in the repo
 
-## Repository Structure
+- **python tutorial/**: Python from scratch: variables, control flow, data structures, functions, errors and classes.
+- **NumPy_Basics/**: arrays, indexing, reshaping, boolean masking, stacking and random numbers.
+- **Pandas_Basics/**: Series and DataFrames, loading and inspecting data, selecting, missing data, grouping and encoding.
+- **Classical_ML/**: regression, classification, train/test splits and decision trees with scikit-learn.
+- **Deep_Learning_PyTorch/**: tensors and the PyTorch training workflow.
+- **webapp/**: the Field Guide site.
+- **ml-research-roadmap.html**: the interactive roadmap.
 
-I'm currently working my way through classical machine learning (Basecamp 1), on top of the Data Science libraries (NumPy and Pandas) finished in Basecamp 0.
+## Built with
 
-Inside this repo, you'll find:
-- **python tutorial:** My first steps with Python, like control flow, data structures, functions, and error handling.
-- **NumPy_Basics:** Array generation, matrix math, broadcasting, reshaping, indexing, and random numbers.
-- **Pandas_Basics:** DataFrames, Series, loading/inspecting data, selection, missing data, and grouping.
-- **Classical_ML:** Regression, classification, and train/test splitting with scikit-learn.
-- **webapp:** The Field Guide — a searchable site built on top of everything above (see above).
-- **ml-research-roadmap.html:** The source code for my interactive roadmap.
-
-I'll be adding new folders for Data Visualization, PyTorch, and Neural Networks as I progress.
-
-## Tech Stack
-Right now, this repository is built on:
-- Python 3, with NumPy, Pandas, and scikit-learn
-- The Field Guide: Vite, React, TypeScript, Tailwind CSS, and Shiki, deployed to GitHub Pages via GitHub Actions
-- HTML and CSS (for the roadmap documentation)
+Python 3 (NumPy, Pandas, scikit-learn, PyTorch). The Field Guide uses Vite, React, TypeScript, Tailwind CSS and Shiki, and is deployed to GitHub Pages by GitHub Actions.

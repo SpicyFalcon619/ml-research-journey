@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
-import { ChevronRight, ExternalLink, MessageSquareText } from 'lucide-react'
+import { ExternalLink, MessageSquareText } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
 import { getOutput } from '@/lib/outputs'
 import { getAdjacent } from '@/lib/roadmap'
@@ -18,6 +18,10 @@ import { cn } from '@/lib/cn'
 import { DoneButton } from '@/components/snippet/DoneButton'
 import { FavoriteButton } from '@/components/snippet/FavoriteButton'
 import { Outline } from '@/components/snippet/Outline'
+import { LessonFinish } from '@/components/snippet/LessonFinish'
+import { TickRail } from '@/components/snippet/TickRail'
+import { lineColor, trackIndexOf } from '@/lib/journey'
+import { allLessons } from '@/lib/progress'
 import { PrevNext } from '@/components/snippet/PrevNext'
 import { Badge } from '@/components/ui/Badge'
 
@@ -80,6 +84,37 @@ export function SnippetPage() {
   const output = getOutput(snippet.path)
   const { prev, next } = getAdjacent(snippet.id)
 
+  // Tags are search helpers; the ones worth showing are the concept words, not section titles or filler.
+  const conceptTags = (snippet?.tags ?? [])
+    .filter((t) => !/^topic/.test(t) && t.length > 3 && !['and', 'the', 'with', 'for', 'basics'].includes(t))
+    .slice(0, 6)
+
+  const viewSwitcher = guided ? (
+    <div
+      role="group"
+      aria-label="Lesson view"
+      className="inline-flex rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5"
+    >
+      {views.map((option) => (
+        <button
+          key={option.id}
+          type="button"
+          onClick={() => setView(option.id)}
+          aria-pressed={activeView === option.id}
+          title={option.hint}
+          className={cn(
+            'cursor-pointer rounded-md px-3 py-1 text-[13px] transition-colors',
+            activeView === option.id
+              ? 'bg-[var(--color-surface-hover)] font-medium text-[var(--color-ink)] shadow-sm'
+              : 'text-[var(--color-ink-faint)] hover:text-[var(--color-ink-dim)]',
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  ) : null
+
   return (
     // Keyed by snippet id so navigating between snippets (same route pattern, `/s/:id`)
     // remounts this whole subtree instead of reusing it — otherwise CodeBlock's
@@ -88,43 +123,49 @@ export function SnippetPage() {
     <div
       key={snippet.id}
       className="mx-auto grid max-w-[72rem] animate-fade-up gap-x-8 pb-16 xl:grid-cols-[minmax(0,1fr)_13rem]"
+      style={{ ['--stop' as string]: lineColor(trackIndexOf(snippet.categorySlug)) }}
     >
       <div className="min-w-0">
-      <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-1.5 text-xs text-[var(--color-ink-faint)]">
-        <Link to={`/c/${snippet.categorySlug}`} className="hover:text-[var(--color-ink-dim)]">
-          {snippet.categoryLabel}
-        </Link>
-        {snippet.subSegments.map((seg) => (
-          <span key={seg} className="flex items-center gap-1.5">
-            <ChevronRight className="h-3 w-3" /> {seg}
-          </span>
-        ))}
-      </nav>
+      <div className="mb-5">
+        <TickRail currentId={snippet.id} />
+      </div>
 
-      {/* Stacked on phones: the title and three buttons side by side are wider than the screen. */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      {/* Stacked on phones: the title and the buttons side by side are wider than the screen. */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold text-[var(--color-ink)] sm:text-3xl">{snippet.title}</h1>
-          <p className="mt-1 font-mono text-xs break-all text-[var(--color-ink-faint)]">{snippet.path}</p>
+          <h1 className="text-4xl leading-none font-bold text-[var(--color-ink)] sm:text-5xl">{snippet.title}</h1>
+          <p className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[15px] text-[var(--color-ink-dim)]">
+            <span aria-hidden className="h-1.5 w-8 shrink-0 rounded-full bg-[var(--stop)]" />
+            <Link to={`/c/${snippet.categorySlug}`} className="underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+              {snippet.categoryLabel}
+            </Link>
+            {snippet.subSegments.length > 0 && <span>{snippet.subSegments.join(' / ')}</span>}
+            {allLessons.some((l) => l.id === snippet.id) && (
+              <span className="text-[var(--color-ink-faint)]">
+                stop {allLessons.findIndex((l) => l.id === snippet.id) + 1} of {allLessons.length}
+              </span>
+            )}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end">
           {/* Data files are shown in the guide but aren't something you finish. */}
           {!snippet.filename.endsWith('.csv') && <DoneButton id={snippet.id} />}
           <FavoriteButton id={snippet.id} />
           {available && (
-          <button
-            type="button"
-            onClick={() => openAssistant()}
-            className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]"
-          >
-            <MessageSquareText className="h-3.5 w-3.5" /> Ask AI
-          </button>
+            <button
+              type="button"
+              onClick={() => openAssistant()}
+              aria-label="Ask the AI about this lesson"
+              className="flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 text-[13px] text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]"
+            >
+              <MessageSquareText className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Ask AI</span>
+            </button>
           )}
           <a
             href={githubUrl}
             target="_blank"
             rel="noreferrer"
-            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]"
+            className="hidden h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 text-[13px] text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] sm:flex"
           >
             <ExternalLink className="h-3.5 w-3.5" /> GitHub
           </a>
@@ -133,12 +174,12 @@ export function SnippetPage() {
 
       {/* On wide screens the same sections live in the "In this lesson" rail instead. */}
       {viewTopics.length > 0 && (
-        <div className="mb-6 flex flex-wrap gap-2 xl:hidden">
+        <div className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 xl:hidden">
           {viewTopics.map((topic) => (
             <button
               key={topic.line}
               onClick={() => jumpToLine(topic.line)}
-              className="cursor-pointer rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1 text-xs text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-accent-glow)] hover:text-[var(--color-accent-soft)]"
+              className="shrink-0 cursor-pointer rounded-[3px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1.5 text-[13px] whitespace-nowrap text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-accent-glow)] hover:text-[var(--color-accent-soft)]"
             >
               {topic.label}
             </button>
@@ -146,37 +187,11 @@ export function SnippetPage() {
         </div>
       )}
 
-      {guided && (
-        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <div
-            role="group"
-            aria-label="Lesson view"
-            className="inline-flex rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5"
-          >
-            {views.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => setView(option.id)}
-                aria-pressed={activeView === option.id}
-                title={option.hint}
-                className={cn(
-                  'cursor-pointer rounded-md px-3 py-1 text-xs transition-colors',
-                  activeView === option.id
-                    ? 'bg-[var(--color-surface-hover)] text-[var(--color-ink)] shadow-sm'
-                    : 'text-[var(--color-ink-faint)] hover:text-[var(--color-ink-dim)]',
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-[var(--color-ink-faint)]">{views.find((v) => v.id === activeView)?.hint}</p>
-        </div>
-      )}
+      {guided && activeView !== 'guided' && <div className="mb-4">{viewSwitcher}</div>}
 
       {activeView === 'guided' ? (
         <GuidedLesson
+          leading={viewSwitcher}
           blocks={blocks}
           code={snippet.code}
           filename={snippet.filename}
@@ -205,7 +220,7 @@ export function SnippetPage() {
       )}
 
       <div className="mt-6 flex flex-wrap gap-1.5">
-        {snippet.tags.slice(0, 12).map((tag) => (
+        {conceptTags.map((tag) => (
           <Link key={tag} to={tagPath(tag)} className="group" title={`All lessons tagged "${tag}"`}>
             <Badge className="transition-colors group-hover:border-[var(--color-border-strong)] group-hover:text-[var(--color-ink)]">
               {tag}
@@ -213,6 +228,8 @@ export function SnippetPage() {
           </Link>
         ))}
       </div>
+
+      <LessonFinish snippet={snippet} next={next} />
 
       <PrevNext prev={prev} next={next} />
       </div>

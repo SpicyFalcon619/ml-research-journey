@@ -26,7 +26,7 @@ export function TagPage() {
     <div className="mx-auto max-w-4xl animate-fade-up pb-16">
       <header className="mb-8">
         <p className="text-xs text-[var(--color-ink-faint)]">Tag</p>
-        <h1 className="mt-1 text-3xl font-semibold break-words text-[var(--color-ink)]">{tag}</h1>
+        <h1 className="mt-1 text-4xl leading-none font-bold break-words text-[var(--color-ink)] sm:text-5xl">{tag}</h1>
         <p className="mt-1 text-sm text-[var(--color-ink-faint)]">
           {matches.length} {matches.length === 1 ? 'lesson' : 'lessons'}
           {groups.size > 1 ? ` across ${groups.size} tracks` : ''}
@@ -49,7 +49,7 @@ export function TagPage() {
       <div className="flex flex-col gap-10">
         {[...groups.values()].map((group) => (
           <section key={group.slug}>
-            <h2 className="mb-3 flex items-baseline gap-2 text-sm font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">
+            <h2 className="mb-3 flex items-baseline gap-2 text-base font-semibold text-[var(--color-ink)]">
               <Link to={`/c/${group.slug}`} className="transition-colors hover:text-[var(--color-ink-dim)]">
                 {group.label}
               </Link>
@@ -82,7 +82,7 @@ export function TagPage() {
 
       {related.length > 0 && (
         <section className="mt-12 border-t border-[var(--color-border)] pt-6">
-          <h2 className="mb-3 text-sm font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">
+          <h2 className="mb-3 text-base font-semibold text-[var(--color-ink)]">
             Often together with
           </h2>
           <div className="flex flex-wrap gap-1.5">

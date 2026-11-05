@@ -254,3 +254,10 @@ export function parseLesson(source: string): LessonBlock[] {
 export function hasGuide(blocks: LessonBlock[]): boolean {
   return blocks.some((b) => b.type === 'banner' && b.kind === 'learn')
 }
+
+/** The "what you will learn" bullets of a guided lesson (empty when it has no guide card). */
+export function learnBullets(code: string): string[] {
+  const card = parseLesson(code).find((b) => b.type === 'banner' && b.kind === 'learn')
+  if (!card || card.type !== 'banner') return []
+  return card.sections.flatMap((s) => s.items).filter((i) => i.kind === 'bullet').map((i) => i.text)
+}

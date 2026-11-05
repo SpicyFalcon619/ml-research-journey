@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import { Link, useSearchParams } from 'react-router-dom'
 import { Check, ChevronRight, Search, Star } from 'lucide-react'
 import { snippets } from '@/lib/content'
-import { ancestorSlugs, navGroups } from '@/lib/roadmap'
+import { ancestorSlugs, navGroups, orderedEntries } from '@/lib/roadmap'
 import { nextUpLesson } from '@/lib/progress'
 import { KEYS } from '@/lib/userData'
 import { CATEGORY_INFO } from '@/lib/categoryInfo'
@@ -193,10 +193,22 @@ function MarkSectionButton({ item, className }: { item: NavItem; className?: str
   )
 }
 
+// Sub-sections and lessons in learning order (4.1 ... 4.8, then the 4.9 folder), neighbouring lessons together.
+function groupInOrder(item: NavItem, show: (s: Snippet) => boolean) {
+  const groups: ({ type: 'section'; item: NavItem } | { type: 'lessons'; lessons: Snippet[] })[] = []
+  for (const entry of orderedEntries(item)) {
+    if (entry.kind === 'section') groups.push({ type: 'section', item: entry.item })
+    else if (show(entry.snippet)) {
+      const last = groups[groups.length - 1]
+      if (last?.type === 'lessons') last.lessons.push(entry.snippet)
+      else groups.push({ type: 'lessons', lessons: [entry.snippet] })
+    }
+  }
+  return groups
+}
+
 function Section({ item, depth, show }: { item: NavItem; depth: number; show: (s: Snippet) => boolean }) {
   const { isOpen } = useContext(OpenContext)
-  const lessons = item.snippets.filter(show)
-  const children = item.children
   const nonEmpty = (node: NavItem): boolean => node.snippets.some(show) || node.children.some(nonEmpty)
   if (!nonEmpty(item)) return null
   // Track titles are h2, so sub-sections start at h3 and nest from there (no skipped levels).
@@ -207,7 +219,7 @@ function Section({ item, depth, show }: { item: NavItem; depth: number; show: (s
     <div className={cn(depth > 0 && 'mt-3')}>
       {depth > 0 && (
         <div className="mb-1 flex items-baseline justify-between gap-3 px-2">
-          <FoldHeading item={item} as={SubHeading} className="min-w-0 text-xs font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">
+          <FoldHeading item={item} as={SubHeading} className="min-w-0 text-sm font-medium text-[var(--color-ink-dim)]">
             {item.label}
           </FoldHeading>
           <MarkSectionButton item={item} />
@@ -215,10 +227,15 @@ function Section({ item, depth, show }: { item: NavItem; depth: number; show: (s
       )}
       {open && (
         <div id={`explore-${item.slug}`} className={cn(depth > 0 && 'pl-3')}>
-          {children.map((child) => (
-            <Section key={child.slug} item={child} depth={depth + 1} show={show} />
-          ))}
-          {lessons.length > 0 && <ul className="flex flex-col">{lessons.map((s) => <LessonRow key={s.id} snippet={s} />)}</ul>}
+          {groupInOrder(item, show).map((group, i) =>
+            group.type === 'section' ? (
+              <Section key={group.item.slug} item={group.item} depth={depth + 1} show={show} />
+            ) : (
+              <ul key={`lessons-${i}`} className="flex flex-col">
+                {group.lessons.map((s) => <LessonRow key={s.id} snippet={s} />)}
+              </ul>
+            ),
+          )}
         </div>
       )}
     </div>
@@ -299,9 +316,9 @@ export function ExplorePage() {
 
   return (
     <OpenContext.Provider value={openState}>
-    <div className="mx-auto max-w-4xl animate-fade-up pb-16">
+    <div className="mx-auto max-w-5xl animate-fade-up pb-16">
       <header className="mb-6">
-        <h1 className="text-3xl font-semibold text-[var(--color-ink)]">Explore</h1>
+        <h1 className="text-5xl leading-none font-bold text-[var(--color-ink)] sm:text-6xl">Explore</h1>
         <p className="mt-2 max-w-2xl text-[var(--color-ink-dim)]">
           Everything in the guide in one place. Browse by track, by tag or A to Z, and use the filters to find what you
           have left to do or what you've saved.
@@ -340,14 +357,13 @@ export function ExplorePage() {
 
       {view === 'track' && (
         <div className="flex flex-col gap-12">
-          {categories.map((category, index) => {
+          {categories.map((category) => {
             const lessons = snippets.filter((s) => s.categorySlug === category.slug && show(s))
             if (lessons.length === 0) return null
             return (
               <section key={category.slug}>
                 <div className="mb-2 flex items-baseline justify-between gap-4">
                   <FoldHeading item={category} as="h2" className="min-w-0 text-lg font-semibold text-[var(--color-ink)]">
-                    <span className="mr-2 font-mono text-xs font-normal text-[var(--color-ink-faint)]">{String(index + 1).padStart(2, '0')}</span>
                     {category.label}
                   </FoldHeading>
                   <span className="flex shrink-0 items-baseline gap-4">

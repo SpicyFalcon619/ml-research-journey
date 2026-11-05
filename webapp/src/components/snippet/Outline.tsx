@@ -47,7 +47,7 @@ export function Outline({ snippet }: { snippet: Snippet }) {
 
   return (
     <aside aria-label="In this lesson" className="sticky top-6 hidden self-start xl:block">
-      <h2 className="mb-3 text-xs font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">
+      <h2 className="mb-3 text-sm font-semibold text-[var(--color-ink)]">
         In this lesson
       </h2>
       {topics.length > 0 ? (

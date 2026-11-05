@@ -14,6 +14,8 @@ import { OutputPanel } from '@/components/code/OutputPanel'
 import { cn } from '@/lib/cn'
 
 interface GuidedLessonProps {
+  /** Shown at the left of the toolbar (the lesson's view switcher). */
+  leading?: ReactNode
   blocks: LessonBlock[]
   code: string
   filename: string
@@ -73,8 +75,8 @@ function Prose({ nodes }: { nodes: ProseNode[] }) {
           default:
             return node.callout ? (
               <aside key={index} className="guide-callout">
-                <span className="guide-callout-label">{node.callout}</span>
                 <p className={node.breaks ? 'guide-breaks' : undefined}>
+                  <span className="guide-callout-label">{node.callout}.</span>
                   <Inline text={node.text} />
                 </p>
               </aside>
@@ -146,7 +148,7 @@ function groupItems(section: BannerSection): ItemGroup[] {
   return groups
 }
 
-function chunkTransformer(firstLine: number): ShikiTransformer {
+export function chunkTransformer(firstLine: number): ShikiTransformer {
   return {
     line(node, line) {
       // Real file line numbers, so a search hit or a "line" link lands on the right spot.
@@ -156,7 +158,7 @@ function chunkTransformer(firstLine: number): ShikiTransformer {
   }
 }
 
-export function GuidedLesson({ blocks, code, filename, topics, output, focusLine }: GuidedLessonProps) {
+export function GuidedLesson({ leading, blocks, code, filename, topics, output, focusLine }: GuidedLessonProps) {
   const [siteTheme] = useTheme()
   const [chunks, setChunks] = useState<Record<number, string>>({})
   const [showOutput, setShowOutput] = useState(false)
@@ -211,7 +213,7 @@ export function GuidedLesson({ blocks, code, filename, topics, output, focusLine
       case 'topic':
         return (
           <h2 key={`t${block.line}`} id={`L${block.line}`} className="guide-topic">
-            {block.eyebrow && <span className="guide-topic-eyebrow">{block.eyebrow}</span>}
+            {block.eyebrow && <span className="guide-topic-num">{block.eyebrow.replace(/^Topic\s+/, '')}</span>}
             {block.title}
           </h2>
         )
@@ -241,24 +243,28 @@ export function GuidedLesson({ blocks, code, filename, topics, output, focusLine
   return (
     <div className="guide">
       <div className="guide-toolbar" data-code-actions>
-        <span className="font-mono text-xs text-[var(--color-code-ink-faint)]">{filename}</span>
+        {leading ?? <span className="font-mono text-xs text-[var(--color-code-ink-faint)]">{filename}</span>}
         <div className="flex flex-wrap items-center gap-2">
           {output && (
             <button
               onClick={() => setShowOutput((v) => !v)}
               className={cn(
-                'flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs transition-colors',
+                'flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-[13px] transition-colors',
                 showOutput
                   ? 'border-[var(--color-code-accent-glow)] bg-[var(--color-code-accent-glow)]/20 text-[var(--color-code-accent-soft)]'
                   : 'border-[var(--color-code-border)] bg-[var(--color-code-surface)] text-[var(--color-code-ink-dim)] hover:border-[var(--color-code-border-strong)] hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)]',
               )}
             >
-              <Play className="h-3.5 w-3.5" /> Run whole lesson
+              <Play className="h-3.5 w-3.5" /> Run<span className="hidden sm:inline"> whole lesson</span>
             </button>
           )}
-          <FontSizeControl />
+          <span className="hidden sm:contents">
+            <FontSizeControl />
+          </span>
           <CopyButton text={code} />
-          <CaptureDialogButton code={code} filename={filename} topics={topics} output={output} />
+          <span className="hidden sm:contents">
+            <CaptureDialogButton code={code} filename={filename} topics={topics} output={output} />
+          </span>
         </div>
       </div>
 

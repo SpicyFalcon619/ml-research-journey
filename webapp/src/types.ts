@@ -23,6 +23,8 @@ export interface NavItem {
   slug: string
   snippets: Snippet[]
   children: NavItem[]
+  /** Position among its siblings, from the folder's numeric prefix (e.g. 4.9). */
+  orderKey?: number[]
 }
 
 export interface NavGroup {

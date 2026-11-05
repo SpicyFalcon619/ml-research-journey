@@ -17,7 +17,7 @@ export function FontSizeControl() {
       >
         <Minus className="h-3 w-3" />
       </button>
-      <span className="min-w-[1.5rem] px-0.5 text-center font-mono text-[10px] tabular-nums select-none">
+      <span className="min-w-[1.5rem] px-0.5 text-center font-mono text-xs tabular-nums select-none">
         {size}
       </span>
       <button

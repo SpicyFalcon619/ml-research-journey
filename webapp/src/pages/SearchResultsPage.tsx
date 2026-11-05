@@ -24,7 +24,7 @@ export function SearchResultsPage() {
     <div className="mx-auto max-w-3xl animate-fade-up pb-16">
       <header className="mb-8">
         <p className="text-sm text-[var(--color-ink-faint)]">Search results for</p>
-        <h1 className="text-2xl font-semibold text-[var(--color-ink)] sm:text-3xl">"{query}"</h1>
+        <h1 className="text-4xl leading-none font-bold text-[var(--color-ink)] sm:text-5xl">"{query}"</h1>
         <p className="mt-1 text-sm text-[var(--color-ink-faint)]">
           {hits.length} {hits.length === 1 ? 'match' : 'matches'}
         </p>

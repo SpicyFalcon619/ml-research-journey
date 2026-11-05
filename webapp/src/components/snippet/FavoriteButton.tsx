@@ -11,7 +11,7 @@ export function FavoriteButton({ id, className }: { id: string; className?: stri
       onClick={() => toggleFavorite(id)}
       aria-pressed={on}
       className={cn(
-        'flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors',
+        'flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border px-3 text-[13px] font-medium transition-colors',
         on
           ? 'border-[var(--color-accent-glow)] bg-[var(--color-accent-glow)]/20 text-[var(--color-accent-soft)]'
           : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink-dim)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]',

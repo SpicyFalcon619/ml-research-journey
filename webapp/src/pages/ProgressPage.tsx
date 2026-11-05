@@ -19,7 +19,7 @@ import { cn } from '@/lib/cn'
 function Heading({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="mb-4 flex items-baseline justify-between gap-4">
-      <h2 className="text-sm font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">{title}</h2>
+      <h2 className="text-lg font-semibold tracking-tight text-[var(--color-ink)]">{title}</h2>
       {children && <span className="text-xs text-[var(--color-ink-faint)]">{children}</span>}
     </div>
   )
@@ -121,44 +121,46 @@ export function ProgressPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-4xl animate-fade-up pb-16">
+    <div className="mx-auto max-w-5xl animate-fade-up pb-16">
       <header className="mb-8">
-        <h1 className="text-3xl font-semibold text-[var(--color-ink)]">Your progress</h1>
+        <h1 className="text-5xl leading-none font-bold text-[var(--color-ink)] sm:text-6xl">Your progress</h1>
         <p className="mt-2 max-w-2xl text-[var(--color-ink-dim)]">
           What you've finished and saved, in one place. It's kept in this browser only, so it's private to you and
           nobody else sees it.
         </p>
       </header>
 
-      <section aria-label="Overview" className="mb-10">
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-6 border-y border-[var(--color-border)] py-6 sm:grid-cols-4">
-          {[
-            ['Done', `${overall.done}`, `of ${overall.total} lessons · ${overall.percent}%`],
-            ['To do', `${overall.total - overall.done}`, 'lessons left'],
-            ['Saved', `${lib.favorites.length}`, 'lessons'],
-            ['Day streak', `${streak.current}`, `best ${streak.longest} · ${lib.activityDays.length} active ${lib.activityDays.length === 1 ? 'day' : 'days'}`],
-          ].map(([label, value, detail]) => (
-            <div key={label}>
-              <dt className="text-xs text-[var(--color-ink-faint)]">{label}</dt>
-              <dd className="mt-1 font-mono text-3xl font-medium text-[var(--color-ink)] tabular-nums">{value}</dd>
-              <dd className="mt-0.5 text-xs text-[var(--color-ink-faint)]">{detail}</dd>
-            </div>
-          ))}
-        </dl>
-        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
-          {next && (
-            <Link to={`/s/${next.id}`} className="group flex items-center gap-2 text-sm text-[var(--color-ink-dim)] hover:text-[var(--color-ink)]">
-              <span className="text-[var(--color-ink-faint)]">Next up</span>
-              <span className="font-medium text-[var(--color-ink)]">{next.title}</span>
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+      <section aria-label="Overview" className="mb-12">
+        <p className="text-2xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-3xl">
+          {overall.done === 0
+            ? 'You have not finished a lesson yet.'
+            : `You have finished ${overall.done} of ${overall.total} lessons.`}
+        </p>
+        <p className="mt-2 text-sm text-[var(--color-ink-dim)]">
+          {streak.current > 0
+            ? `${streak.current} day${streak.current === 1 ? '' : 's'} in a row (best ${streak.longest}). `
+            : lib.activityDays.length > 0
+              ? `Your best run is ${streak.longest} day${streak.longest === 1 ? '' : 's'}. `
+              : ''}
+          {lib.favorites.length > 0 ? `${lib.favorites.length} lesson${lib.favorites.length === 1 ? '' : 's'} saved for later.` : ''}
+        </p>
+        <div className="mt-5">
+          {next ? (
+            <Link
+              to={`/s/${next.id}`}
+              className="plate"
+            >
+              {overall.done === 0 ? 'Start learning' : 'Next lesson'}
+              <ArrowRight className="h-4 w-4" />
             </Link>
+          ) : (
+            overall.total > 0 && <p className="text-sm text-[var(--color-ink-dim)]">You have marked every lesson as done.</p>
           )}
-          {!next && overall.total > 0 && <p className="text-sm text-[var(--color-ink-dim)]">You've marked every lesson as done.</p>}
         </div>
       </section>
 
       <section className="mb-12">
-        <Heading title="By track">Mark lessons as done on their page.</Heading>
+        <Heading title="By track">Tick lessons off on their own page</Heading>
         <ul className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
           {tracks.map((track) => {
             const pct = track.total ? (track.done / track.total) * 100 : 0

@@ -1,13 +1,32 @@
+import { useMemo, type CSSProperties } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { ArrowRight, FileSpreadsheet } from 'lucide-react'
-import { navGroups, flattenNavItems, countSnippets } from '@/lib/roadmap'
+import { ArrowRight, Check, FileSpreadsheet, Star } from 'lucide-react'
+import { navGroups, flattenNavItems } from '@/lib/roadmap'
+import { allLessons } from '@/lib/progress'
 import { CATEGORY_INFO } from '@/lib/categoryInfo'
+import { learnBullets } from '@/lib/lesson'
+import { lineColor, trackIndexOf } from '@/lib/journey'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import { GlassPanel } from '@/components/ui/GlassPanel'
-import { Badge } from '@/components/ui/Badge'
+import { useLibrary } from '@/hooks/useLibrary'
+import type { Snippet } from '@/types'
+import { cn } from '@/lib/cn'
+
+const lessonIds = new Set(allLessons.map((s) => s.id))
+
+// One line on what a lesson teaches: its first two "what you will learn" points, or its
+// section names when it has no guide card.
+function summaryOf(snippet: Snippet): string {
+  const bullets = learnBullets(snippet.code)
+  if (bullets.length > 0) return bullets.slice(0, 2).join(' · ')
+  return snippet.topics
+    .slice(0, 3)
+    .map((t) => t.label.replace(/^Topic\s*\d*:?\s*/i, ''))
+    .join(' · ')
+}
 
 export function CategoryPage() {
   const { categorySlug } = useParams()
+  const { isDone, isFavorite } = useLibrary()
   const categories = navGroups.flatMap((g) => g.categories)
   const index = categories.findIndex((c) => c.slug === categorySlug)
   const category = categories[index]
@@ -15,75 +34,102 @@ export function CategoryPage() {
 
   useDocumentTitle(category?.label)
 
+  const sections = useMemo(
+    () => (category ? flattenNavItems([category]).filter((s) => s.snippets.length > 0) : []),
+    [category],
+  )
+  const summaries = useMemo(() => new Map(sections.flatMap((s) => s.snippets).map((sn) => [sn.id, summaryOf(sn)])), [sections])
+
   if (!category) return <Navigate to="/" replace />
 
-  const sections = flattenNavItems([category]).filter((s) => s.snippets.length > 0)
   const info = CATEGORY_INFO[category.slug]
+  const lessons = sections.flatMap((s) => s.snippets).filter((s) => lessonIds.has(s.id))
+  const doneCount = lessons.filter((s) => isDone(s.id)).length
+  const nextHere = lessons.find((s) => !isDone(s.id))
 
   return (
-    <div className="mx-auto max-w-4xl animate-fade-up pb-16">
-      <header className="mb-8">
-        <p className="text-xs text-[var(--color-ink-faint)]">
-          Track {index + 1} of {categories.length}
+    <div className="mx-auto max-w-5xl animate-fade-up pb-16" style={{ '--stop': lineColor(trackIndexOf(category.slug)) } as CSSProperties}>
+      <header className="mb-10 max-w-3xl">
+        <div aria-hidden className="mb-4 h-2 w-28 rounded-full bg-[var(--stop)]" />
+        <h1 className="text-balance text-5xl leading-none font-bold text-[var(--color-ink)] sm:text-6xl">{category.label}</h1>
+        {info && <p className="mt-3 max-w-2xl text-lg leading-relaxed text-[var(--color-ink-dim)]">{info}</p>}
+        <p className="mt-3 text-sm text-[var(--color-ink-faint)]">
+          {lessons.length} lessons{doneCount > 0 ? `, ${doneCount} finished` : ''}
         </p>
-        <h1 className="mt-1 text-3xl font-semibold text-[var(--color-ink)]">{category.label}</h1>
-        <p className="mt-1 text-sm text-[var(--color-ink-faint)]">{countSnippets(category)} snippets</p>
-        {info && <p className="mt-3 max-w-2xl leading-relaxed text-[var(--color-ink-dim)]">{info}</p>}
+        {nextHere && (
+          <Link
+            to={`/s/${nextHere.id}`}
+            className="plate mt-5"
+            style={{ background: 'var(--stop)' }}
+          >
+            {doneCount === 0 ? 'Start this track' : 'Continue'}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        )}
       </header>
-      <div className="flex flex-col gap-10">
+
+      <div className="flex max-w-3xl flex-col gap-10">
         {sections.map((section) => (
-          <div key={section.slug}>
+          <section key={section.slug}>
             {section.slug !== category.slug ? (
-              <h2 className="mb-3 text-sm font-semibold tracking-wider text-[var(--color-ink-faint)] uppercase">
-                {section.label}
-              </h2>
+              <h2 className="mb-3 text-lg font-semibold tracking-tight text-[var(--color-ink)]">{section.label}</h2>
             ) : (
               // Keeps the heading outline valid (h1 > h2 > h3) when a track has no sub-sections.
               <h2 className="sr-only">Lessons</h2>
             )}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <ol className="relative ml-[7px] border-l-[3px] border-l-[color:color-mix(in_srgb,var(--stop)_55%,transparent)]">
               {section.snippets.map((snippet) => {
                 const isData = snippet.filename.endsWith('.csv')
-                const rowCount = snippet.code.split('\n').filter((l) => l.trim().length > 0).length - 1
+                const finished = isDone(snippet.id)
+                const isNext = nextHere?.id === snippet.id
+                const summary = summaries.get(snippet.id)
                 return (
-                  <Link key={snippet.id} to={`/s/${snippet.id}`} className="min-w-0">
-                    <GlassPanel className="group h-full p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--color-border-strong)]">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="flex items-center gap-1.5 font-medium text-[var(--color-ink)]">
-                          {isData && <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" />}
-                          {snippet.title}
-                        </h3>
-                        <span className="shrink-0 font-mono text-[11px] text-[var(--color-ink-faint)]">
-                          {isData ? `${rowCount} rows` : `${snippet.lineCount}L`}
+                  <li key={snippet.id} className="relative">
+                    <Link
+                      to={`/s/${snippet.id}`}
+                      className="group relative block rounded-r-lg py-3 pr-3 pl-6 transition-colors hover:bg-[var(--color-surface)]"
+                    >
+                      {isData ? (
+                        <FileSpreadsheet aria-hidden className="absolute top-[1.15rem] -left-[7px] h-3.5 w-3.5 bg-[var(--color-bg)] text-[var(--color-ink-faint)]" />
+                      ) : (
+                        <span
+                          aria-hidden
+                          className={cn(
+                            'absolute top-[1.25rem] -left-[7.5px] h-[12px] w-[12px] rounded-full border-[2.5px] bg-[var(--color-bg)]',
+                            finished
+                              ? 'border-[var(--stop)] bg-[var(--stop)]'
+                              : isNext
+                                ? 'border-[var(--color-ink)] bg-[var(--stop)] shadow-[0_0_0_3px_var(--stop)]'
+                                : 'border-[var(--stop)] opacity-70',
+                          )}
+                        />
+                      )}
+                      <div className="flex items-baseline justify-between gap-3">
+                        <h3 className="font-medium text-[var(--color-ink)] group-hover:text-[var(--color-accent-soft)]">{snippet.title}</h3>
+                        <span className="flex shrink-0 items-center gap-2 text-xs text-[var(--color-ink-faint)]">
+                          {isNext && <span className="rounded-[3px] bg-[var(--color-accent-glow)]/30 px-2 py-0.5 text-xs font-medium text-[var(--color-accent-soft)]">next</span>}
+                          {isFavorite(snippet.id) && <Star aria-label="Saved" className="h-3 w-3 fill-[var(--color-accent)] text-[var(--color-accent)]" />}
+                          {finished && <Check aria-label="Done" className="h-3.5 w-3.5 text-[var(--color-accent-soft)]" strokeWidth={3} />}
                         </span>
                       </div>
-                      <p className="mt-1 truncate font-mono text-xs text-[var(--color-ink-faint)]">
-                        {snippet.filename}
-                      </p>
-                      {snippet.topics.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {snippet.topics.slice(0, 3).map((t) => (
-                            <Badge key={t.line}>{t.label}</Badge>
-                          ))}
-                        </div>
-                      )}
-                    </GlassPanel>
-                  </Link>
+                      {summary && <p className="mt-0.5 line-clamp-2 max-w-xl text-sm leading-relaxed text-[var(--color-ink-faint)]">{summary}</p>}
+                    </Link>
+                  </li>
                 )
               })}
-            </div>
-          </div>
+            </ol>
+          </section>
         ))}
       </div>
 
       {nextCategory && (
         <Link
           to={`/c/${nextCategory.slug}`}
-          className="mt-12 flex items-center justify-between gap-4 border-t border-[var(--color-border)] pt-6 text-[var(--color-ink-dim)] transition-colors hover:text-[var(--color-ink)]"
+          className="mt-14 flex max-w-3xl items-center justify-between gap-4 border-t border-[var(--color-border)] pt-6 text-[var(--color-ink-dim)] transition-colors hover:text-[var(--color-ink)]"
         >
           <span>
-            <span className="block text-xs text-[var(--color-ink-faint)]">Next track</span>
-            <span className="font-medium">{nextCategory.label}</span>
+            <span className="block text-sm text-[var(--color-ink-faint)]">After this track</span>
+            <span className="text-lg font-medium text-[var(--color-ink)]">{nextCategory.label}</span>
           </span>
           <ArrowRight className="h-4 w-4" />
         </Link>

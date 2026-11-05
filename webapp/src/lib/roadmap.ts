@@ -130,9 +130,10 @@ function buildNavItem(label: string, slug: string, items: Snippet[], depth: numb
 
   const rawSegmentOf = (item: Snippet) => item.path.split('/')[depth + 1] ?? ''
 
-  const children = Array.from(groups.entries()).map(([childLabel, childItems]) =>
-    buildNavItem(childLabel, `${slug}-${slugify(childLabel)}`, childItems, depth + 1),
-  )
+  const children = Array.from(groups.entries()).map(([childLabel, childItems]) => ({
+    ...buildNavItem(childLabel, `${slug}-${slugify(childLabel)}`, childItems, depth + 1),
+    orderKey: extractOrderKey(rawSegmentOf(childItems[0])),
+  }))
 
   // Sort children using the raw numeric folder prefix (e.g. "4.9_More_on...") for natural order.
   children.sort((a, b) => {
@@ -172,11 +173,23 @@ export function countSnippets(item: NavItem): number {
   return flattenNavItems([item]).reduce((sum, node) => sum + node.snippets.length, 0)
 }
 
-// The sidebar lists sub-folders first and then the files directly in a folder,
-// so "the next lesson" has to follow that same order or prev/next would
-// disagree with what the sidebar shows.
+export type NavEntry = { kind: 'section'; item: NavItem } | { kind: 'lesson'; snippet: Snippet }
+
+/**
+ * A folder's contents in learning order: its sub-folders and its own lessons together,
+ * by their numeric prefixes. So 4.1 ... 4.8 come first and the 4.9.x sub-folder after
+ * them, instead of all sub-folders being pushed ahead of the files beside them.
+ */
+export function orderedEntries(item: NavItem): NavEntry[] {
+  const keyed = [
+    ...item.children.map((child) => ({ entry: { kind: 'section', item: child } as NavEntry, key: child.orderKey ?? [] })),
+    ...item.snippets.map((snippet) => ({ entry: { kind: 'lesson', snippet } as NavEntry, key: snippet.orderKey })),
+  ]
+  return keyed.sort((x, y) => compareOrderKey(x.key, y.key)).map((k) => k.entry)
+}
+
 function orderedSnippetsOf(item: NavItem): Snippet[] {
-  return [...item.children.flatMap(orderedSnippetsOf), ...item.snippets]
+  return orderedEntries(item).flatMap((entry) => (entry.kind === 'section' ? orderedSnippetsOf(entry.item) : [entry.snippet]))
 }
 
 /** Every lesson on the trail, in the exact order the sidebar presents them. */

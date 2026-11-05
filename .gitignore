@@ -1,2 +1,7 @@
 Test/
 implementation_plan.md
+# Impeccable design-skill scratch files (the surface brief and config stay tracked)
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/review/
+.impeccable/build/

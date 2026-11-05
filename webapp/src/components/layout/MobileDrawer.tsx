@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 
 // Below the laptop breakpoint the sidebar doesn't fit beside the content, so it
@@ -75,13 +76,13 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
             >
               <X className="h-4 w-4" />
             </button>
-            <a
-              href={`${import.meta.env.BASE_URL}ml-research-roadmap.html`}
-              className="absolute top-3.5 left-5 z-10 text-xs font-medium text-[var(--color-ink-dim)] transition-colors hover:text-[var(--color-ink)]"
-            >
-              Roadmap
-            </a>
-            <div className="h-full pt-8">
+            <nav aria-label="Site" className="absolute top-3 left-4 z-10 flex items-center gap-3 text-xs font-medium text-[var(--color-ink-dim)]">
+              <Link to="/" onClick={onClose} className="transition-colors hover:text-[var(--color-ink)]">Home</Link>
+              <Link to="/explore" onClick={onClose} className="transition-colors hover:text-[var(--color-ink)]">Explore</Link>
+              <Link to="/me" onClick={onClose} className="transition-colors hover:text-[var(--color-ink)]">Progress</Link>
+              <a href={`${import.meta.env.BASE_URL}ml-research-roadmap.html`} className="transition-colors hover:text-[var(--color-ink)]">Roadmap</a>
+            </nav>
+            <div className="h-full pt-10">
               <Sidebar onNavigate={onClose} />
             </div>
           </motion.div>

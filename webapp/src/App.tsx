@@ -12,7 +12,6 @@ import { SearchResultsPage } from '@/pages/SearchResultsPage'
 import { TagPage } from '@/pages/TagPage'
 import { ExplorePage } from '@/pages/ExplorePage'
 import { ProgressPage } from '@/pages/ProgressPage'
-import { SiteNav } from '@/components/layout/SiteNav'
 import { AskButton } from '@/components/ai/AskButton'
 import { SelectionAsk } from '@/components/ai/SelectionAsk'
 import { useAssistant } from '@/hooks/useAssistant'
@@ -42,9 +41,15 @@ function isTypingTarget(target: EventTarget | null): boolean {
 
 function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const { pathname } = useLocation()
+  const [sidebarOpen, setSidebarOpen] = useState(() => !['', '#', '#/'].includes(window.location.hash))
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { everOpened } = useAssistant()
+
+  // On Home the journey map is the navigation, so the path rail steps aside; every other page opens it.
+  useEffect(() => {
+    setSidebarOpen(pathname !== '/')
+  }, [pathname])
 
   useEffect(() => {
     function handleKeydown(event: KeyboardEvent) {
@@ -83,8 +88,7 @@ function App() {
             onOpenDrawer={() => setDrawerOpen(true)}
             sidebarOpen={sidebarOpen}
           />
-          <SiteNav />
-          <main className="flex-1 px-4 py-8 sm:px-8">
+          <main className="flex-1 px-4 py-8 pb-20 sm:px-10 sm:pb-8">
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<Home onOpenSearch={() => setPaletteOpen(true)} />} />

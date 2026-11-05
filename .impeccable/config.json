@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/d-metro.html"
+        ],
+        "createdAt": "2026-11-05T01:37:33.689Z",
+        "reason": "agent: throwaway decision-page sketch, not shipped; tight leading is on large display type or a deliberately dense timetable row"
+      },
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/d-timetable.html"
+        ],
+        "createdAt": "2026-11-05T01:37:33.752Z",
+        "reason": "agent: throwaway decision-page sketch, not shipped; tight leading is on large display type or a deliberately dense timetable row"
+      }
+    ]
+  }
+}
