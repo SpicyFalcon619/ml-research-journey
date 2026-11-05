@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Play } from 'lucide-react'
 import { chunkTransformer, getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
 import type { BannerSection, LessonBlock, ProseNode } from '@/lib/lesson'
-import type { CapturedOutput } from '@/lib/outputs'
+import { outputForLines, partHasOutput, type CapturedOutput } from '@/lib/outputs'
 import type { Topic } from '@/types'
 import { useTheme } from '@/hooks/useTheme'
 import { CopyButton } from '@/components/code/CopyButton'
@@ -148,10 +148,87 @@ function groupItems(section: BannerSection): ItemGroup[] {
 }
 
 
+// One code block's own Run button and output: only what THIS part printed, so a reader can
+// see the effect of exactly the lines in front of them. (Captured from a run of the whole
+// lesson, so a part that uses an earlier part's variables still shows what it really printed.)
+function PartRun({
+  output,
+  first,
+  last,
+  open,
+  onToggle,
+  scenario,
+  onScenario,
+}: {
+  output: CapturedOutput
+  first: number
+  last: number
+  open: boolean
+  onToggle: () => void
+  scenario: number
+  onScenario: (index: number) => void
+}) {
+  const text = outputForLines(output, first, last, scenario)
+  const scenarios = output.scenarios ?? []
+  return (
+    <>
+      <div className="guide-part-bar">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className={cn(
+            'flex min-h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-[13px] transition-colors',
+            open
+              ? 'border-[var(--color-code-accent-glow)] bg-[var(--color-code-accent-glow)]/20 text-[var(--color-code-accent-soft)]'
+              : 'border-[var(--color-code-border)] bg-[var(--color-code-surface)] text-[var(--color-code-ink-dim)] hover:border-[var(--color-code-border-strong)] hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)]',
+          )}
+        >
+          <Play className="h-3 w-3" aria-hidden /> {open ? 'Hide output' : 'Run this part'}
+        </button>
+        {open && scenarios.length > 1 && (
+          <label className="flex items-center gap-2 text-xs text-[var(--color-code-ink-faint)]">
+            Typed input
+            <select
+              value={scenario}
+              onChange={(event) => onScenario(Number(event.target.value))}
+              className="min-h-6 max-w-[16rem] cursor-pointer rounded-md border border-[var(--color-code-border)] bg-[var(--color-code-surface)] px-1.5 text-[13px] text-[var(--color-code-ink)]"
+            >
+              {scenarios.map((s, index) => (
+                <option key={s.label} value={index}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
+      {open && (
+        <div className="guide-part-out" role="region" aria-label="Output of this part">
+          {text ? (
+            <pre tabIndex={0}>{text}</pre>
+          ) : (
+            <p className="guide-part-none">This part prints nothing for the input you picked.</p>
+          )}
+        </div>
+      )}
+    </>
+  )
+}
+
 export function GuidedLesson({ leading, blocks, code, filename, topics, output, focusLine }: GuidedLessonProps) {
   const [siteTheme] = useTheme()
   const [chunks, setChunks] = useState<Record<number, string>>({})
   const [showOutput, setShowOutput] = useState(false)
+  const [openParts, setOpenParts] = useState<Set<number>>(() => new Set())
+  const [scenario, setScenario] = useState(0)
+
+  const togglePart = (line: number) =>
+    setOpenParts((current) => {
+      const next = new Set(current)
+      if (!next.delete(line)) next.add(line)
+      return next
+    })
 
   const codeBlocks = useMemo(
     () => blocks.filter((b): b is Extract<LessonBlock, { type: 'code' }> => b.type === 'code'),
@@ -213,7 +290,9 @@ export function GuidedLesson({ leading, blocks, code, filename, topics, output, 
             <Prose nodes={block.nodes} />
           </div>
         )
-      case 'code':
+      case 'code': {
+        const last = block.line + block.code.replace(/\s+$/, '').split('\n').length - 1
+        const runnable = output && partHasOutput(output, block.line, last)
         return (
           <div
             key={`c${block.line}`}
@@ -225,8 +304,20 @@ export function GuidedLesson({ leading, blocks, code, filename, topics, output, 
             ) : (
               <pre className="overflow-x-auto px-4 py-2.5 font-mono text-[var(--color-code-ink-dim)]" tabIndex={0}>{block.code}</pre>
             )}
+            {runnable && (
+              <PartRun
+                output={output}
+                first={block.line}
+                last={last}
+                open={openParts.has(block.line)}
+                onToggle={() => togglePart(block.line)}
+                scenario={scenario}
+                onScenario={setScenario}
+              />
+            )}
           </div>
         )
+      }
     }
   })
 

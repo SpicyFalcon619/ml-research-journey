@@ -50,6 +50,8 @@ npm run capture-outputs
 
 This runs every lesson with a real Python interpreter (`python` or `python3` on the PATH) in an isolated scratch folder and rewrites the whole cache. Re-run it after any change to a lesson's code, even if you already know the output; the site reads only the cache. Then commit the updated JSON with the lesson. The script prints one line per file:
 
+Lessons are run through `scripts/trace_run.py`, which records which line printed what. That is how each code block in the Guided view gets its own "Run this part" output: the block shows whatever its lines printed during the whole-lesson run. A print inside a function is credited to the line that called it. A block that prints nothing gets no button. If the per-line record does not add up to the real output, the script says so and that lesson falls back to the whole-lesson Run only.
+
 - `ok`: ran and printed something
 - `empty`: ran fine and printed nothing
 - `error`: a non-zero exit, which is a real bug in the lesson

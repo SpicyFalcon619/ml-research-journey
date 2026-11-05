@@ -116,6 +116,47 @@ const INTERACTIVE_SCENARIOS = {
   ],
 }
 
+// Every lesson is run through trace_run.py, which behaves like `python lesson.py` but also
+// records which line of the lesson printed what. That is what lets the Guided view show
+// each code block's own output. The record is only kept if it adds up to the real stdout.
+const traceRunner = join(__dirname, 'trace_run.py')
+
+function runLesson(file, { inputs, timeout }) {
+  const recordFile = join(os.tmpdir(), `mlfg-segments-${process.pid}.json`)
+  rmSync(recordFile, { force: true })
+  const result = spawnSync(pythonCmd, [traceRunner, file], {
+    cwd: scratchDir,
+    encoding: 'utf8',
+    timeout,
+    input: inputs,
+    env: {
+      ...process.env,
+      // Windows defaults piped stdout to the system codepage (e.g. cp1252), which
+      // breaks on non-ASCII text (names, emoji, etc.) that prints fine in a real terminal.
+      PYTHONIOENCODING: 'utf-8',
+      // Force matplotlib's non-interactive backend so a lesson that imports
+      // pyplot can never pop a GUI window / hang the capture, regardless of
+      // whether the script remembers to do this itself.
+      MPLBACKEND: 'Agg',
+      MLFG_SEGMENTS: recordFile,
+    },
+  })
+  const normalize = (s) => (s ?? '').replace(/\r\n/g, '\n')
+  result.stdout = normalize(result.stdout)
+  result.stderr = normalize(result.stderr)
+
+  let segments
+  try {
+    const parsed = JSON.parse(readFileSync(recordFile, 'utf8'))
+    if (parsed.map((p) => p[1]).join('') === result.stdout) segments = parsed
+    else console.log(`  (per-part output does not match stdout for ${relative(repoRoot, file)}; skipped)`)
+  } catch {
+    // The run died before writing a record (timeout/crash): the whole-lesson output still works.
+  }
+  rmSync(recordFile, { force: true })
+  return { result, segments }
+}
+
 // Isolated scratch cwd so side effects (e.g. a lesson writing "dummy.txt") never
 // touch the real repo. Pandas_Basics lessons load a CSV via a repo-root-relative
 // path, so mirror just that one file into the scratch dir.
@@ -136,20 +177,12 @@ for (const dir of contentDirs) {
     if (/\binput\s*\(/.test(source)) {
       const scenarioDefs = INTERACTIVE_SCENARIOS[relPath] ?? []
       const scenarios = scenarioDefs.map((scenario) => {
-        const result = spawnSync(pythonCmd, [file], {
-          cwd: scratchDir,
-          encoding: 'utf8',
-          timeout: 15000,
-          input: scenario.inputs.join('\n') + '\n',
-          // Force matplotlib's non-interactive backend so a lesson that imports
-          // pyplot can never pop a GUI window / hang the capture, regardless of
-          // whether the script remembers to do this itself.
-          env: { ...process.env, PYTHONIOENCODING: 'utf-8', MPLBACKEND: 'Agg' },
-        })
+        const { result, segments } = runLesson(file, { inputs: scenario.inputs.join('\n') + '\n', timeout: 15000 })
         return {
           label: scenario.label,
           inputs: scenario.inputs,
-          stdout: (result.stdout ?? '').replace(/\r\n/g, '\n'),
+          stdout: result.stdout,
+          segments,
         }
       })
       cache[relPath] = {
@@ -167,27 +200,9 @@ for (const dir of contentDirs) {
 
     const imagesBefore = listImageFiles(scratchDir)
     const start = Date.now()
-    const result = spawnSync(pythonCmd, [file], {
-      cwd: scratchDir,
-      encoding: 'utf8',
-      timeout: 15000,
-      input: '',
-      env: {
-        ...process.env,
-        // Windows defaults piped stdout to the system codepage (e.g. cp1252), which
-        // breaks on non-ASCII text (names, emoji, etc.) that prints fine in a real terminal.
-        PYTHONIOENCODING: 'utf-8',
-        // Force matplotlib's non-interactive backend so a lesson that imports
-        // pyplot can never pop a GUI window / hang the capture, regardless of
-        // whether the script remembers to do this itself.
-        MPLBACKEND: 'Agg',
-      },
-    })
+    const { result, segments } = runLesson(file, { inputs: '', timeout: 15000 })
     const durationMs = Date.now() - start
     const timedOut = Boolean(result.signal) || result.error?.code === 'ETIMEDOUT'
-    const normalize = (s) => (s ?? '').replace(/\r\n/g, '\n')
-    result.stdout = normalize(result.stdout)
-    result.stderr = normalize(result.stderr)
     const images = captureImages(scratchDir, imagesBefore, relPath)
 
     if (timedOut) {
@@ -217,7 +232,7 @@ for (const dir of contentDirs) {
       counts.empty++
       console.log(`empty        ${relPath}${images ? `  (${images.length} image${images.length === 1 ? '' : 's'})` : ''}`)
     } else {
-      cache[relPath] = { status: 'ok', stdout: result.stdout, stderr: result.stderr ?? '', durationMs, capturedAt, images }
+      cache[relPath] = { status: 'ok', stdout: result.stdout, stderr: result.stderr ?? '', durationMs, capturedAt, images, segments }
       counts.ok++
       console.log(`ok           ${relPath}  (${durationMs}ms)${images ? ` +${images.length} image${images.length === 1 ? '' : 's'}` : ''}`)
     }
