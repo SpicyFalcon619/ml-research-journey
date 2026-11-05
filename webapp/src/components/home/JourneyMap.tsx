@@ -1,6 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { layoutJourney, lineColor, trackBlurb, tracks, type Stop } from '@/lib/journey'
+import { placeTag, TAG_HEIGHT, TAG_TOP_OFFSET } from '@/lib/journeyTag'
+
+const MARK_WIDTH = 24
 import { allLessons } from '@/lib/progress'
 import { useLibrary } from '@/hooks/useLibrary'
 import { TickRail } from '@/components/snippet/TickRail'
@@ -67,13 +70,18 @@ export function JourneyMap({ focusId, returning }: { focusId: string; returning:
   const dim = (trackIndex: number) => (isolated !== null && isolated !== trackIndex ? 0.16 : 1)
   const tagText = returning ? 'KEEP READING' : 'START HERE'
   // The tag is sized from the real rendered text, because each theme sets the sign face differently
-  // (Expedition's serif is much wider than the condensed sans).
-  const tagRef = useRef<SVGTextElement>(null)
-  const [measured, setMeasured] = useState(0)
+  // (Expedition's serif is much wider than the condensed sans). Both wordings are measured.
+  const fullRef = useRef<SVGTextElement>(null)
+  const shortRef = useRef<SVGTextElement>(null)
+  const [measured, setMeasured] = useState({ full: 0, short: 0 })
   useLayoutEffect(() => {
     const measure = () => {
-      const text = tagRef.current
-      if (text) setMeasured(Math.ceil(text.getComputedTextLength()) + 18)
+      const full = fullRef.current
+      const short = shortRef.current
+      if (full && short) {
+        const next = { full: Math.ceil(full.getComputedTextLength()) + 18, short: Math.ceil(short.getComputedTextLength()) + 18 }
+        setMeasured((prev) => (prev.full === next.full && prev.short === next.short ? prev : next))
+      }
     }
     measure()
     document.fonts?.ready.then(measure)
@@ -82,9 +90,80 @@ export function JourneyMap({ focusId, returning }: { focusId: string; returning:
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
     return () => observer.disconnect()
   }, [tagText, focusStop?.snippet.title, layout.width])
-  const tagWidth = measured || (focusStop ? (tagText.length + 2 + focusStop.snippet.title.length) * 8.4 + 18 : 0)
-  const tagX = focusStop ? Math.min(Math.max(focusStop.x - tagWidth / 2, 8), layout.width - tagWidth - 8) : 0
+  // Real widths of the line names, measured like the tag, because the faces differ per theme.
+  const labelRefs = useRef<Record<string, SVGGElement | null>>({})
+  const [labelWidths, setLabelWidths] = useState<Record<string, number>>({})
+  useLayoutEffect(() => {
+    const measure = () => {
+      const next: Record<string, number> = {}
+      for (const [slug, group] of Object.entries(labelRefs.current)) {
+        if (!group) continue
+        next[slug] = Math.ceil(Math.max(...[...group.querySelectorAll('text')].map((t) => t.getComputedTextLength())))
+      }
+      setLabelWidths((prev) => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next))
+    }
+    measure()
+    document.fonts?.ready.then(measure)
+    const observer = new MutationObserver(measure)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => observer.disconnect()
+  }, [layout.width])
+  const fullText = focusStop ? `${tagText}: ${focusStop.snippet.title}` : tagText
+  const fullWidth = measured.full || (fullText.length * 8.4 + 18)
+  const shortWidth = measured.short || (tagText.length * 8.4 + 18)
+
+  // Where each line's name hangs (under its first stop), so the tag can steer clear of them.
+  const labels = tracks.flatMap((track) => {
+    const first = layout.stops.find((s) => s.trackIndex === track.index)
+    if (!first) return []
+    const anchorEnd = first.x > layout.width * 0.7
+    const x = first.x + (anchorEnd ? 4 : -4)
+    // On a narrow screen two lines can start close together on one row. Keep this name
+    // from running into the one that ends against the right-hand side.
+    const rival = tracks
+      .map((other) => layout.stops.find((s) => s.trackIndex === other.index))
+      .find((s) => s && s !== first && s.row === first.row && s.x > first.x && s.x > layout.width * 0.7)
+    const rivalName = rival ? stationName(rival.snippet.title) : ''
+    const rivalLeft = rival ? rival.x + 4 - rivalName.length * 7.4 : Infinity
+    const room = anchorEnd ? Infinity : rivalLeft - x - 10
+    const maxChars = Math.max(Math.floor(room / 7.4), 8)
+    const name = stationName(first.snippet.title)
+    const shown = name.length > maxChars ? `${name.slice(0, maxChars - 1).trimEnd()}…` : name
+    const width = labelWidths[track.slug] ?? Math.max(track.label.replace(/ Tutorial$/, '').length * 11, shown.length * 7.6)
+    const left = anchorEnd ? x - width : x
+    return [{ track, first, x, anchorEnd, shown, left, right: left + width, top: first.y + 16, bottom: first.y + 56 }]
+  })
+
+  // The tag goes in the strip above its stop, steering clear of the line names that hang there.
+  const placement = focusStop
+    ? placeTag({
+        stopX: focusStop.x,
+        stopY: focusStop.y,
+        fullWidth,
+        shortWidth,
+        markWidth: MARK_WIDTH,
+        layoutWidth: layout.width,
+        edge: 40,
+        labels: labels.map((l) => ({ id: l.track.slug, left: l.left, right: l.right, top: l.top, bottom: l.bottom })),
+      })
+    : null
+  const tagX = placement?.x ?? 0
+  const tagVariant = placement?.variant ?? 'full'
+  const tagWidth = tagVariant === 'full' ? fullWidth : tagVariant === 'short' ? shortWidth : MARK_WIDTH
+  const hiddenLabels = placement?.hidden ?? []
+  const tagBottomY = focusStop ? focusStop.y - TAG_TOP_OFFSET + TAG_HEIGHT : 0
+  // When the tag cannot sit right over its stop, a thin connector runs along its foot and down to the stop.
+  const reach = Boolean(focusStop) && ((focusStop?.x ?? 0) < tagX + 10 || (focusStop?.x ?? 0) > tagX + tagWidth - 10)
   const board = selected ?? hover
+  // One arrow per line: its best spot that is not under the floating tag, so the two never overlap.
+  const spanLeft = focusStop ? Math.min(tagX, focusStop.x) : 0
+  const spanRight = focusStop ? Math.max(tagX + tagWidth, focusStop.x) : 0
+  const underTag = (cue: { x: number; y: number }) =>
+    Boolean(focusStop) && Math.abs(cue.y - (focusStop?.y ?? 0)) < 1 && cue.x > spanLeft - 12 && cue.x < spanRight + 12
+  const cues = tracks.flatMap((track) => {
+    const choice = layout.cues.find((cue) => cue.trackIndex === track.index && !underTag(cue))
+    return choice ? [choice] : []
+  })
 
   return (
     <section aria-label="The journey map" className="flex flex-col">
@@ -105,11 +184,11 @@ export function JourneyMap({ focusId, returning }: { focusId: string; returning:
             />
           ))}
 
-          {/* The two ends of the line, as bumpers, and an arrowhead on each row so the direction is clear. */}
+          {/* The two ends of the line, as bumpers, and one arrowhead per line, in its colour, so the direction is clear. */}
           {[layout.start, layout.end].map((cap, i) => (
             <rect key={i} x={cap.x + cap.dir * 17 - 2} y={cap.y - 11} width={4} height={22} rx={1} fill="var(--color-ink)" opacity={0.75} />
           ))}
-          {layout.cues.map((cue, i) => (
+          {cues.map((cue, i) => (
             <path
               key={i}
               d={`M ${cue.x - cue.dir * 6} ${cue.y - 29} L ${cue.x + cue.dir * 7} ${cue.y - 21} L ${cue.x - cue.dir * 6} ${cue.y - 13} Z`}
@@ -119,24 +198,28 @@ export function JourneyMap({ focusId, returning }: { focusId: string; returning:
           ))}
 
           {/* Line names, and the first stop's name, under the first stop of each line. */}
-          {tracks.map((track) => {
-            const first = layout.stops.find((s) => s.trackIndex === track.index)
-            if (!first) return null
-            const anchorEnd = first.x > layout.width * 0.7
-            const x = first.x + (anchorEnd ? 4 : -4)
+          {labels.map(({ track, first, x, anchorEnd, shown }) => {
+            const up = false
             return (
-              <g key={track.slug} opacity={dim(track.index)} style={{ transition: 'opacity 160ms ease-out' }}>
+              <g
+                key={track.slug}
+                ref={(el) => {
+                  labelRefs.current[track.slug] = el
+                }}
+                opacity={hiddenLabels.includes(track.slug) ? 0 : dim(track.index)}
+                style={{ transition: 'opacity 160ms ease-out' }}
+              >
                 <text
                   x={x}
-                  y={first.y + 30}
+                  y={first.y + (up ? -36 : 30)}
                   textAnchor={anchorEnd ? 'end' : 'start'}
                   fill={lineColor(track.index)}
                   style={{ font: '700 14px var(--font-display)', letterSpacing: '0.1em', textTransform: 'uppercase' }}
                 >
                   {track.label.replace(/ Tutorial$/, '')}
                 </text>
-                <text x={x} y={first.y + 48} textAnchor={anchorEnd ? 'end' : 'start'} fill="var(--color-ink-dim)" style={{ font: '500 14px var(--font-sans)' }}>
-                  {stationName(first.snippet.title)}
+                <text x={x} y={first.y + (up ? -18 : 48)} textAnchor={anchorEnd ? 'end' : 'start'} fill="var(--color-ink-dim)" style={{ font: '500 14px var(--font-sans)' }}>
+                  {shown}
                 </text>
               </g>
             )
@@ -207,10 +290,34 @@ export function JourneyMap({ focusId, returning }: { focusId: string; returning:
           {/* The tag over the stop you should read next. */}
           {focusStop && (
             <g aria-hidden style={{ pointerEvents: 'none' }}>
-              <rect x={tagX} y={focusStop.y - 44} width={tagWidth} height={22} rx={2} fill="var(--color-ink)" />
-              <text ref={tagRef} x={tagX + 9} y={focusStop.y - 28.5} fill="var(--color-bg)" style={{ font: '700 13px var(--font-display)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                {tagText}: {focusStop.snippet.title}
+              {/* Off-screen measurers for the two wordings; the visible tag picks one. */}
+              <text ref={fullRef} visibility="hidden" style={{ font: '700 13px var(--font-display)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                {fullText}
               </text>
+              <text ref={shortRef} visibility="hidden" style={{ font: '700 13px var(--font-display)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                {tagText}
+              </text>
+              <path
+                d={
+                  reach
+                    ? `M ${focusStop.x < tagX ? tagX + 6 : tagX + tagWidth - 6} ${tagBottomY} L ${focusStop.x < tagX ? tagX + 6 : tagX + tagWidth - 6} ${tagBottomY + 5} L ${focusStop.x} ${tagBottomY + 5} L ${focusStop.x} ${focusStop.y - 12}`
+                    : `M ${focusStop.x} ${tagBottomY} L ${focusStop.x} ${focusStop.y - 12}`
+                }
+                fill="none"
+                stroke="var(--color-ink)"
+                strokeWidth={2}
+              />
+              <rect x={tagX} y={focusStop.y - TAG_TOP_OFFSET} width={tagWidth} height={TAG_HEIGHT} rx={2} fill="var(--color-ink)" />
+              {tagVariant === 'mark' ? (
+                <path
+                  d={`M ${tagX + 9} ${focusStop.y - TAG_TOP_OFFSET + 5.5} L ${tagX + 16} ${focusStop.y - TAG_TOP_OFFSET + 11} L ${tagX + 9} ${focusStop.y - TAG_TOP_OFFSET + 16.5} Z`}
+                  fill="var(--color-bg)"
+                />
+              ) : (
+                <text x={tagX + 9} y={focusStop.y - TAG_TOP_OFFSET + 15.5} fill="var(--color-bg)" style={{ font: '700 13px var(--font-display)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  {tagVariant === 'full' ? fullText : tagText}
+                </text>
+              )}
             </g>
           )}
         </svg>

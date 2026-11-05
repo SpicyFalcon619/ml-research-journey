@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Link, useLocation } from 'react-router-dom'
-import { ArrowUp, Check, Copy, History, Plus, RotateCcw, Settings as SettingsIcon, Square, Trash2, X } from 'lucide-react'
+import { ArrowUp, Check, Copy, History, Maximize2, Minimize2, Plus, RotateCcw, Settings as SettingsIcon, Square, Trash2, X } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
 import { buildMessages, CONTINUE_PROMPT, FOLLOW_UPS, GENERAL_ACTIONS, LESSON_ACTIONS, MAX_QUESTION_CHARS } from '@/lib/assistantPrompts'
 import { ACTIVE_PROVIDERS, LlmError, MODELS, modelOrder, PROVIDERS, streamChat } from '@/lib/llm'
@@ -61,6 +61,8 @@ function Unavailable() {
 
 type View = 'chat' | 'history' | 'settings'
 
+const EXPANDED_KEY = 'mlfg-ai-expanded'
+
 function TypingDots() {
   return (
     <span className="inline-flex items-center gap-1 py-1" role="status" aria-label="Thinking">
@@ -84,6 +86,23 @@ export function AssistantPanel() {
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
   const [view, setView] = useState<View>('chat')
+  // Full-screen reading mode for the panel on a large screen (phones are always full screen). Remembered, but the panel works without it.
+  const [expanded, setExpanded] = useState(() => {
+    try {
+      return window.localStorage.getItem(EXPANDED_KEY) === 'yes'
+    } catch {
+      return false
+    }
+  })
+  const toggleExpanded = () =>
+    setExpanded((value) => {
+      try {
+        window.localStorage.setItem(EXPANDED_KEY, value ? 'no' : 'yes')
+      } catch {
+        // Not remembering is fine.
+      }
+      return !value
+    })
   const [useLesson, setUseLesson] = useState(true)
   const abortRef = useRef<AbortController | null>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -241,7 +260,10 @@ export function AssistantPanel() {
           onKeyDown={onPanelKey}
           {...motionProps}
           transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-[70] flex flex-col border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] shadow-[var(--shadow-glass)] lg:inset-auto lg:top-4 lg:right-4 lg:bottom-4 lg:w-[27rem] lg:rounded-2xl lg:border"
+          className={cn(
+            'fixed inset-0 z-[70] flex flex-col border-[var(--color-border-strong)] bg-[var(--color-bg-elevated)] shadow-[var(--shadow-glass)]',
+            !expanded && 'lg:inset-auto lg:top-4 lg:right-4 lg:bottom-4 lg:w-[27rem] lg:rounded-lg lg:border',
+          )}
         >
           <header className="flex items-center justify-between gap-2 border-b border-[var(--color-border)] px-4 py-2.5">
             <div className="min-w-0">
@@ -264,6 +286,16 @@ export function AssistantPanel() {
                   <SettingsIcon className="h-4 w-4" />
                 </button>
               )}
+              <button
+                type="button"
+                onClick={toggleExpanded}
+                aria-label={expanded ? 'Shrink to a side panel' : 'Expand to full screen'}
+                aria-pressed={expanded}
+                title={expanded ? 'Shrink to a side panel' : 'Expand to full screen'}
+                className={cn(iconButton, 'hidden lg:flex')}
+              >
+                {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </button>
               <button type="button" onClick={closeAssistant} aria-label="Close" className={iconButton}>
                 <X className="h-4 w-4" />
               </button>
@@ -327,6 +359,7 @@ export function AssistantPanel() {
           ) : (
             <>
               <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4" aria-live="polite">
+                <div className={cn(expanded && 'mx-auto w-full max-w-3xl')}>
                 {messages.length === 0 ? (
                   <div className="animate-fade-up">
                     <p className="text-sm leading-relaxed text-[var(--color-ink-dim)]">
@@ -355,7 +388,7 @@ export function AssistantPanel() {
                     {messages.map((message, index) => (
                       <li key={message.id} className="animate-fade-up">
                         {message.role === 'user' ? (
-                          <div className="ml-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm whitespace-pre-wrap text-[var(--color-ink)]">{message.content}</div>
+                          <div className="ml-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm whitespace-pre-wrap text-[var(--color-ink)]">{message.content}</div>
                         ) : (
                           <div>
                             {message.content ? (
@@ -404,9 +437,11 @@ export function AssistantPanel() {
                     ))}
                   </div>
                 )}
+                </div>
               </div>
 
               <footer className="border-t border-[var(--color-border)] p-3">
+                <div className={cn(expanded && 'mx-auto w-full max-w-3xl')}>
                 {lesson && (
                   <div className="mb-2 flex items-center justify-between gap-2 text-xs text-[var(--color-ink-faint)]">
                     <span className="min-w-0 truncate">
@@ -455,6 +490,7 @@ export function AssistantPanel() {
                     Your data
                   </Link>
                 </p>
+                </div>
               </footer>
             </>
           )}

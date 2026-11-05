@@ -72,7 +72,7 @@ export interface Layout {
   rows: number
   stops: Stop[]
   segments: Segment[]
-  /** Small arrowheads on each row showing which way the journey runs. */
+  /** Candidate arrowheads showing which way each line runs, best placement first per line. */
   cues: Cue[]
   /** The two ends of the line, drawn as bumpers. */
   start: Cue
@@ -122,13 +122,22 @@ export function layoutJourney(width: number): Layout {
 
   const rows = stops.length ? stops[stops.length - 1].row + 1 : 0
 
-  // One arrowhead per row, between two stops near its middle.
+  // Candidate arrowheads, one per straight stretch of each line (a line that wraps onto the next
+  // row is cut into stretches), longest stretch first. The map draws the first candidate of each
+  // line that is not under the "start here" tag, so every line ends up with one arrow in its colour.
   const cues: Cue[] = []
-  for (let r = 0; r < rows; r++) {
-    const inRow = stops.filter((st) => st.row === r)
-    if (inRow.length < 3) continue
-    const k = Math.floor(inRow.length / 2) - 1
-    cues.push({ x: (inRow[k].x + inRow[k + 1].x) / 2, y: inRow[0].y, dir: r % 2 === 0 ? 1 : -1, trackIndex: inRow[k].trackIndex })
+  const trackIndexes = [...new Set(stops.map((st) => st.trackIndex))]
+  for (const trackIndex of trackIndexes) {
+    const stretches: Stop[][] = []
+    for (let r = 0; r < rows; r++) {
+      const stretch = stops.filter((st) => st.row === r && st.trackIndex === trackIndex)
+      if (stretch.length >= 2) stretches.push(stretch)
+    }
+    stretches.sort((x, y) => y.length - x.length)
+    for (const stretch of stretches) {
+      const k = Math.max(Math.floor(stretch.length / 2) - 1, 0)
+      cues.push({ x: (stretch[k].x + stretch[k + 1].x) / 2, y: stretch[0].y, dir: stretch[0].row % 2 === 0 ? 1 : -1, trackIndex })
+    }
   }
   const first = stops[0]
   const last = stops[stops.length - 1]

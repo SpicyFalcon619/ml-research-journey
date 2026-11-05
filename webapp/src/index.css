@@ -636,6 +636,14 @@ samp,
      preserved *inside* each line instead. */
   white-space: normal;
 }
+/* Code reads at weight 500 and comments at 400 italic, so the two are told apart by weight and
+   shape as well as colour (in a light theme, grey-on-white alone is too close to dark-on-white). */
+.code-line span {
+  font-weight: 500;
+}
+.code-line span[style*="italic"] {
+  font-weight: 400;
+}
 .code-line {
   counter-increment: line;
   display: block;

@@ -25,13 +25,16 @@ export const SHIKI_THEME_BY_SITE_THEME: Record<ThemeId, string> = {
 
 // Tokyo Night, GitHub Light and Vitesse Black set comments at 2.6-4.3:1 contrast,
 // which reads as "disabled" on a site where the comments *are* the lesson. Recolor
-// only the comment rules to a tone that still looks muted but clears 4.5:1.
+// only the comment rules to a tone that still looks muted but clears 4.5:1. Comments
+// are also always italic (and lighter in weight, see .code-line in index.css), so a
+// reader can tell notes from code by shape and weight, not by colour alone.
 function withReadableComments(theme: ThemeRegistrationRaw, color: string, scopeContains = 'comment'): ThemeRegistrationRaw {
+  const italic = scopeContains === 'comment'
   const recolor = (rules: NonNullable<ThemeRegistrationRaw['tokenColors']>) =>
     rules.map((rule) => {
       const scopes = Array.isArray(rule.scope) ? rule.scope : rule.scope ? [rule.scope] : []
       return scopes.some((scope) => scope.includes(scopeContains))
-        ? { ...rule, settings: { ...rule.settings, foreground: color } }
+        ? { ...rule, settings: { ...rule.settings, foreground: color, ...(italic ? { fontStyle: 'italic' } : {}) } }
         : rule
     })
   return theme.tokenColors
@@ -60,8 +63,8 @@ export function getHighlighter(): Promise<HighlighterCore> {
         withReadableComments(withReadableComments(quietlight as unknown as ThemeRegistrationRaw, '#6a6a6a'), '#3a7a1f', 'string'),
         expedition as unknown as ThemeRegistrationRaw,
         withReadableComments(tokyoNight as unknown as ThemeRegistrationRaw, '#7983b0'),
-        withReadableComments(githubLight as unknown as ThemeRegistrationRaw, '#5c636b'),
-        withReadableComments(vitesseBlack as unknown as ThemeRegistrationRaw, '#7f917f'),
+        withReadableComments(githubLight as unknown as ThemeRegistrationRaw, '#636c76'),
+        withReadableComments(vitesseBlack as unknown as ThemeRegistrationRaw, '#778a77'),
       ],
       langs: [python],
       engine: createJavaScriptRegexEngine(),
