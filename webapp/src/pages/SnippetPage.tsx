@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ChevronRight, ExternalLink, MessageSquareText } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
@@ -10,11 +10,35 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useLibrary } from '@/hooks/useLibrary'
 import { useAssistant } from '@/hooks/useAssistant'
 import { CodeBlock } from '@/components/code/CodeBlock'
+import { GuidedLesson } from '@/components/snippet/GuidedLesson'
+import { hasGuide, parseLesson } from '@/lib/lesson'
+import { toBareCode } from '@/lib/bare'
+import { getOriginal } from '@/lib/originals'
+import { cn } from '@/lib/cn'
 import { DoneButton } from '@/components/snippet/DoneButton'
 import { FavoriteButton } from '@/components/snippet/FavoriteButton'
 import { Outline } from '@/components/snippet/Outline'
 import { PrevNext } from '@/components/snippet/PrevNext'
 import { Badge } from '@/components/ui/Badge'
+
+type LessonView = 'guided' | 'code' | 'bare' | 'original'
+const VIEWS: { id: LessonView; label: string; hint: string }[] = [
+  { id: 'guided', label: 'Guided', hint: 'Explanations as readable text, with the code in short pieces' },
+  { id: 'code', label: 'Full code', hint: 'The whole file, comments included' },
+  { id: 'bare', label: 'Bare code', hint: 'Only the code, with every comment removed' },
+  { id: 'original', label: 'Original', hint: 'Your first version of this lesson, before the guided rewrite' },
+]
+const VIEW_KEY = 'mlfg-lesson-view'
+
+function readView(): LessonView {
+  try {
+    const stored = window.localStorage.getItem(VIEW_KEY)
+    if (stored === 'guided' || stored === 'code' || stored === 'bare' || stored === 'original') return stored
+  } catch {
+    // storage blocked: fall back to the default
+  }
+  return 'guided'
+}
 
 export function SnippetPage() {
   const { id } = useParams()
@@ -22,6 +46,25 @@ export function SnippetPage() {
   const { recordVisit } = useLibrary()
   const { available, openAssistant } = useAssistant()
   const snippet = id ? getSnippetById(id) : undefined
+  const [view, setViewState] = useState<LessonView>(readView)
+  // Only lessons written with a "What you will learn" card have a guided version.
+  const blocks = useMemo(() => (snippet ? parseLesson(snippet.code) : []), [snippet])
+  const guided = hasGuide(blocks)
+  const bare = useMemo(() => (snippet ? toBareCode(snippet.code, snippet.topics) : null), [snippet])
+  const original = snippet ? getOriginal(snippet.path) : undefined
+  const views = VIEWS.filter((v) => v.id !== 'original' || original !== undefined)
+  // A remembered view that this lesson doesn't have (no original, say) falls back to Guided.
+  const activeView: LessonView = guided ? (views.some((v) => v.id === view) ? view : 'guided') : 'code'
+  const viewTopics = activeView === 'bare' ? (bare?.topics ?? []) : activeView === 'original' ? [] : (snippet?.topics ?? [])
+
+  function setView(next: LessonView) {
+    setViewState(next)
+    try {
+      window.localStorage.setItem(VIEW_KEY, next)
+    } catch {
+      // not persisted, still applies for this visit
+    }
+  }
 
   useDocumentTitle(snippet?.title)
   // Remembered locally so the home page can offer "continue where you left off".
@@ -89,9 +132,9 @@ export function SnippetPage() {
       </div>
 
       {/* On wide screens the same sections live in the "In this lesson" rail instead. */}
-      {snippet.topics.length > 0 && (
+      {viewTopics.length > 0 && (
         <div className="mb-6 flex flex-wrap gap-2 xl:hidden">
-          {snippet.topics.map((topic) => (
+          {viewTopics.map((topic) => (
             <button
               key={topic.line}
               onClick={() => jumpToLine(topic.line)}
@@ -103,7 +146,63 @@ export function SnippetPage() {
         </div>
       )}
 
-      <CodeBlock code={snippet.code} filename={snippet.filename} focusLine={focusLine} output={output} topics={snippet.topics} />
+      {guided && (
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div
+            role="group"
+            aria-label="Lesson view"
+            className="inline-flex rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5"
+          >
+            {views.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setView(option.id)}
+                aria-pressed={activeView === option.id}
+                title={option.hint}
+                className={cn(
+                  'cursor-pointer rounded-md px-3 py-1 text-xs transition-colors',
+                  activeView === option.id
+                    ? 'bg-[var(--color-surface-hover)] text-[var(--color-ink)] shadow-sm'
+                    : 'text-[var(--color-ink-faint)] hover:text-[var(--color-ink-dim)]',
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-[var(--color-ink-faint)]">{views.find((v) => v.id === activeView)?.hint}</p>
+        </div>
+      )}
+
+      {activeView === 'guided' ? (
+        <GuidedLesson
+          blocks={blocks}
+          code={snippet.code}
+          filename={snippet.filename}
+          topics={snippet.topics}
+          output={output}
+          focusLine={focusLine}
+        />
+      ) : activeView === 'original' && original !== undefined ? (
+        <>
+          <p className="mb-3 max-w-[44rem] text-sm leading-relaxed text-[var(--color-ink-dim)]">
+            This is the lesson exactly as first written, kept for reference. The Guided, Full code and Bare code views
+            show the improved version.
+          </p>
+          <CodeBlock code={original} filename={snippet.filename} />
+        </>
+      ) : activeView === 'bare' && bare ? (
+        <CodeBlock code={bare.code} filename={snippet.filename} output={output} topics={bare.topics} />
+      ) : (
+        <CodeBlock
+          code={snippet.code}
+          filename={snippet.filename}
+          focusLine={focusLine}
+          output={output}
+          topics={snippet.topics}
+        />
+      )}
 
       <div className="mt-6 flex flex-wrap gap-1.5">
         {snippet.tags.slice(0, 12).map((tag) => (
@@ -118,7 +217,7 @@ export function SnippetPage() {
       <PrevNext prev={prev} next={next} />
       </div>
 
-      <Outline snippet={snippet} />
+      {activeView !== 'original' && <Outline snippet={{ ...snippet, topics: viewTopics }} />}
     </div>
   )
 }
