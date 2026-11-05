@@ -16,7 +16,7 @@ export function DoneButton({ id }: { id: string }) {
         'flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 text-[13px] transition-colors',
         done
           ? 'border-[var(--stop)] text-[var(--color-ink)]'
-          : 'border-transparent bg-[var(--stop)] font-semibold text-[var(--color-accent-ink)] hover:brightness-110',
+          : 'border-transparent bg-[var(--color-accent)] font-semibold text-[var(--color-accent-ink)] hover:brightness-110',
       )}
     >
       <Check className={cn('h-3.5 w-3.5', done ? 'stroke-[3] text-[var(--stop)]' : 'stroke-[3]')} />

@@ -18,7 +18,7 @@ function formatDate(isoDate: string) {
 }
 
 const quietLink =
-  'inline-flex cursor-pointer items-center gap-1.5 text-[15px] text-[var(--color-ink-dim)] underline decoration-[var(--color-border-strong)] underline-offset-4 transition-colors hover:text-[var(--color-ink)]'
+  'inline-flex min-h-6 cursor-pointer items-center gap-1.5 text-[15px] text-[var(--color-ink-dim)] underline decoration-[var(--color-border-strong)] underline-offset-4 transition-colors hover:text-[var(--color-ink)]'
 
 export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
   useDocumentTitle()

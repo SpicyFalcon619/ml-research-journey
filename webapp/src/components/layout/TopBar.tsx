@@ -49,7 +49,7 @@ export function TopBar({
         <Menu className="h-4 w-4" />
       </button>
 
-      <Link to="/" className="flex shrink-0 items-center gap-2 pr-2 font-semibold tracking-tight text-[var(--color-ink)]">
+      <Link to="/" aria-label="Field Guide home" className="flex shrink-0 items-center gap-2 pr-2 font-semibold tracking-tight text-[var(--color-ink)]">
         <Logo className="h-7 w-7 shrink-0" />
         <span className="hidden sm:inline">Field Guide</span>
       </Link>
@@ -85,7 +85,7 @@ export function TopBar({
       >
         <Search className="h-4 w-4 shrink-0" />
         <span className="flex-1 truncate text-left">Find a concept</span>
-        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-[10px] sm:inline">
+        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-xs sm:inline">
           {isMac ? '⌘K' : 'Ctrl+K'}
         </kbd>
       </button>

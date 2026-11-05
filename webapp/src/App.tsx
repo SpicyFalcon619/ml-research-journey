@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import { GradientMesh } from '@/components/layout/GradientMesh'
 import { MobileDrawer } from '@/components/layout/MobileDrawer'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -15,6 +15,7 @@ import { ProgressPage } from '@/pages/ProgressPage'
 import { AskButton } from '@/components/ai/AskButton'
 import { SelectionAsk } from '@/components/ai/SelectionAsk'
 import { useAssistant } from '@/hooks/useAssistant'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { cn } from '@/lib/cn'
 
 // Shiki (syntax highlighting) is only needed once a snippet is opened, so keep
@@ -27,7 +28,11 @@ const SnippetPage = lazy(() => import('@/pages/SnippetPage').then((m) => ({ defa
 // specific line (?line=) are left alone: the code block scrolls there itself.
 function ScrollToTopOnNavigate() {
   const { pathname, search } = useLocation()
+  const first = useRef(true)
   useEffect(() => {
+    // Move keyboard and screen-reader focus to the new page (not on the very first load).
+    if (first.current) first.current = false
+    else document.getElementById('main')?.focus({ preventScroll: true })
     if (new URLSearchParams(search).has('line')) return
     window.scrollTo(0, 0)
   }, [pathname, search])
@@ -37,6 +42,18 @@ function ScrollToTopOnNavigate() {
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
   return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+}
+
+function NotFound() {
+  return (
+    <div className="mx-auto max-w-2xl py-16">
+      <h1 className="text-5xl leading-none font-bold text-[var(--color-ink)]">That page is not on the map.</h1>
+      <p className="mt-4 text-lg text-[var(--color-ink-dim)]">The link may be old, or mistyped.</p>
+      <Link to="/" className="plate mt-6">
+        Back to the map
+      </Link>
+    </div>
+  )
 }
 
 function App() {
@@ -68,10 +85,14 @@ function App() {
 
   return (
     <>
+      <a href="#main" className="skip-link" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus() }}>
+        Skip to the page
+      </a>
       <GradientMesh />
       <ScrollToTopOnNavigate />
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
         <aside
+          aria-label="Lesson path"
           className={cn(
             'sticky top-0 hidden h-screen shrink-0 border-r border-[var(--color-border)] lg:block transition-[width,opacity,margin] duration-300 ease-in-out',
             sidebarOpen ? 'w-72 opacity-100' : 'w-0 border-none opacity-0 overflow-hidden'
@@ -88,7 +109,8 @@ function App() {
             onOpenDrawer={() => setDrawerOpen(true)}
             sidebarOpen={sidebarOpen}
           />
-          <main className="flex-1 px-4 py-8 pb-20 sm:px-10 sm:pb-8">
+          <main id="main" tabIndex={-1} className="flex-1 px-4 py-8 pb-20 sm:px-10 sm:pb-8">
+            <ErrorBoundary inline key={pathname}>
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<Home onOpenSearch={() => setPaletteOpen(true)} />} />
@@ -98,8 +120,10 @@ function App() {
                 <Route path="/explore" element={<ExplorePage />} />
                 <Route path="/me" element={<ProgressPage />} />
                 <Route path="/s/:id" element={<SnippetPage />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            </ErrorBoundary>
           </main>
         </div>
       </div>

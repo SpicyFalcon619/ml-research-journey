@@ -166,7 +166,7 @@ export function ProgressPage() {
             const pct = track.total ? (track.done / track.total) * 100 : 0
             return (
               <li key={track.slug} className="grid grid-cols-1 items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(0,1fr)_14rem_9rem]">
-                <Link to={`/c/${track.slug}`} className="min-w-0 text-sm font-medium text-[var(--color-ink)] hover:underline">
+                <Link to={`/c/${track.slug}`} className="inline-flex min-h-6 min-w-0 items-center text-sm font-medium text-[var(--color-ink)] hover:underline">
                   {track.label}
                 </Link>
                 <div
@@ -313,7 +313,7 @@ export function ProgressPage() {
               <span className="flex items-center gap-4">
                 <span className="font-mono text-xs text-[var(--color-ink-faint)]">{row.detail}</span>
                 {row.label === 'Roadmap steps ticked' ? (
-                  <a href={`${import.meta.env.BASE_URL}ml-research-roadmap.html`} className="text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+                  <a href={`${import.meta.env.BASE_URL}ml-research-roadmap.html`} className="text-xs text-[var(--color-ink-faint)] inline-flex min-h-6 items-center underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
                     Manage
                   </a>
                 ) : (
@@ -332,7 +332,7 @@ export function ProgressPage() {
                         row.onClear,
                       )
                     }
-                    className="cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)] disabled:cursor-not-allowed disabled:no-underline disabled:opacity-40"
+                    className="cursor-pointer text-xs text-[var(--color-ink-faint)] inline-flex min-h-6 items-center underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)] disabled:cursor-not-allowed disabled:no-underline disabled:opacity-40"
                   >
                     {row.clearLabel ?? 'Clear'}
                   </button>

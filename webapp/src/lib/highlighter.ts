@@ -1,4 +1,5 @@
 import { createHighlighterCore, type HighlighterCore, type ThemeRegistrationRaw } from 'shiki/core'
+import type { ShikiTransformer } from 'shiki'
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
 import python from 'shiki/langs/python.mjs'
 import poimandres from 'shiki/themes/poimandres.mjs'
@@ -25,11 +26,11 @@ export const SHIKI_THEME_BY_SITE_THEME: Record<ThemeId, string> = {
 // Tokyo Night, GitHub Light and Vitesse Black set comments at 2.6-4.3:1 contrast,
 // which reads as "disabled" on a site where the comments *are* the lesson. Recolor
 // only the comment rules to a tone that still looks muted but clears 4.5:1.
-function withReadableComments(theme: ThemeRegistrationRaw, color: string): ThemeRegistrationRaw {
+function withReadableComments(theme: ThemeRegistrationRaw, color: string, scopeContains = 'comment'): ThemeRegistrationRaw {
   const recolor = (rules: NonNullable<ThemeRegistrationRaw['tokenColors']>) =>
     rules.map((rule) => {
       const scopes = Array.isArray(rule.scope) ? rule.scope : rule.scope ? [rule.scope] : []
-      return scopes.some((scope) => scope.includes('comment'))
+      return scopes.some((scope) => scope.includes(scopeContains))
         ? { ...rule, settings: { ...rule.settings, foreground: color } }
         : rule
     })
@@ -38,15 +39,25 @@ function withReadableComments(theme: ThemeRegistrationRaw, color: string): Theme
     : { ...theme, settings: recolor(theme.settings ?? []) }
 }
 
+/** Gives every line of a code chunk its real file line number as an id, so search hits and links land on the right line. */
+export function chunkTransformer(firstLine: number): ShikiTransformer {
+  return {
+    line(node, line) {
+      node.properties.id = `L${firstLine + line - 1}`
+      this.addClassToHast(node, 'code-line')
+    },
+  }
+}
+
 let highlighterPromise: Promise<HighlighterCore> | null = null
 
 export function getHighlighter(): Promise<HighlighterCore> {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighterCore({
       themes: [
-        poimandres,
+        withReadableComments(poimandres as unknown as ThemeRegistrationRaw, '#8b92b3'),
         vesper as unknown as ThemeRegistrationRaw,
-        quietlight as unknown as ThemeRegistrationRaw,
+        withReadableComments(withReadableComments(quietlight as unknown as ThemeRegistrationRaw, '#6a6a6a'), '#3a7a1f', 'string'),
         expedition as unknown as ThemeRegistrationRaw,
         withReadableComments(tokyoNight as unknown as ThemeRegistrationRaw, '#7983b0'),
         withReadableComments(githubLight as unknown as ThemeRegistrationRaw, '#5c636b'),

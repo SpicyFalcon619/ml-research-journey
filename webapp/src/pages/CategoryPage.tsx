@@ -60,7 +60,6 @@ export function CategoryPage() {
           <Link
             to={`/s/${nextHere.id}`}
             className="plate mt-5"
-            style={{ background: 'var(--stop)' }}
           >
             {doneCount === 0 ? 'Start this track' : 'Continue'}
             <ArrowRight className="h-4 w-4" />

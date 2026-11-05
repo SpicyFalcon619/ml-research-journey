@@ -166,7 +166,11 @@ export function CodeBlock({ code, filename, focusLine, className, output, topics
           )}
         </div>
       </div>
-      <div ref={containerRef} className={cn(!isCsv && 'code-scroll overflow-x-auto py-3 leading-relaxed')}>
+      <div
+        ref={containerRef}
+        className={cn(!isCsv && 'code-scroll overflow-x-auto py-3 leading-relaxed')}
+        {...(isCsv ? {} : { tabIndex: 0, role: 'group', 'aria-label': 'Code, scrollable' })}
+      >
         {isCsv ? (
           <CsvTable code={code} />
         ) : html ? (

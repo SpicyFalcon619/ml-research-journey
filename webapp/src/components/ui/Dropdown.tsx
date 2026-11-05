@@ -73,13 +73,22 @@ export function Dropdown<T extends string | number>({ value, options, onChange, 
       if (!listRef.current?.contains(target) && !triggerRef.current?.contains(target)) setOpen(false)
     }
     const dismiss = () => setOpen(false)
+    // The list is positioned from the button when it opens, so it only needs to close if the button
+    // moves (the page or dialog behind it scrolled). Scrolling the list itself must never close it:
+    // a scroll event from the list also reaches this window-level listener.
+    const anchor = triggerRef.current?.getBoundingClientRect()
+    const handleScroll = (event: Event) => {
+      if (listRef.current?.contains(event.target as Node)) return
+      const now = triggerRef.current?.getBoundingClientRect()
+      if (!anchor || !now || Math.abs(now.top - anchor.top) > 1 || Math.abs(now.left - anchor.left) > 1) setOpen(false)
+    }
     document.addEventListener('mousedown', handlePointerDown)
     window.addEventListener('resize', dismiss)
-    window.addEventListener('scroll', dismiss, true)
+    window.addEventListener('scroll', handleScroll, true)
     return () => {
       document.removeEventListener('mousedown', handlePointerDown)
       window.removeEventListener('resize', dismiss)
-      window.removeEventListener('scroll', dismiss, true)
+      window.removeEventListener('scroll', handleScroll, true)
     }
   }, [open])
 

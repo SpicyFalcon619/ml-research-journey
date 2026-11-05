@@ -150,12 +150,12 @@ function FoldHeading({ item, as: Tag, className, children }: { item: NavItem; as
         aria-expanded={open}
         aria-controls={`explore-${item.slug}`}
         title={forced ? 'A search or filter is on, so everything that matches is shown' : open ? 'Collapse' : 'Expand'}
-        className={cn('group/fold flex min-w-0 cursor-pointer items-center gap-1.5 text-left', forced && 'cursor-default')}
+        className={cn('group/fold flex min-h-6 min-w-0 cursor-pointer items-center gap-1.5 text-left', forced && 'cursor-default')}
       >
         <ChevronRight className={cn('h-4 w-4 shrink-0 transition-transform', open && 'rotate-90', forced ? 'opacity-30' : 'text-[var(--color-ink-faint)] group-hover/fold:text-[var(--color-ink)]')} aria-hidden />
         <span className="min-w-0">{children}</span>
         {lessons.length > 0 && (
-          <span className="ml-1 shrink-0 font-mono text-[11px] font-normal tracking-normal text-[var(--color-ink-faint)] normal-case">
+          <span className="ml-1 shrink-0 font-mono text-xs font-normal tracking-normal text-[var(--color-ink-faint)] normal-case">
             {finished}/{lessons.length}
           </span>
         )}
@@ -182,9 +182,9 @@ function MarkSectionButton({ item, className }: { item: NavItem; className?: str
       type="button"
       onClick={() => setManyDone(ids, !allDone)}
       title={allDone ? `Clear done on all ${lessons.length} lessons in ${item.label}` : `Mark the ${remaining.length} unfinished lessons in ${item.label} as done`}
-      aria-label={allDone ? `Clear done on all lessons in ${item.label}` : `Mark all lessons in ${item.label} as done`}
+      aria-label={allDone ? `Clear all, lessons in ${item.label}` : `Mark all done, lessons in ${item.label}`}
       className={cn(
-        'shrink-0 cursor-pointer text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 transition-colors hover:text-[var(--color-ink)]',
+        'shrink-0 cursor-pointer text-xs text-[var(--color-ink-faint)] inline-flex min-h-6 items-center underline decoration-[var(--color-border-strong)] underline-offset-4 transition-colors hover:text-[var(--color-ink)]',
         className,
       )}
     >
@@ -344,10 +344,10 @@ export function ExplorePage() {
           <p className="font-mono text-xs text-[var(--color-ink-faint)]" role="status">{countLabel}</p>
           {view === 'track' && !forced && (
             <span className="flex shrink-0 items-center gap-3 text-xs">
-              <button type="button" onClick={() => setAll(true)} className="cursor-pointer text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+              <button type="button" onClick={() => setAll(true)} className="cursor-pointer text-[var(--color-ink-faint)] inline-flex min-h-6 items-center underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
                 Expand all
               </button>
-              <button type="button" onClick={() => setAll(false)} className="cursor-pointer text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+              <button type="button" onClick={() => setAll(false)} className="cursor-pointer text-[var(--color-ink-faint)] inline-flex min-h-6 items-center underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
                 Collapse all
               </button>
             </span>
@@ -368,7 +368,7 @@ export function ExplorePage() {
                   </FoldHeading>
                   <span className="flex shrink-0 items-baseline gap-4">
                     <MarkSectionButton item={category} />
-                    <Link to={`/c/${category.slug}`} className="shrink-0 text-xs text-[var(--color-ink-faint)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+                    <Link to={`/c/${category.slug}`} className="shrink-0 text-xs text-[var(--color-ink-faint)] inline-flex min-h-6 items-center underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
                       Open track
                     </Link>
                   </span>
@@ -401,7 +401,7 @@ export function ExplorePage() {
             ))}
           </div>
           {!showAllTags && !needle && tags.length > TAG_PREVIEW && (
-            <button onClick={() => setShowAllTags(true)} className="mt-5 cursor-pointer text-sm text-[var(--color-ink-dim)] underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+            <button onClick={() => setShowAllTags(true)} className="mt-5 cursor-pointer text-sm text-[var(--color-ink-dim)] inline-flex min-h-6 items-center underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
               Show all {tags.length} tags
             </button>
           )}

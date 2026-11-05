@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
-import { getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
+import { chunkTransformer, getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
 import { parseLesson } from '@/lib/lesson'
 import { getOutput } from '@/lib/outputs'
 import { allLessons } from '@/lib/progress'
 import { useTheme } from '@/hooks/useTheme'
-import { chunkTransformer } from '@/components/snippet/GuidedLesson'
 import type { Snippet } from '@/types'
 
 const MAX_CODE_LINES = 12
@@ -82,9 +81,9 @@ export default function LessonPeek({ snippet, returning = false }: { snippet: Sn
 
       <div className="guide-code code-font mt-6" style={{ ['--line-start' as string]: code.line - 1 }}>
         {html ? (
-          <div className="overflow-x-auto py-2.5" dangerouslySetInnerHTML={{ __html: html }} />
+          <div className="overflow-x-auto py-2.5" tabIndex={0} role="group" aria-label="Code, scrollable" dangerouslySetInnerHTML={{ __html: html }} />
         ) : (
-          <pre className="overflow-x-auto px-4 py-2.5 font-mono text-[var(--color-code-ink-dim)]">{code.text}</pre>
+          <pre className="overflow-x-auto px-4 py-2.5 font-mono text-[var(--color-code-ink-dim)]" tabIndex={0}>{code.text}</pre>
         )}
         {printed.length > 0 && (
           <div className="border-t border-[var(--color-code-border)] bg-[var(--color-code-terminal-bg)] px-4 py-3">
@@ -96,7 +95,7 @@ export default function LessonPeek({ snippet, returning = false }: { snippet: Sn
 
       <Link
         to={`/s/${snippet.id}`}
-        className="group mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent-soft)] underline-offset-4 hover:underline"
+        className="group mt-5 inline-flex min-h-6 items-center gap-1.5 text-sm font-medium text-[var(--color-accent-soft)] underline-offset-4 hover:underline"
       >
         Read the whole lesson
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

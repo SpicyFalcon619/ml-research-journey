@@ -282,6 +282,9 @@ export function OutputPanel({ output, filename, onClose }: OutputPanelProps) {
 
       <div
         className="output-scroll overflow-auto bg-[var(--color-code-terminal-bg)] px-4 py-3"
+        tabIndex={0}
+        role="group"
+        aria-label="Output, scrollable"
         style={{ height }}
       >
         {output.status === 'ok' && (

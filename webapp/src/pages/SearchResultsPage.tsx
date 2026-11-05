@@ -1,16 +1,27 @@
+import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { CornerDownLeft, FileText } from 'lucide-react'
-import { search, searchCategories } from '@/lib/search'
+import { MessageSquareText } from 'lucide-react'
+import { popularSearches, search, searchCategories, suggest } from '@/lib/search'
+import { lineColor, trackIndexOf } from '@/lib/journey'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
-import { GlassPanel } from '@/components/ui/GlassPanel'
-import { Highlight } from '@/components/search/Highlight'
+import { useAssistant } from '@/hooks/useAssistant'
+import { ResultRow, hitKey, hitPath } from '@/components/search/ResultRow'
 import { cn } from '@/lib/cn'
 
 export function SearchResultsPage() {
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') ?? ''
   const category = searchParams.get('c') ?? undefined
-  const hits = search(query, 100, category)
+  const { available: aiAvailable, openAssistant } = useAssistant()
+
+  const everything = useMemo(() => search(query, 200), [query])
+  const hits = useMemo(() => everything.filter((h) => !category || h.snippet.categorySlug === category), [everything, category])
+  const counts = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const hit of everything) map.set(hit.snippet.categorySlug, (map.get(hit.snippet.categorySlug) ?? 0) + 1)
+    return map
+  }, [everything])
+  const closest = useMemo(() => (hits.length === 0 ? suggest(query) : []), [hits.length, query])
 
   useDocumentTitle(query ? `Search: ${query}` : 'Search')
 
@@ -21,81 +32,104 @@ export function SearchResultsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up pb-16">
-      <header className="mb-8">
-        <p className="text-sm text-[var(--color-ink-faint)]">Search results for</p>
-        <h1 className="text-4xl leading-none font-bold text-[var(--color-ink)] sm:text-5xl">"{query}"</h1>
-        <p className="mt-1 text-sm text-[var(--color-ink-faint)]">
-          {hits.length} {hits.length === 1 ? 'match' : 'matches'}
+    <div className="mx-auto max-w-5xl animate-fade-up pb-16">
+      <header className="mb-8 max-w-3xl">
+        <h1 className="text-4xl leading-none font-bold text-[var(--color-ink)] sm:text-5xl">{query ? `“${query}”` : 'Search'}</h1>
+        <p className="mt-3 text-[15px] text-[var(--color-ink-faint)]" role="status">
+          {query ? `${hits.length} ${hits.length === 1 ? 'result' : 'results'}${category ? ' in this track' : ''}` : 'Type in the search box above, or press / from any page.'}
         </p>
       </header>
 
-      <div className="mb-6 flex flex-wrap gap-1.5" role="group" aria-label="Filter by track">
-        {[{ slug: undefined, label: 'All tracks' }, ...searchCategories].map((c) => {
-          const active = c.slug === category
-          return (
-            <Link
-              key={c.slug ?? 'all'}
-              to={filterLink(c.slug)}
-              replace
-              aria-current={active ? 'true' : undefined}
-              className={cn(
-                'rounded-md border px-2.5 py-1 text-xs transition-colors',
-                active
-                  ? 'border-[var(--color-accent)] bg-[var(--color-surface-hover)] text-[var(--color-ink)]'
-                  : 'border-[var(--color-border)] text-[var(--color-ink-dim)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]',
-              )}
-            >
-              {c.label}
-            </Link>
-          )
-        })}
-      </div>
-
-      {hits.length === 0 && (
-        <GlassPanel className="p-8 text-center text-sm text-[var(--color-ink-faint)]">
-          No snippets matched "{query}"{category ? ' in this track' : ''}. Try a different function name, topic, or
-          keyword.
-        </GlassPanel>
+      {query && (
+        <div className="mb-6 flex max-w-3xl flex-wrap gap-1.5" role="group" aria-label="Filter by track">
+          {[{ slug: undefined, label: 'All tracks' }, ...searchCategories].map((c) => {
+            const active = c.slug === category
+            const n = c.slug ? (counts.get(c.slug) ?? 0) : everything.length
+            return (
+              <Link
+                key={c.slug ?? 'all'}
+                to={filterLink(c.slug)}
+                replace
+                aria-current={active ? 'true' : undefined}
+                className={cn(
+                  'inline-flex min-h-6 items-center rounded-md border px-2.5 py-1 text-[13px] transition-colors',
+                  active
+                    ? 'border-[var(--color-accent)] bg-[var(--color-surface-hover)] text-[var(--color-ink)]'
+                    : 'border-[var(--color-border)] text-[var(--color-ink-dim)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]',
+                )}
+              >
+                {c.slug && <span aria-hidden className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle" style={{ background: lineColor(trackIndexOf(c.slug)) }} />}
+                {c.label.replace(/ Tutorial$/, '')} · {n}
+              </Link>
+            )
+          })}
+        </div>
       )}
 
-      <div className="flex flex-col gap-2.5">
+      {query && hits.length === 0 && (
+        <div className="max-w-3xl border-y border-[var(--color-border)] py-8">
+          <p className="text-lg text-[var(--color-ink)]">
+            Nothing matched “{query}”{category ? ' in this track' : ''}.
+          </p>
+          <p className="mt-1 text-[15px] text-[var(--color-ink-dim)]">Try a single keyword, a function name, or the plain-words version of what you mean.</p>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[15px]">
+            {category && (
+              <Link to={filterLink()} replace className="text-[var(--color-accent-soft)] underline underline-offset-4">
+                Search all tracks
+              </Link>
+            )}
+            {aiAvailable && (
+              <button
+                onClick={() => openAssistant(query.endsWith('?') ? query : `${query}?`)}
+                className="inline-flex min-h-6 cursor-pointer items-center gap-1.5 text-[var(--color-accent-soft)] underline underline-offset-4"
+              >
+                <MessageSquareText className="h-4 w-4" /> Ask the AI instead
+              </button>
+            )}
+          </div>
+          {closest.length > 0 && (
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold text-[var(--color-ink)]">Did you mean</h2>
+              <ul className="mt-2 flex flex-col">
+                {closest.map((s) => (
+                  <li key={s.id}>
+                    <Link to={`/s/${s.id}`} className="block rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--color-surface)]">
+                      <span className="flex items-center gap-3">
+                        <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: lineColor(trackIndexOf(s.categorySlug)) }} />
+                        <span className="font-medium text-[var(--color-ink)]">{s.title}</span>
+                        <span className="text-[13px] text-[var(--color-ink-faint)]">{s.categoryLabel}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!query && (
+        <div className="max-w-3xl">
+          <h2 className="text-lg font-semibold text-[var(--color-ink)]">Popular searches</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {popularSearches.map((q) => (
+              <Link key={q} to={`/search?q=${encodeURIComponent(q)}`} className="rounded-md border border-[var(--color-border)] px-3 py-1.5 text-[15px] text-[var(--color-ink-dim)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]">
+                {q}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <ul className="flex max-w-3xl flex-col">
         {hits.map((hit) => (
-          <Link
-            key={hit.type === 'topic' ? `topic-${hit.snippet.id}-${hit.topic.line}` : `file-${hit.snippet.id}`}
-            to={hit.type === 'topic' ? `/s/${hit.snippet.id}?line=${hit.topic.line}` : `/s/${hit.snippet.id}`}
-          >
-            <GlassPanel className="flex items-center justify-between gap-3 p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--color-border-strong)]">
-              {hit.type === 'topic' ? (
-                <div className="flex min-w-0 items-center gap-3">
-                  <CornerDownLeft className="h-4 w-4 shrink-0 text-[var(--color-accent-soft)]" />
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate font-medium text-[var(--color-ink)]">
-                      <Highlight text={hit.topic.label} query={query} />
-                    </span>
-                    <span className="truncate text-xs text-[var(--color-ink-faint)]">
-                      within {hit.snippet.title} · {hit.snippet.categoryLabel}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex min-w-0 items-center gap-3">
-                  <FileText className="h-4 w-4 shrink-0 text-[var(--color-ink-faint)]" />
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate font-medium text-[var(--color-ink)]">
-                      <Highlight text={hit.snippet.title} query={query} />
-                    </span>
-                    <span className="truncate text-xs text-[var(--color-ink-faint)]">{hit.snippet.categoryLabel}</span>
-                  </div>
-                </div>
-              )}
-              <span className="shrink-0 font-mono text-xs text-[var(--color-ink-faint)]">
-                {hit.snippet.filename}
-              </span>
-            </GlassPanel>
-          </Link>
+          <li key={hitKey(hit)}>
+            <Link to={hitPath(hit)} className="block rounded-lg px-3 py-3 transition-colors hover:bg-[var(--color-surface)]">
+              <ResultRow hit={hit} query={query} />
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   )
 }

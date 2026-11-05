@@ -48,11 +48,10 @@ export function AskButton() {
           exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.94 }}
           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-          aria-label="Ask the AI"
           className="fixed right-3 bottom-3 z-40 flex h-11 w-11 cursor-pointer items-center justify-center rounded-[3px] float-solid border border-[var(--color-border-strong)] text-sm font-medium text-[var(--color-ink)] shadow-[var(--shadow-glass)] sm:h-auto sm:w-auto sm:gap-2 sm:px-3.5 sm:py-2.5"
         >
           <MessageSquareText className="h-4 w-4 text-[var(--color-accent-soft)]" aria-hidden />
-          <span className="hidden sm:inline">Ask AI</span>
+          <span className="sr-only sm:not-sr-only">Ask AI</span>
         </motion.button>
       )}
     </AnimatePresence>

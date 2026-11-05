@@ -77,7 +77,7 @@ export function CsvTable({ code }: { code: string }) {
   const [header, ...body] = rows
 
   return (
-    <div className="csv-table-scroll">
+    <div className="csv-table-scroll" tabIndex={0} role="group" aria-label="Data table, scrollable">
       <table className="csv-table">
         <thead>
           <tr>

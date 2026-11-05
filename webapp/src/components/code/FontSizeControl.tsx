@@ -13,7 +13,7 @@ export function FontSizeControl() {
         onClick={() => setSize(Math.max(MIN_CODE_FONT_SIZE, size - 1))}
         disabled={size <= MIN_CODE_FONT_SIZE}
         aria-label="Decrease code font size"
-        className="cursor-pointer rounded-l-md px-1.5 py-1 transition-colors hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)] disabled:cursor-not-allowed disabled:opacity-40"
+        className="min-h-6 cursor-pointer rounded-l-md px-1.5 py-1 transition-colors hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)] disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Minus className="h-3 w-3" />
       </button>
@@ -24,7 +24,7 @@ export function FontSizeControl() {
         onClick={() => setSize(Math.min(MAX_CODE_FONT_SIZE, size + 1))}
         disabled={size >= MAX_CODE_FONT_SIZE}
         aria-label="Increase code font size"
-        className="cursor-pointer rounded-r-md px-1.5 py-1 transition-colors hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)] disabled:cursor-not-allowed disabled:opacity-40"
+        className="min-h-6 cursor-pointer rounded-r-md px-1.5 py-1 transition-colors hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)] disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Plus className="h-3 w-3" />
       </button>

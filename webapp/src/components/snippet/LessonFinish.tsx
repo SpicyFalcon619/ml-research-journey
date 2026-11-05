@@ -43,7 +43,7 @@ export function LessonFinish({ snippet, next }: { snippet: Snippet; next?: Snipp
             onClick={() => toggleDone(snippet.id)}
             aria-pressed={done}
             className={cn(
-              'inline-flex cursor-pointer items-center gap-1.5 text-sm underline underline-offset-4 transition-colors',
+              'inline-flex min-h-6 cursor-pointer items-center gap-1.5 text-sm underline underline-offset-4 transition-colors',
               done
                 ? 'text-[var(--color-accent-soft)] decoration-[var(--color-accent)]'
                 : 'text-[var(--color-ink-dim)] decoration-[var(--color-border-strong)] hover:text-[var(--color-ink)]',

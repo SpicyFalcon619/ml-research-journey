@@ -106,7 +106,7 @@ export function SnippetPage() {
             'cursor-pointer rounded-md px-3 py-1 text-[13px] transition-colors',
             activeView === option.id
               ? 'bg-[var(--color-surface-hover)] font-medium text-[var(--color-ink)] shadow-sm'
-              : 'text-[var(--color-ink-faint)] hover:text-[var(--color-ink-dim)]',
+              : 'text-[var(--color-ink-dim)] hover:text-[var(--color-ink)]',
           )}
         >
           {option.label}
@@ -136,7 +136,7 @@ export function SnippetPage() {
           <h1 className="text-4xl leading-none font-bold text-[var(--color-ink)] sm:text-5xl">{snippet.title}</h1>
           <p className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[15px] text-[var(--color-ink-dim)]">
             <span aria-hidden className="h-1.5 w-8 shrink-0 rounded-full bg-[var(--stop)]" />
-            <Link to={`/c/${snippet.categorySlug}`} className="underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
+            <Link to={`/c/${snippet.categorySlug}`} className="inline-flex min-h-6 items-center underline decoration-[var(--color-border-strong)] underline-offset-4 hover:text-[var(--color-ink)]">
               {snippet.categoryLabel}
             </Link>
             {snippet.subSegments.length > 0 && <span>{snippet.subSegments.join(' / ')}</span>}
@@ -155,10 +155,9 @@ export function SnippetPage() {
             <button
               type="button"
               onClick={() => openAssistant()}
-              aria-label="Ask the AI about this lesson"
               className="flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 text-[13px] text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]"
             >
-              <MessageSquareText className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Ask AI</span>
+              <MessageSquareText className="h-3.5 w-3.5" /> <span className="sr-only sm:not-sr-only">Ask AI</span>
             </button>
           )}
           <a

@@ -1,8 +1,7 @@
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { ShikiTransformer } from 'shiki'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Play } from 'lucide-react'
-import { getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
+import { chunkTransformer, getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
 import type { BannerSection, LessonBlock, ProseNode } from '@/lib/lesson'
 import type { CapturedOutput } from '@/lib/outputs'
 import type { Topic } from '@/types'
@@ -56,7 +55,7 @@ function Prose({ nodes }: { nodes: ProseNode[] }) {
             )
           case 'pre':
             return (
-              <pre key={index} className="guide-pre">
+              <pre key={index} className="guide-pre" tabIndex={0}>
                 {node.text}
               </pre>
             )
@@ -108,7 +107,7 @@ function Banner({ kind, sections }: { kind: 'learn' | 'practice' | 'note'; secti
                 <Inline text={group.text} />
               </p>
             ) : group.type === 'pre' ? (
-              <pre key={gi} className="guide-pre">
+              <pre key={gi} className="guide-pre" tabIndex={0}>
                 {group.text}
               </pre>
             ) : (
@@ -148,15 +147,6 @@ function groupItems(section: BannerSection): ItemGroup[] {
   return groups
 }
 
-export function chunkTransformer(firstLine: number): ShikiTransformer {
-  return {
-    line(node, line) {
-      // Real file line numbers, so a search hit or a "line" link lands on the right spot.
-      node.properties.id = `L${firstLine + line - 1}`
-      this.addClassToHast(node, 'code-line')
-    },
-  }
-}
 
 export function GuidedLesson({ leading, blocks, code, filename, topics, output, focusLine }: GuidedLessonProps) {
   const [siteTheme] = useTheme()
@@ -231,9 +221,9 @@ export function GuidedLesson({ leading, blocks, code, filename, topics, output, 
             style={{ ['--line-start' as string]: block.line - 1 }}
           >
             {chunks[block.line] ? (
-              <div className="overflow-x-auto py-2.5" dangerouslySetInnerHTML={{ __html: chunks[block.line] }} />
+              <div className="overflow-x-auto py-2.5" tabIndex={0} role="group" aria-label="Code, scrollable" dangerouslySetInnerHTML={{ __html: chunks[block.line] }} />
             ) : (
-              <pre className="overflow-x-auto px-4 py-2.5 font-mono text-[var(--color-code-ink-dim)]">{block.code}</pre>
+              <pre className="overflow-x-auto px-4 py-2.5 font-mono text-[var(--color-code-ink-dim)]" tabIndex={0}>{block.code}</pre>
             )}
           </div>
         )
