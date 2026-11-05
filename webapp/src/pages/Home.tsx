@@ -9,6 +9,7 @@ import { useAssistant } from '@/hooks/useAssistant'
 import { useLibrary } from '@/hooks/useLibrary'
 import { isMac } from '@/lib/platform'
 import { JourneyMap } from '@/components/home/JourneyMap'
+import { SisterGuide } from '@/components/home/SisterGuide'
 
 // Shiki only loads once the preview mounts, so the first paint stays light.
 const LessonPeek = lazy(() => import('@/components/home/LessonPeek'))
@@ -65,6 +66,10 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
           )}
         </div>
       </section>
+
+      <div className="animate-fade-up [animation-delay:60ms]">
+        <SisterGuide />
+      </div>
 
       <div className="animate-fade-up mt-8 [animation-delay:100ms] sm:mt-6">
         <JourneyMap focusId={focus.id} returning={returning} />
