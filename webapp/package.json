@@ -8,15 +8,22 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "capture-outputs": "node scripts/capture-outputs.mjs"
+    "capture-outputs": "node scripts/capture-outputs.mjs",
+    "build-notebooks": "node scripts/build-notebooks.mjs"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource/barlow": "^5.3.0",
     "@fontsource/barlow-condensed": "^5.3.0",
     "@fontsource/geist": "^5.2.9",
     "@fontsource/geist-mono": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.3.0",
+    "@lezer/highlight": "^1.2.5",
     "@tailwindcss/vite": "^4.3.2",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

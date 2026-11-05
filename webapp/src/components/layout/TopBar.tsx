@@ -17,6 +17,7 @@ function GithubMark(props: SVGProps<SVGSVGElement>) {
 const NAV = [
   { to: '/explore', label: 'Explore' },
   { to: '/me', label: 'Progress' },
+  { to: '/playground', label: 'Playground' },
 ]
 
 export function TopBar({
@@ -85,7 +86,7 @@ export function TopBar({
       >
         <Search className="h-4 w-4 shrink-0" />
         <span className="flex-1 truncate text-left">Find a concept</span>
-        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-xs sm:inline">
+        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-ink-dim)] sm:inline">
           {isMac ? '⌘K' : 'Ctrl+K'}
         </kbd>
       </button>

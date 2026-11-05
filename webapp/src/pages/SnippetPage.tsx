@@ -22,6 +22,7 @@ import { TickRail } from '@/components/snippet/TickRail'
 import { lineColor, trackIndexOf } from '@/lib/journey'
 import { allLessons } from '@/lib/progress'
 import { PrevNext } from '@/components/snippet/PrevNext'
+import { colabUrl, needsColab } from '@/lib/colab'
 import { Badge } from '@/components/ui/Badge'
 
 type LessonView = 'guided' | 'code' | 'bare' | 'original'
@@ -82,6 +83,8 @@ export function SnippetPage() {
   const githubUrl = `https://github.com/SpicyFalcon619/ml-research-journey/blob/master/${encodeURI(snippet.path)}`
   const output = getOutput(snippet.path)
   const { prev, next } = getAdjacent(snippet.id)
+  // Python lessons run in the browser; PyTorch ones open in Colab instead.
+  const runsInBrowser = snippet.filename.endsWith('.py') && !needsColab(snippet.code)
 
   // Tags are search helpers; the ones worth showing are the concept words, not section titles or filler.
   const conceptTags = (snippet?.tags ?? [])
@@ -196,6 +199,8 @@ export function SnippetPage() {
           topics={snippet.topics}
           output={output}
           focusLine={focusLine}
+          live={runsInBrowser ? { path: snippet.path, id: snippet.id } : undefined}
+          colabUrl={snippet.filename.endsWith('.py') && !runsInBrowser ? colabUrl(snippet.path) : undefined}
         />
       ) : activeView === 'original' && original !== undefined ? (
         <>

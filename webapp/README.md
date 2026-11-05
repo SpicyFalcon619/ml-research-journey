@@ -50,7 +50,7 @@ npm run capture-outputs
 
 This runs every lesson with a real Python interpreter (`python` or `python3` on the PATH) in an isolated scratch folder and rewrites the whole cache. Re-run it after any change to a lesson's code, even if you already know the output; the site reads only the cache. Then commit the updated JSON with the lesson. The script prints one line per file:
 
-Lessons are run through `scripts/trace_run.py`, which records which line printed what. That is how each code block in the Guided view gets its own "Run this part" output: the block shows whatever its lines printed during the whole-lesson run. A print inside a function is credited to the line that called it. A block that prints nothing gets no button. If the per-line record does not add up to the real output, the script says so and that lesson falls back to the whole-lesson Run only.
+Lessons are run through `scripts/trace_run.py`, which records which line printed what. That is how each code block in the Guided view gets its own "Run this part" output, and how the Capture dialog adds only the output of the lines you picked: the block shows whatever its lines printed during the whole-lesson run. A print inside a function is credited to the line that called it. A block that prints nothing gets no button. If the per-line record does not add up to the real output, the script says so and that lesson falls back to the whole-lesson Run only.
 
 - `ok`: ran and printed something
 - `empty`: ran fine and printed nothing
@@ -67,6 +67,19 @@ Lessons are run through `scripts/trace_run.py`, which records which line printed
 ```
 
 Without an entry the site shows a "copy this into your own terminal" note instead of real output.
+
+## Running Python in the browser (editable blocks and the Playground)
+
+Visitors can edit and run code on the site: an **Edit and run** button under each code block in the Guided view, and a **Playground** page (`/playground`). It costs nothing to host: Python runs inside the visitor's own browser using [Pyodide](https://pyodide.org) (CPython compiled to WebAssembly), loaded from the jsDelivr CDN. No server, no keys, nothing is sent anywhere.
+
+- `src/workers/pyodide.worker.ts` runs Python in a Web Worker, so a program stuck in a loop can be ended with **Stop** (the worker is simply terminated; Python restarts on the next run). `src/lib/pyRunner.ts` is the page's handle on it, and `src/lib/pyProtocol.ts` holds the messages between them.
+- It starts only when someone presses Run, never for people who are just reading. The first run downloads about 13 MB (cached after that); NumPy, pandas, matplotlib and scikit-learn are fetched on demand when the code imports them.
+- The editor (CodeMirror, `components/code/PyEditor.tsx`) and the runner UI (`LiveRunner.tsx`) are a separate, lazily loaded chunk. Colours come from the site's `--color-code-*` variables, so all themes work.
+- The blocks of one lesson share variables like cells in a notebook, and "Run the earlier parts first" (on by default) replays them silently so a block has what it needs. Reset variables clears them.
+- `input()` is answered from the "Typed input" box (one line per call), because a browser worker cannot wait for the keyboard. Printing more than 200,000 characters ends the run.
+- Lesson data files (the CSVs) are written into Python's file system at their repo paths, and `__file__` is set to the lesson's path, so `pd.read_csv("Pandas_Basics/mock_data.csv")` and the Titanic lesson work unchanged.
+- **Version:** `PYODIDE_VERSION` in the worker. To upgrade, change it and re-run every lesson (the editable blocks are only as good as the lessons working under Pyodide). If you want to confirm all of them still work, paste each file into the Playground.
+- **PyTorch cannot run in the browser** (Pyodide has no torch). Those lessons show **Open in Colab** instead. `npm run build-notebooks` turns each lesson that imports torch into a notebook in `public/notebooks/`; Colab opens them straight from GitHub, so commit them with the lesson and re-run the script after editing one.
 
 ## How search works
 

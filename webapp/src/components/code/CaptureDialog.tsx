@@ -220,7 +220,7 @@ function CaptureDialog({ code, filename, topics = [], output, onClose }: Capture
   const cardRef = useRef<HTMLDivElement>(null)
 
   const renderTheme: ThemeId = style.theme === 'site' ? siteTheme : style.theme
-  const stdout = output?.status === 'ok' ? output.stdout.trim() : ''
+  const fullStdout = output?.status === 'ok' ? output.stdout.trim() : ''
 
   // The appearance options are global: every change is saved for next time.
   useEffect(() => saveStyle(style), [style])
@@ -258,6 +258,20 @@ function CaptureDialog({ code, filename, topics = [], output, onClose }: Capture
   }, [selected, total])
   const filtered = useMemo(() => (previewHtml ? keepLines(previewHtml, chosen, leaveOut) : null), [previewHtml, chosen, leaveOut])
   const wholeFile = selected.size === 0 || chosen.length === total
+
+  // The output under the picture matches the lines you picked: only what those lines printed. The whole
+  // file shows everything; a lesson with no per-line record cannot say what a part printed, so it shows none.
+  const stdout = useMemo(() => {
+    if (!fullStdout) return ''
+    if (wholeFile) return fullStdout
+    if (!output?.segments) return ''
+    const picked = new Set(chosen)
+    return output.segments
+      .filter(([line]) => picked.has(line))
+      .map(([, text]) => text)
+      .join('')
+      .trim()
+  }, [fullStdout, wholeFile, output, chosen])
 
   function selectSection(index: number) {
     const topic = topics[index]
@@ -462,7 +476,11 @@ function CaptureDialog({ code, filename, topics = [], output, onClose }: Capture
               </div>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <Checkbox label="File name" checked={style.showTitle} onChange={(showTitle) => patch({ showTitle })} />
-                {stdout && <Checkbox label="Include the output" checked={withOutput} onChange={setWithOutput} />}
+                {stdout ? (
+                  <Checkbox label="Include the output" checked={withOutput} onChange={setWithOutput} />
+                ) : (
+                  fullStdout && <span className="text-xs text-[var(--color-ink-faint)]">The lines you picked print nothing, so there is no output to add.</span>
+                )}
                 <button
                   type="button"
                   aria-expanded={showMore}

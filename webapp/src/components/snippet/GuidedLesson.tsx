@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Fragment, lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Play } from 'lucide-react'
+import { ExternalLink, Pencil, Play } from 'lucide-react'
 import { chunkTransformer, getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
 import type { BannerSection, LessonBlock, ProseNode } from '@/lib/lesson'
 import { figuresForLines, outputForLines, partHasOutput, type CapturedOutput } from '@/lib/outputs'
@@ -12,6 +12,9 @@ import { CaptureDialogButton } from '@/components/code/CaptureDialog'
 import { ImageLightbox, OutputPanel, withBase } from '@/components/code/OutputPanel'
 import { cn } from '@/lib/cn'
 
+// The editor, the Python runner and Pyodide are a separate download, fetched only when someone opens an editor.
+const LiveRunner = lazy(() => import('@/components/code/LiveRunner'))
+
 interface GuidedLessonProps {
   /** Shown at the left of the toolbar (the lesson's view switcher). */
   leading?: ReactNode
@@ -21,6 +24,10 @@ interface GuidedLessonProps {
   topics: Topic[]
   output?: CapturedOutput
   focusLine?: number
+  /** The lesson's repo path and id, for running its code in the browser. Absent means it cannot run here. */
+  live?: { path: string; id: string }
+  /** Where to open this lesson as a notebook, for lessons that cannot run in the browser (PyTorch). */
+  colabUrl?: string
 }
 
 // Words in prose that are really code: `backticked`, name(...) calls, __dunders__.
@@ -148,9 +155,8 @@ function groupItems(section: BannerSection): ItemGroup[] {
 }
 
 
-// One code block's own Run button and output: only what THIS part printed, so a reader can
-// see the effect of exactly the lines in front of them. (Captured from a run of the whole
-// lesson, so a part that uses an earlier part's variables still shows what it really printed.)
+// One code block's own buttons. "Run this part" shows what that part printed in the captured run of the
+// whole lesson, instantly. "Edit and run" opens a real editor under the block and runs Python in the browser.
 function PartRun({
   output,
   first,
@@ -159,36 +165,45 @@ function PartRun({
   onToggle,
   scenario,
   onScenario,
+  live,
 }: {
-  output: CapturedOutput
+  /** The captured run, when this part printed or drew something in it. */
+  output?: CapturedOutput
   first: number
   last: number
   open: boolean
   onToggle: () => void
   scenario: number
   onScenario: (index: number) => void
+  live?: { open: boolean; onToggle: () => void; sessionKey: string; filename: string; code: string; earlier: string[] }
 }) {
-  const text = outputForLines(output, first, last, scenario)
-  const figures = figuresForLines(output, first, last)
+  const text = output ? outputForLines(output, first, last, scenario) : undefined
+  const figures = output ? figuresForLines(output, first, last) : []
   const [zoomed, setZoomed] = useState<string | null>(null)
-  const scenarios = output.scenarios ?? []
+  const scenarios = output?.scenarios ?? []
+  const barButton = (active: boolean) =>
+    cn(
+      'flex min-h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-[13px] transition-colors',
+      active
+        ? 'border-[var(--color-code-accent-glow)] bg-[var(--color-code-accent-glow)]/20 text-[var(--color-code-accent-soft)]'
+        : 'border-[var(--color-code-border)] bg-[var(--color-code-surface)] text-[var(--color-code-ink-dim)] hover:border-[var(--color-code-border-strong)] hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)]',
+    )
   return (
     <>
       <div className="guide-part-bar">
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={open}
-          className={cn(
-            'flex min-h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-[13px] transition-colors',
-            open
-              ? 'border-[var(--color-code-accent-glow)] bg-[var(--color-code-accent-glow)]/20 text-[var(--color-code-accent-soft)]'
-              : 'border-[var(--color-code-border)] bg-[var(--color-code-surface)] text-[var(--color-code-ink-dim)] hover:border-[var(--color-code-border-strong)] hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)]',
+        <div className="flex flex-wrap items-center gap-2">
+          {output && (
+            <button type="button" onClick={onToggle} aria-expanded={open} className={barButton(open)}>
+              <Play className="h-3 w-3" aria-hidden /> {open ? 'Hide output' : 'Run this part'}
+            </button>
           )}
-        >
-          <Play className="h-3 w-3" aria-hidden /> {open ? 'Hide output' : 'Run this part'}
-        </button>
-        {open && scenarios.length > 1 && (
+          {live && (
+            <button type="button" onClick={live.onToggle} aria-expanded={live.open} className={barButton(live.open)}>
+              <Pencil className="h-3 w-3" aria-hidden /> {live.open ? 'Close editor' : 'Edit and run'}
+            </button>
+          )}
+        </div>
+        {output && open && scenarios.length > 1 && (
           <label className="flex items-center gap-2 text-xs text-[var(--color-code-ink-faint)]">
             Typed input
             <select
@@ -205,7 +220,7 @@ function PartRun({
           </label>
         )}
       </div>
-      {open && (
+      {output && open && (
         <div className="guide-part-out" role="region" aria-label="Output of this part">
           {text && <pre tabIndex={0}>{text}</pre>}
           {figures.map((src) => (
@@ -225,19 +240,37 @@ function PartRun({
         </div>
       )}
       {zoomed && <ImageLightbox src={zoomed} onClose={() => setZoomed(null)} />}
+      {live?.open && (
+        <Suspense fallback={<p className="guide-part-none">Opening the editor...</p>}>
+          <LiveRunner
+            sessionKey={live.sessionKey}
+            filename={live.filename}
+            initialCode={live.code}
+            firstLine={first}
+            priorCode={live.earlier}
+          />
+        </Suspense>
+      )}
     </>
   )
 }
 
-export function GuidedLesson({ leading, blocks, code, filename, topics, output, focusLine }: GuidedLessonProps) {
+export function GuidedLesson({ leading, blocks, code, filename, topics, output, focusLine, live, colabUrl }: GuidedLessonProps) {
   const [siteTheme] = useTheme()
   const [chunks, setChunks] = useState<Record<number, string>>({})
   const [showOutput, setShowOutput] = useState(false)
   const [openParts, setOpenParts] = useState<Set<number>>(() => new Set())
+  const [openEditors, setOpenEditors] = useState<Set<number>>(() => new Set())
   const [scenario, setScenario] = useState(0)
 
   const togglePart = (line: number) =>
     setOpenParts((current) => {
+      const next = new Set(current)
+      if (!next.delete(line)) next.add(line)
+      return next
+    })
+  const toggleEditor = (line: number) =>
+    setOpenEditors((current) => {
       const next = new Set(current)
       if (!next.delete(line)) next.add(line)
       return next
@@ -305,27 +338,43 @@ export function GuidedLesson({ leading, blocks, code, filename, topics, output, 
         )
       case 'code': {
         const last = block.line + block.code.replace(/\s+$/, '').split('\n').length - 1
-        const runnable = output && partHasOutput(output, block.line, last)
+        const hasCaptured = Boolean(output && partHasOutput(output, block.line, last))
+        const earlier = codeBlocks.filter((b) => b.line < block.line).map((b) => b.code)
         return (
           <div
             key={`c${block.line}`}
             className="guide-code code-font"
             style={{ ['--line-start' as string]: block.line - 1 }}
           >
-            {chunks[block.line] ? (
-              <div className="overflow-x-auto py-2.5" tabIndex={0} role="group" aria-label="Code, scrollable" dangerouslySetInnerHTML={{ __html: chunks[block.line] }} />
-            ) : (
-              <pre className="overflow-x-auto px-4 py-2.5 font-mono text-[var(--color-code-ink-dim)]" tabIndex={0}>{block.code}</pre>
-            )}
-            {runnable && (
+            {/* While the editor is open it holds this same code, so the plain copy steps aside. */}
+            <div className={cn(live && openEditors.has(block.line) && 'hidden')}>
+              {chunks[block.line] ? (
+                <div className="overflow-x-auto py-2.5" tabIndex={0} role="group" aria-label="Code, scrollable" dangerouslySetInnerHTML={{ __html: chunks[block.line] }} />
+              ) : (
+                <pre className="overflow-x-auto px-4 py-2.5 font-mono text-[var(--color-code-ink-dim)]" tabIndex={0}>{block.code}</pre>
+              )}
+            </div>
+            {(hasCaptured || live) && (
               <PartRun
-                output={output}
+                output={hasCaptured ? output : undefined}
                 first={block.line}
                 last={last}
                 open={openParts.has(block.line)}
                 onToggle={() => togglePart(block.line)}
                 scenario={scenario}
                 onScenario={setScenario}
+                live={
+                  live
+                    ? {
+                        open: openEditors.has(block.line),
+                        onToggle: () => toggleEditor(block.line),
+                        sessionKey: `lesson:${live.id}`,
+                        filename: live.path,
+                        code: block.code.replace(/\s+$/, ''),
+                        earlier,
+                      }
+                    : undefined
+                }
               />
             )}
           </div>
@@ -351,6 +400,17 @@ export function GuidedLesson({ leading, blocks, code, filename, topics, output, 
             >
               <Play className="h-3.5 w-3.5" /> Run<span className="hidden sm:inline"> whole lesson</span>
             </button>
+          )}
+          {colabUrl && (
+            <a
+              href={colabUrl}
+              target="_blank"
+              rel="noreferrer"
+              title="PyTorch cannot run in the browser, so this opens the lesson as a notebook in Google Colab (free, with a GPU)"
+              className="flex items-center gap-1.5 rounded-md border border-[var(--color-code-border)] bg-[var(--color-code-surface)] px-2.5 py-1 text-[13px] text-[var(--color-code-ink-dim)] transition-colors hover:border-[var(--color-code-border-strong)] hover:bg-[var(--color-code-surface-hover)] hover:text-[var(--color-code-ink)]"
+            >
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden /> Open in Colab
+            </a>
           )}
           <span className="hidden sm:contents">
             <FontSizeControl />
