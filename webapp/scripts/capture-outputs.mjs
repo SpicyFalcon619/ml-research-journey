@@ -108,6 +108,7 @@ const INTERACTIVE_SCENARIOS = {
   'python tutorial/Section 4/4.9_More_on_Defining_Functions/4.9.1_default_argument_values.py': [
     { label: 'Answer "yes"', inputs: ['yes'] },
     { label: 'Answer "no"', inputs: ['no'] },
+    { label: 'Unclear answer, then "yes"', inputs: ['maybe', 'yes'] },
   ],
   'python tutorial/Section 8/8.3_handling_exceptions.py': [
     { label: 'Valid number right away', inputs: ['42'] },

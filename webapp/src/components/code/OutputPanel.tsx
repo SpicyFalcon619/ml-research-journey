@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { AlertTriangle, Clock, ImageIcon, Keyboard, Maximize2, Terminal, X } from 'lucide-react'
 import type { CapturedOutput } from '@/lib/outputs'
@@ -159,6 +159,84 @@ function InteractiveScenarioPicker({ output }: { output: CapturedOutput }) {
   )
 }
 
+const OUTPUT_HEIGHT_KEY = 'mlfg-output-height'
+const DEFAULT_OUTPUT_HEIGHT = 160
+const MIN_OUTPUT_HEIGHT = 80
+const KEY_STEP = 24
+
+function maxOutputHeight() {
+  return Math.max(MIN_OUTPUT_HEIGHT + 40, Math.round(window.innerHeight * 0.75))
+}
+
+function clampHeight(value: number) {
+  return Math.min(maxOutputHeight(), Math.max(MIN_OUTPUT_HEIGHT, Math.round(value)))
+}
+
+function readStoredHeight() {
+  try {
+    const stored = Number(window.localStorage.getItem(OUTPUT_HEIGHT_KEY))
+    if (stored) return clampHeight(stored)
+  } catch {
+    // storage blocked: use the default
+  }
+  return DEFAULT_OUTPUT_HEIGHT
+}
+
+// Output panel height, remembered across lessons. The panel sits at the bottom of
+// the screen, so dragging its top edge UP makes it taller.
+function useOutputHeight() {
+  const [height, setHeight] = useState(readStoredHeight)
+  const drag = useRef<{ startY: number; startHeight: number } | null>(null)
+
+  const commit = useCallback((value: number) => {
+    const next = clampHeight(value)
+    setHeight(next)
+    try {
+      window.localStorage.setItem(OUTPUT_HEIGHT_KEY, String(next))
+    } catch {
+      // not persisted, still applies for this visit
+    }
+  }, [])
+
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId)
+    drag.current = { startY: event.clientY, startHeight: height }
+  }
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!drag.current) return
+    setHeight(clampHeight(drag.current.startHeight + (drag.current.startY - event.clientY)))
+  }
+  const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    if (!drag.current) return
+    commit(drag.current.startHeight + (drag.current.startY - event.clientY))
+    drag.current = null
+  }
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'ArrowUp') commit(height + KEY_STEP)
+    else if (event.key === 'ArrowDown') commit(height - KEY_STEP)
+    else if (event.key === 'Home') commit(DEFAULT_OUTPUT_HEIGHT)
+    else return
+    event.preventDefault()
+  }
+
+  const handleProps = {
+    role: 'separator' as const,
+    'aria-orientation': 'horizontal' as const,
+    'aria-label': 'Resize output',
+    'aria-valuemin': MIN_OUTPUT_HEIGHT,
+    'aria-valuenow': height,
+    tabIndex: 0,
+    title: 'Drag to resize, double-click to reset',
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel: onPointerUp,
+    onKeyDown,
+    onDoubleClick: () => commit(DEFAULT_OUTPUT_HEIGHT),
+  }
+  return { height, handleProps }
+}
+
 interface OutputPanelProps {
   output: CapturedOutput
   filename?: string
@@ -166,8 +244,16 @@ interface OutputPanelProps {
 }
 
 export function OutputPanel({ output, filename, onClose }: OutputPanelProps) {
+  const { height, handleProps } = useOutputHeight()
+
   return (
     <div className="border-t border-[var(--color-code-border)]">
+      <div
+        {...handleProps}
+        className="group/resize flex h-3 cursor-row-resize touch-none items-center justify-center bg-[var(--color-code-surface)] outline-none"
+      >
+        <span className="h-1 w-10 rounded-full bg-[var(--color-code-border-strong)] transition-colors group-hover/resize:bg-[var(--color-code-ink-faint)] group-focus-visible/resize:bg-[var(--color-code-accent-soft)]" />
+      </div>
       <div className="flex items-center gap-2 bg-[var(--color-code-surface)] px-4 py-2.5">
         <Terminal className="h-3.5 w-3.5 text-[var(--color-code-ink-faint)]" />
         <span className="text-xs font-medium text-[var(--color-code-ink-dim)]">Output</span>
@@ -194,7 +280,10 @@ export function OutputPanel({ output, filename, onClose }: OutputPanelProps) {
         )}
       </div>
 
-      <div className="output-scroll h-40 overflow-auto bg-[var(--color-code-terminal-bg)] px-4 py-3">
+      <div
+        className="output-scroll overflow-auto bg-[var(--color-code-terminal-bg)] px-4 py-3"
+        style={{ height }}
+      >
         {output.status === 'ok' && (
           <>
             <pre className="code-font whitespace-pre font-mono leading-relaxed text-[var(--color-code-ink)]">

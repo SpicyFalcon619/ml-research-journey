@@ -36,6 +36,38 @@ search indexing, and routing are 100% automatic from the file's path/name/conten
   `webapp/src/lib/content.ts`; not required for the file to show up, only for
   extra search recall.
 
+## Writing a lesson so it works in the "Guided" view
+
+Lesson pages have three views: **Guided** (explanations as readable text with the
+code in short pieces), **Full code**, and **Bare code** (comments hidden). The
+Guided view is built from the `.py` file itself (`webapp/src/lib/lesson.ts`), so
+the explanation lives in the file's comments; there is no separate notes file.
+A lesson gets the Guided view when it contains a "WHAT YOU WILL LEARN" card.
+
+- Fence a card with `# ====...` lines. First line `# WHAT YOU WILL LEARN`
+  (bullets as `#   - item`) or `# YOUR TURN  (hint text)` (numbered `#   1. item`).
+- `### Topic 1: Title ###` starts a section (also feeds the outline and search).
+- Comment lines at column 0 become prose; indented comments and trailing
+  `# ...` comments stay inside the code, so keep short notes there.
+- In prose: `#   - item` / `#   1. item` make lists; indented lines or lines with
+  3+ spaces in a row stay monospaced (diagrams, tables); a double space inside a
+  line keeps that paragraph's line breaks; `# --- Title -----` is a sub-heading;
+  `# NOTE:` / `# WARNING:` / `# TIP:` become callouts; `` `backticks` `` and
+  `name(...)` calls are shown as code.
+- Never write the text `input(` in a comment unless the file really calls it:
+  the capture script treats any mention as an interactive lesson.
+
+### Originals and the Bare view
+
+- Each lesson page can also show **Original**: the lesson as first written, before it was
+  rewritten for the Guided view. Those files live in `webapp/src/originals/`, using the
+  same folder layout as the repo (`webapp/src/originals/NumPy_Basics/2_creating_arrays.py`).
+  They are deliberately outside the content folders, so they are not listed as lessons.
+  If you rewrite a lesson, copy the old version there first; a lesson with no file there
+  simply has no Original tab.
+- **Bare code** is generated (`webapp/src/lib/bare.ts`): the lesson with every comment
+  removed but the title docstring kept. Nothing to maintain.
+
 ## The one required step after adding/editing a lesson file: capture its output
 
 The site never executes Python in the browser — every "Run" button shows real,
