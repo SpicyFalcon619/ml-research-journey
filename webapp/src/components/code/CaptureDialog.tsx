@@ -406,7 +406,7 @@ function CaptureDialog({ code, filename, topics = [], output, onClose }: Capture
           </button>
         </header>
 
-        <div className="grid min-h-0 flex-1 overflow-y-auto wide:h-[min(38rem,calc(100vh-11rem))] wide:grid-cols-2 wide:overflow-hidden">
+        <div className="grid min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable] wide:h-[min(38rem,calc(100vh-11rem))] wide:grid-cols-2 wide:overflow-hidden">
           <section className="flex min-w-0 flex-col gap-3 p-5 wide:min-h-0 wide:border-r wide:border-[var(--color-border)]">
             <Step number={1} title="Choose lines">
               <div className="flex items-center gap-1.5">
@@ -444,11 +444,11 @@ function CaptureDialog({ code, filename, topics = [], output, onClose }: Capture
             </p>
           </section>
 
-          <section className="flex min-w-0 flex-col gap-3 border-t border-[var(--color-border)] p-5 wide:min-h-0 wide:overflow-y-auto wide:border-t-0">
+          <section className="flex min-w-0 flex-col gap-3 border-t border-[var(--color-border)] p-5 [scrollbar-gutter:stable] wide:min-h-0 wide:overflow-y-auto wide:border-t-0">
             <Step number={2} title="Preview">
               <span className="font-mono text-xs text-[var(--color-ink-faint)]">{size.w ? `${pixels.w} x ${pixels.h} px` : ''}</span>
             </Step>
-            <div ref={frameRef} className="min-h-[13rem] shrink-0 overflow-auto wide:shrink wide:flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+            <div ref={frameRef} className="min-h-[13rem] shrink-0 overflow-auto [scrollbar-gutter:stable] wide:shrink wide:flex-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
               {filtered === null ? (
                 <p className="text-sm text-[var(--color-ink-faint)]">Preparing preview...</p>
               ) : (
