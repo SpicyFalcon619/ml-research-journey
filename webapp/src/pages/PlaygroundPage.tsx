@@ -93,7 +93,7 @@ function stored(): string | null {
 }
 
 export function PlaygroundPage() {
-  useDocumentTitle('Playground')
+  useDocumentTitle('Sandbox')
   const [code, setCode] = useState(() => stored() ?? EXAMPLES[0].code)
   // Picking an example replaces the editor, so it is given a new identity to start fresh.
   const [version, setVersion] = useState(0)
@@ -115,7 +115,7 @@ export function PlaygroundPage() {
   return (
     <div className="mx-auto max-w-4xl animate-fade-up pb-16">
       <header className="mb-6">
-        <h1 className="text-5xl leading-none font-bold text-[var(--color-ink)] sm:text-6xl">Playground</h1>
+        <h1 className="text-5xl leading-none font-bold text-[var(--color-ink)] sm:text-6xl">Sandbox</h1>
         <p className="mt-2 max-w-2xl text-[var(--color-ink-dim)]">
           Write your own Python and run it here. It runs in your browser, so nothing you type is sent anywhere. The first run
           downloads Python (about 13 MB, once); after that it is quick.

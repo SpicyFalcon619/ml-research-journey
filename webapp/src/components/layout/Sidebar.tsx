@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { ArrowUpRight, BarChart3, Check, ChevronRight, Compass, FileSpreadsheet, Star, Terminal } from 'lucide-react'
+import { ArrowUpRight, BarChart3, BookOpen, Check, ChevronRight, Compass, FileSpreadsheet, Star, Terminal } from 'lucide-react'
 import { ancestorSlugs, flattenNavItems, navGroups, orderedEntries, parseBasecampLabel } from '@/lib/roadmap'
 import { otherGuides } from '@/lib/guides'
 import { getSnippetById } from '@/lib/content'
@@ -214,9 +214,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       {/* The top bar hides its menu below 768px, so on a phone these pages live here. */}
       <div className="flex flex-col md:hidden">
         {[
-          { to: '/playground', label: 'Playground', note: 'Write and run your own Python', icon: Terminal },
           { to: '/explore', label: 'Explore', note: 'Browse everything', icon: Compass },
+          { to: '/sandbox', label: 'Sandbox', note: 'Write and run your own Python', icon: Terminal },
           { to: '/me', label: 'Progress', note: 'What you have finished', icon: BarChart3 },
+          { to: '/glossary', label: 'Glossary', note: 'What every word means', icon: BookOpen },
         ].map(({ to, label, note, icon: Icon }) => (
           <NavLink
             key={to}

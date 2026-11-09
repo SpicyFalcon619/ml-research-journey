@@ -23,7 +23,7 @@ export const GUIDES: Guide[] = [
     name: 'ML Field Guide',
     short: 'ML',
     url: 'https://spicyfalcon619.github.io/ml-research-journey/',
-    blurb: 'Python, data science and machine learning, one stop at a time, with a Playground that runs Python in the page.',
+    blurb: 'Python, data science and machine learning, one stop at a time, with a Sandbox that runs Python in the page.',
   },
   {
     id: 'java',

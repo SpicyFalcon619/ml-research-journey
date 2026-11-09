@@ -15,10 +15,12 @@ function GithubMark(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+// The same pages, in the same order, in all three field guides. (This guide also has a Roadmap page, added after them.)
 const NAV = [
   { to: '/explore', label: 'Explore' },
+  { to: '/sandbox', label: 'Sandbox' },
   { to: '/me', label: 'Progress' },
-  { to: '/playground', label: 'Playground' },
+  { to: '/glossary', label: 'Glossary' },
 ]
 
 export function TopBar({

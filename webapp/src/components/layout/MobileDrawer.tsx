@@ -79,7 +79,9 @@ export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => 
             <nav aria-label="Site" className="absolute top-3 left-4 z-10 flex items-center gap-3 text-xs font-medium text-[var(--color-ink-dim)]">
               <Link to="/" onClick={onClose} className="transition-colors hover:text-[var(--color-ink)]">Home</Link>
               <Link to="/explore" onClick={onClose} className="transition-colors hover:text-[var(--color-ink)]">Explore</Link>
+              <Link to="/sandbox" onClick={onClose} className="transition-colors hover:text-[var(--color-ink)]">Sandbox</Link>
               <Link to="/me" onClick={onClose} className="transition-colors hover:text-[var(--color-ink)]">Progress</Link>
+              <Link to="/glossary" onClick={onClose} className="transition-colors hover:text-[var(--color-ink)]">Glossary</Link>
               <a href={`${import.meta.env.BASE_URL}ml-research-roadmap.html`} className="transition-colors hover:text-[var(--color-ink)]">Roadmap</a>
             </nav>
             <div className="h-full pt-10">

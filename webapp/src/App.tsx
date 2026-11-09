@@ -23,6 +23,7 @@ import { cn } from '@/lib/cn'
 // The assistant panel is also loaded on demand: most visits never open it.
 const AssistantPanel = lazy(() => import('@/components/ai/AssistantPanel').then((m) => ({ default: m.AssistantPanel })))
 const PlaygroundPage = lazy(() => import('@/pages/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })))
+const GlossaryPage = lazy(() => import('@/pages/GlossaryPage').then((m) => ({ default: m.GlossaryPage })))
 const SnippetPage = lazy(() => import('@/pages/SnippetPage').then((m) => ({ default: m.SnippetPage })))
 
 // A new route should start at the top, like a real page load. Jumps to a
@@ -116,7 +117,10 @@ function App() {
                 <Route path="/explore" element={<ExplorePage />} />
                 <Route path="/me" element={<ProgressPage />} />
                 <Route path="/s/:id" element={<SnippetPage />} />
+                {/* Called the Sandbox in all three guides. The old /playground address keeps working. */}
+                <Route path="/sandbox" element={<PlaygroundPage />} />
                 <Route path="/playground" element={<PlaygroundPage />} />
+                <Route path="/glossary" element={<GlossaryPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

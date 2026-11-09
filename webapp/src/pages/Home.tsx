@@ -50,7 +50,7 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
             {returning ? 'Keep reading' : 'Start learning'}
             <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link to="/playground" className={quietLink}>
+          <Link to="/sandbox" className={quietLink}>
             <Terminal className="h-3.5 w-3.5" />
             Try Python yourself
           </Link>
