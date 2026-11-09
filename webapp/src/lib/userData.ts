@@ -19,6 +19,7 @@ export const KEYS = {
   aiChats: CHATS_KEY,
   exploreOpen: 'mlfg-explore-open',
   background: 'mlfg-bg',
+  sidebar: 'mlfg-sidebar',
 } as const
 
 /** The roadmap page (same site, so same storage) saves one `roadmap-<id>` key per ticked step. */

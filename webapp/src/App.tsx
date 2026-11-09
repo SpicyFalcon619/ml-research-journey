@@ -3,7 +3,6 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import { GradientMesh } from '@/components/layout/GradientMesh'
 import { MobileDrawer } from '@/components/layout/MobileDrawer'
 import { Sidebar } from '@/components/layout/Sidebar'
-import { SidebarToggle } from '@/components/layout/SidebarToggle'
 import { TopBar } from '@/components/layout/TopBar'
 import { CommandPalette } from '@/components/search/CommandPalette'
 import { Home } from '@/pages/Home'
@@ -15,6 +14,7 @@ import { ProgressPage } from '@/pages/ProgressPage'
 import { AskButton } from '@/components/ai/AskButton'
 import { SelectionAsk } from '@/components/ai/SelectionAsk'
 import { useAssistant } from '@/hooks/useAssistant'
+import { useSidebar } from '@/hooks/useSidebar'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { cn } from '@/lib/cn'
 
@@ -60,14 +60,9 @@ function NotFound() {
 function App() {
   const [paletteOpen, setPaletteOpen] = useState(false)
   const { pathname } = useLocation()
-  const [sidebarOpen, setSidebarOpen] = useState(() => !['', '#', '#/'].includes(window.location.hash))
+  const { open: sidebarOpen, toggle: toggleSidebar } = useSidebar()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { everOpened } = useAssistant()
-
-  // On Home the journey map is the navigation, so the path rail steps aside; every other page opens it.
-  useEffect(() => {
-    setSidebarOpen(pathname !== '/')
-  }, [pathname])
 
   useEffect(() => {
     function handleKeydown(event: KeyboardEvent) {
@@ -104,11 +99,11 @@ function App() {
           </div>
         </aside>
         <div className="flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out">
-          <SidebarToggle open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
           <TopBar
             onOpenSearch={() => setPaletteOpen(true)}
             onOpenDrawer={() => setDrawerOpen(true)}
             sidebarOpen={sidebarOpen}
+            onToggleSidebar={toggleSidebar}
           />
           <main id="main" tabIndex={-1} className="flex-1 px-4 py-8 pb-20 sm:px-10 sm:pb-8">
             <ErrorBoundary inline key={pathname}>

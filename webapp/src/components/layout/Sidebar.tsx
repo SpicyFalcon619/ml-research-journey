@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { BarChart3, Check, ChevronRight, Compass, FileSpreadsheet, Star, Terminal } from 'lucide-react'
+import { ArrowUpRight, BarChart3, Check, ChevronRight, Compass, FileSpreadsheet, Star, Terminal } from 'lucide-react'
 import { ancestorSlugs, flattenNavItems, navGroups, orderedEntries, parseBasecampLabel } from '@/lib/roadmap'
+import { otherGuides } from '@/lib/guides'
 import { getSnippetById } from '@/lib/content'
 import { allLessons, nextUpLesson, overallProgress } from '@/lib/progress'
 import { lineColor, trackIndexOf } from '@/lib/journey'
@@ -234,6 +235,20 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               <span className="block truncate text-xs text-[var(--color-ink-faint)]">{note}</span>
             </span>
           </NavLink>
+        ))}
+        {/* The top bar's links to the other guides are hidden on a phone, so they live here. */}
+        {otherGuides.map((guide) => (
+          <a
+            key={guide.id}
+            href={guide.url}
+            className="flex items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--color-ink-dim)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
+          >
+            <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="min-w-0">
+              <span className="block leading-tight">{guide.name}</span>
+              <span className="block truncate text-xs text-[var(--color-ink-faint)]">Another site</span>
+            </span>
+          </a>
         ))}
       </div>
 

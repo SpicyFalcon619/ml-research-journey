@@ -1,10 +1,11 @@
 import type { SVGProps } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Menu, Search } from 'lucide-react'
+import { ArrowUpRight, Menu, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { Logo } from './Logo'
 import { cn } from '@/lib/cn'
 import { isMac } from '@/lib/platform'
+import { otherGuides } from '@/lib/guides'
 
 function GithubMark(props: SVGProps<SVGSVGElement>) {
   return (
@@ -23,10 +24,13 @@ const NAV = [
 export function TopBar({
   onOpenSearch,
   onOpenDrawer,
+  sidebarOpen,
+  onToggleSidebar,
 }: {
   onOpenSearch: () => void
   onOpenDrawer: () => void
-  sidebarOpen?: boolean
+  sidebarOpen: boolean
+  onToggleSidebar: () => void
 }) {
   const location = useLocation()
   // On lesson pages the code block's own header is the sticky control (Run, Copy),
@@ -41,6 +45,16 @@ export function TopBar({
         isSnippetPage ? 'relative' : 'sticky top-0',
       )}
     >
+      {/* On a wide screen the lesson path is a sidebar, and its toggle sits first in the bar, where most sites keep it. */}
+      <button
+        onClick={onToggleSidebar}
+        aria-label={sidebarOpen ? 'Hide the lesson path' : 'Show the lesson path'}
+        aria-pressed={sidebarOpen}
+        title={sidebarOpen ? 'Hide the lesson path' : 'Show the lesson path'}
+        className="hidden shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[var(--color-border)] p-2 text-[var(--color-ink-dim)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] lg:flex"
+      >
+        {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+      </button>
       {/* The path rail is hidden below the laptop breakpoint, so phones get a menu button for it. */}
       <button
         onClick={onOpenDrawer}
@@ -80,13 +94,29 @@ export function TopBar({
         </a>
       </nav>
 
+      {/* The other field guides: separate sites that point at each other. Phones find them in the lesson menu. */}
+      <nav aria-label="Other field guides" className="hidden items-center gap-0.5 border-l border-[var(--color-border)] pl-2 xl:flex">
+        {otherGuides.map((guide) => (
+          <a
+            key={guide.id}
+            href={guide.url}
+            title={`${guide.name}: ${guide.blurb}`}
+            className={cn(linkBase, 'inline-flex items-center gap-1 text-[var(--color-ink-dim)] hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]')}
+          >
+            {guide.short}
+            <ArrowUpRight className="h-3 w-3 shrink-0 text-[var(--color-ink-faint)]" aria-hidden />
+            <span className="sr-only">Field Guide</span>
+          </a>
+        ))}
+      </nav>
+
       <button
         onClick={onOpenSearch}
         className="ml-auto flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink-faint)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink-dim)] sm:max-w-sm"
       >
         <Search className="h-4 w-4 shrink-0" />
         <span className="flex-1 truncate text-left">Find a concept</span>
-        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-ink-dim)] sm:inline">
+        <kbd className="hidden shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-ink-dim)] 2xl:inline">
           {isMac ? '⌘K' : 'Ctrl+K'}
         </kbd>
       </button>
