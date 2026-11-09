@@ -1,6 +1,8 @@
-import { Fragment, lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ExternalLink, Pencil, Play } from 'lucide-react'
+import { getTerm, TERM_PATTERN, termIdOf, termsIn } from '@/lib/glossary'
 import { chunkTransformer, getHighlighter, SHIKI_THEME_BY_SITE_THEME } from '@/lib/highlighter'
 import type { BannerSection, LessonBlock, ProseNode } from '@/lib/lesson'
 import { figuresForLines, outputForLines, partHasOutput, type CapturedOutput } from '@/lib/outputs'
@@ -33,6 +35,95 @@ interface GuidedLessonProps {
 // Words in prose that are really code: `backticked`, name(...) calls, __dunders__.
 const INLINE_CODE = /(`[^`]+`|(?<!\w)\.?[A-Za-z_][\w.]*\((?:[^()]|\([^()]*\))*\)|__\w+__)/g
 
+// The glossary terms that may be underlined in the block being drawn: only the first block of a lesson that
+// uses a term underlines it, so the page is not full of underlines.
+const TermsContext = createContext<ReadonlySet<string>>(new Set())
+const NO_TERMS: ReadonlySet<string> = new Set()
+
+// A word with a meaning behind it. Hover (mouse), tap or Enter (touch, keyboard) shows the short meaning.
+function Term({ id, children }: { id: string; children: ReactNode }) {
+  const entry = getTerm(id)
+  const [open, setOpen] = useState(false)
+  const wrap = useRef<HTMLSpanElement>(null)
+  const mouse = useRef(false)
+  const closing = useRef(0)
+
+  useEffect(() => () => window.clearTimeout(closing.current), [])
+
+  useEffect(() => {
+    if (!open) return
+    const outside = (event: MouseEvent) => {
+      if (!wrap.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', outside)
+    document.addEventListener('keydown', escape)
+    return () => {
+      document.removeEventListener('mousedown', outside)
+      document.removeEventListener('keydown', escape)
+    }
+  }, [open])
+
+  if (!entry) return <>{children}</>
+  return (
+    <span
+      ref={wrap}
+      className="guide-term-wrap"
+      onPointerEnter={(event) => {
+        if (event.pointerType === 'mouse') {
+          mouse.current = true
+          window.clearTimeout(closing.current)
+          setOpen(true)
+        }
+      }}
+      onPointerLeave={(event) => {
+        // A short grace period, so a slightly off path toward the card does not dismiss it.
+        if (event.pointerType === 'mouse') closing.current = window.setTimeout(() => setOpen(false), 180)
+      }}
+    >
+      <button
+        type="button"
+        className="guide-term"
+        aria-expanded={open}
+        aria-describedby={open ? `term-${id}` : undefined}
+        onClick={() => setOpen((value) => (mouse.current ? true : !value))}
+      >
+        {children}
+      </button>
+      {open && (
+        <span role="tooltip" id={`term-${id}`} className="guide-term-pop">
+          <strong>{entry.term}</strong> {entry.short}{' '}
+          <Link to={`/glossary?term=${id}`} className="guide-term-more">
+            More in the glossary
+          </Link>
+        </span>
+      )}
+    </span>
+  )
+}
+
+function Plain({ text }: { text: string }) {
+  const allowed = useContext(TermsContext)
+  if (allowed.size === 0) return <>{text}</>
+  const out: ReactNode[] = []
+  let last = 0
+  for (const match of text.matchAll(TERM_PATTERN)) {
+    const id = termIdOf(match[1])
+    if (!id || !allowed.has(id)) continue
+    out.push(text.slice(last, match.index))
+    out.push(
+      <Term key={`${id}-${match.index}`} id={id}>
+        {match[1]}
+      </Term>,
+    )
+    last = match.index + match[0].length
+  }
+  out.push(text.slice(last))
+  return <>{out}</>
+}
+
 function Inline({ text }: { text: string }) {
   return (
     <>
@@ -42,11 +133,19 @@ function Inline({ text }: { text: string }) {
             {part.startsWith('`') ? part.slice(1, -1) : part}
           </code>
         ) : (
-          <Fragment key={index}>{part}</Fragment>
+          <Plain key={index} text={part} />
         ),
       )}
     </>
   )
+}
+
+/** All the plain text of a prose block (code spans taken out), to find which glossary words it uses. */
+function proseText(nodes: ProseNode[]): string {
+  return nodes
+    .flatMap((node) => (node.type === 'p' ? [node.text] : node.type === 'list' ? node.items : []))
+    .join('\n')
+    .replace(/`[^`]*`/g, ' ')
 }
 
 function Prose({ nodes }: { nodes: ProseNode[] }) {
@@ -281,6 +380,19 @@ export function GuidedLesson({ leading, blocks, code, filename, topics, output, 
     [blocks],
   )
 
+  // Which glossary words each block of explanation may underline: the first block to use a word gets it.
+  const termsByBlock = useMemo(() => {
+    const seen = new Set<string>()
+    const byBlock = new Map<number, Set<string>>()
+    for (const block of blocks) {
+      if (block.type !== 'prose') continue
+      const fresh = termsIn(proseText(block.nodes)).filter((id) => !seen.has(id))
+      fresh.forEach((id) => seen.add(id))
+      if (fresh.length) byBlock.set(block.line, new Set(fresh))
+    }
+    return byBlock
+  }, [blocks])
+
   useEffect(() => {
     let cancelled = false
     getHighlighter().then((highlighter) => {
@@ -333,7 +445,9 @@ export function GuidedLesson({ leading, blocks, code, filename, topics, output, 
       case 'prose':
         return (
           <div key={`p${block.line}`} id={`L${block.line}`} className="scroll-mt-24">
-            <Prose nodes={block.nodes} />
+            <TermsContext.Provider value={termsByBlock.get(block.line) ?? NO_TERMS}>
+              <Prose nodes={block.nodes} />
+            </TermsContext.Provider>
           </div>
         )
       case 'code': {

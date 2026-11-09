@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, MessageSquareText, Search, Terminal } from 'lucide-react'
+import { ArrowRight, Milestone, MessageSquareText, Search, Terminal } from 'lucide-react'
 import { getSnippetById } from '@/lib/content'
 import { trailOrder } from '@/lib/roadmap'
 import { allLessons, nextUpLesson, overallProgress } from '@/lib/progress'
@@ -38,7 +38,7 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
     <div className="mx-auto max-w-5xl pb-16">
       <section className="animate-fade-up pt-2 sm:pt-8">
         <h1 className="max-w-3xl text-balance text-5xl leading-[0.95] font-bold text-[var(--color-ink)] sm:text-7xl">
-          {returning ? 'Welcome back.' : 'Learn it in the order I did.'}
+          {returning ? 'Back to the data.' : 'From Python to machine learning.'}
         </h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--color-ink-dim)]">
           {returning
@@ -54,6 +54,10 @@ export function Home({ onOpenSearch }: { onOpenSearch: () => void }) {
             <Terminal className="h-3.5 w-3.5" />
             Try Python yourself
           </Link>
+          <a href={`${import.meta.env.BASE_URL}ml-research-roadmap.html`} className={quietLink}>
+            <Milestone className="h-3.5 w-3.5" />
+            Roadmap
+          </a>
           <button onClick={onOpenSearch} className={`${quietLink} max-sm:hidden`}>
             <Search className="h-3.5 w-3.5" />
             Find a concept <kbd className="hidden font-sans text-[var(--color-ink-faint)] sm:inline">({isMac ? '⌘K' : 'Ctrl+K'})</kbd>
