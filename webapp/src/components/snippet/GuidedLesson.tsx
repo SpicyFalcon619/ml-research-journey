@@ -1,4 +1,5 @@
 import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ExternalLink, Pencil, Play } from 'lucide-react'
@@ -45,6 +46,7 @@ function Term({ id, children }: { id: string; children: ReactNode }) {
   const entry = getTerm(id)
   const [open, setOpen] = useState(false)
   const wrap = useRef<HTMLSpanElement>(null)
+  const card = useRef<HTMLSpanElement>(null)
   const mouse = useRef(false)
   const closing = useRef(0)
 
@@ -53,7 +55,8 @@ function Term({ id, children }: { id: string; children: ReactNode }) {
   useEffect(() => {
     if (!open) return
     const outside = (event: MouseEvent) => {
-      if (!wrap.current?.contains(event.target as Node)) setOpen(false)
+      const inside = wrap.current?.contains(event.target as Node) || card.current?.contains(event.target as Node)
+      if (!inside) setOpen(false)
     }
     const escape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false)
@@ -67,6 +70,19 @@ function Term({ id, children }: { id: string; children: ReactNode }) {
   }, [open])
 
   if (!entry) return <>{children}</>
+
+  // On a phone the card is a sheet fixed to the bottom of the screen. The lesson fades in with a transform, and a
+  // transformed ancestor becomes the reference for `position: fixed`, which would put the sheet far down the page.
+  // So there the card is drawn on the page itself.
+  const phone = window.matchMedia('(max-width: 640px)').matches
+  const popover = (
+    <span ref={card} role="tooltip" id={`term-${id}`} className="guide-term-pop">
+      <strong>{entry.term}</strong> {entry.short}{' '}
+      <Link to={`/glossary?term=${id}`} className="guide-term-more">
+        More in the glossary
+      </Link>
+    </span>
+  )
   return (
     <span
       ref={wrap}
@@ -92,14 +108,7 @@ function Term({ id, children }: { id: string; children: ReactNode }) {
       >
         {children}
       </button>
-      {open && (
-        <span role="tooltip" id={`term-${id}`} className="guide-term-pop">
-          <strong>{entry.term}</strong> {entry.short}{' '}
-          <Link to={`/glossary?term=${id}`} className="guide-term-more">
-            More in the glossary
-          </Link>
-        </span>
-      )}
+      {open && (phone ? createPortal(popover, document.body) : popover)}
     </span>
   )
 }
